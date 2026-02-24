@@ -1,17 +1,53 @@
-# mobile_gym_app
+📱 GymSystem Mobile App
+Mobilna część systemu zarządzania siłownią realizowana w ramach projektu ZMP. Aplikacja została zaprojektowana z myślą o użytkownikach końcowych (klientach siłowni) oraz personelu trenerskim.
 
-ZMP PROJECT
+🛠 Tech Stack & Wersje
+Framework: Flutter 3.x
 
-## Getting Started
+Język: Dart 3.x
 
-This project is a starting point for a Flutter application.
+Zarządzanie stanem: Riverpod (skalowalność i testowalność)
 
-A few resources to get you started if this is your first Flutter project:
+Komunikacja API: Dio (z obsługą interceptorów dla JWT)
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+Baza danych lokalna: Drift (SQLite) – obsługa trybu offline
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Architektura: Feature-first (podział na moduły funkcjonalne)
+
+🚀 Funkcjonalności (Roadmap)
+Na podstawie analizy wymagań, aplikacja realizuje następujące moduły:
+
+🔐 Autoryzacja i Bezpieczeństwo
+Logowanie klasyczne oraz przez zewnętrzne serwisy (Facebook, Google).
+
+Rejestracja nowych użytkowników i system resetowania hasła.
+
+Dwuetapowa weryfikacja (2FA).
+
+👤 Profil i Klient
+Zarządzanie profilem i sprawdzanie statusu karnetu.
+
+Przeglądanie listy zajęć w bieżącym tygodniu i zapisywanie się na nie.
+
+Lokalizator siłowni z informacją o aktualnym obłożeniu obiektu.
+
+Wybór języka aplikacji.
+
+🎫 System Dostępu i Offline
+Kod QR: Generator kodów umożliwiający wejście do klubu.
+
+TRYB OFFLINE: Dostęp do kluczowych danych (karnet, grafik) bez połączenia z siecią.
+
+👟 Moduł Trenera
+Dedykowane Konto dla Trenera.
+
+Zarządzanie listą zajęć prowadzonych przez trenera.
+
+🔔 Powiadomienia Systemowe
+Aplikacja wysyła powiadomienia o:
+
+Zbliżającym się terminie wygaśnięcia karnetu.
+
+Odwołanych lub przełożonych zajęciach.
+
+Nadchodzących treningach, na które użytkownik jest zapisany.
