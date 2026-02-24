@@ -1,53 +1,53 @@
-📱 GymSystem Mobile App
+# 📱 GymSystem Mobile App
 Mobilna część systemu zarządzania siłownią realizowana w ramach projektu ZMP. Aplikacja została zaprojektowana z myślą o użytkownikach końcowych (klientach siłowni) oraz personelu trenerskim.
 
-🛠 Tech Stack & Wersje
-Framework: Flutter 3.x
+## 🛠 Tech Stack & Wersje
+* **Framework**: Flutter 3.x
 
-Język: Dart 3.x
+* **Język**: Dart 3.x
 
-Zarządzanie stanem: Riverpod (skalowalność i testowalność)
+* **Zarządzanie stanem**: Riverpod (skalowalność i testowalność)
 
-Komunikacja API: Dio (z obsługą interceptorów dla JWT)
+* **Komunikacja API**: Dio (z obsługą interceptorów dla JWT)
 
-Baza danych lokalna: Drift (SQLite) – obsługa trybu offline
+* **Baza danych lokalna**: Drift (SQLite) – obsługa trybu offline
 
-Architektura: Feature-first (podział na moduły funkcjonalne)
+* **Architektura**: Feature-first (podział na moduły funkcjonalne)
 
-🚀 Funkcjonalności (Roadmap)
+## 🚀 Funkcjonalności (Roadmap)
 Na podstawie analizy wymagań, aplikacja realizuje następujące moduły:
 
-🔐 Autoryzacja i Bezpieczeństwo
-Logowanie klasyczne oraz przez zewnętrzne serwisy (Facebook, Google).
+**🔐 Autoryzacja i Bezpieczeństwo**
+* Logowanie klasyczne oraz przez zewnętrzne serwisy (Facebook, Google).
 
-Rejestracja nowych użytkowników i system resetowania hasła.
+* Rejestracja nowych użytkowników i system resetowania hasła.
 
-Dwuetapowa weryfikacja (2FA).
+* Dwuetapowa weryfikacja (2FA).
 
-👤 Profil i Klient
-Zarządzanie profilem i sprawdzanie statusu karnetu.
+**👤 Profil i Klient**
+* Zarządzanie profilem i sprawdzanie statusu karnetu.
 
-Przeglądanie listy zajęć w bieżącym tygodniu i zapisywanie się na nie.
+* Przeglądanie listy zajęć w bieżącym tygodniu i zapisywanie się na nie.
 
-Lokalizator siłowni z informacją o aktualnym obłożeniu obiektu.
+* Lokalizator siłowni z informacją o aktualnym obłożeniu obiektu.
 
-Wybór języka aplikacji.
+* Wybór języka aplikacji.
 
-🎫 System Dostępu i Offline
-Kod QR: Generator kodów umożliwiający wejście do klubu.
+**🎫 System Dostępu i Offline**
+* Kod QR: Generator kodów umożliwiający wejście do klubu.
 
-TRYB OFFLINE: Dostęp do kluczowych danych (karnet, grafik) bez połączenia z siecią.
+* TRYB OFFLINE: Dostęp do kluczowych danych (karnet, grafik) bez połączenia z siecią.
 
-👟 Moduł Trenera
-Dedykowane Konto dla Trenera.
+**👟 Moduł Trenera**
+* Dedykowane Konto dla Trenera.
 
-Zarządzanie listą zajęć prowadzonych przez trenera.
+* Zarządzanie listą zajęć prowadzonych przez trenera.
 
-🔔 Powiadomienia Systemowe
-Aplikacja wysyła powiadomienia o:
+**🔔 Powiadomienia Systemowe**
+* Aplikacja wysyła powiadomienia o:
 
-Zbliżającym się terminie wygaśnięcia karnetu.
+* Zbliżającym się terminie wygaśnięcia karnetu.
 
-Odwołanych lub przełożonych zajęciach.
+* Odwołanych lub przełożonych zajęciach.
 
-Nadchodzących treningach, na które użytkownik jest zapisany.
+* Nadchodzących treningach, na które użytkownik jest zapisany.
