@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_gym_app/features/auth/data/auth_repository.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -15,12 +16,33 @@ class _LoginPageState extends State<LoginPage> {
   final Color midnightBlue = const Color(0xFF162133);
   final Color cloudWhite = const Color(0xFFE0E6ED);
 
-  void _handleLogin() {
+  bool _isLoading = false;
+
+  void _handleLogin() async {
     if (emailController.text.isNotEmpty && passwordController.text.length >= 6) {
-      debugPrint("Dane poprawne: ${emailController.text}");
+      setState(() => _isLoading = true);
+
+      final repo = AuthRepository();
+      final success = await repo.login(emailController.text, passwordController.text);
+
+      if (!mounted) return;
+
+      setState(() => _isLoading = false);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(success ? 'Zalogowano! (Mock)' : 'Blad polaczenia!'),
+            backgroundColor: success ? Colors.green : Colors.red,
+      ));
+
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Błędny email lub za krótkie hasło")),
+        SnackBar(
+            content:
+            Text('Błędny email lub za krótkie hasło',
+              style: TextStyle(color: cloudWhite, fontSize: 14, fontWeight: FontWeight.bold)),
+            backgroundColor: Colors.red,
+        ),
       );
     }
   }
@@ -34,10 +56,10 @@ class _LoginPageState extends State<LoginPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 80),
+              const SizedBox(height: 120),
 
               Text(
-                "Witaj,\nGotowy na trening?",
+                'Gotowy na trening?',
                 style: TextStyle(
                   color: cloudWhite,
                   fontSize: 32,
@@ -46,7 +68,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
               const SizedBox(height: 10),
               Text(
-                "Zaloguj się, aby kontynuować",
+                'Zaloguj się, aby kontynuować',
                 style: TextStyle(color: cloudWhite.withValues(alpha: 0.6), fontSize: 16),
               ),
 
@@ -54,7 +76,7 @@ class _LoginPageState extends State<LoginPage> {
 
               _buildTextField(
                 controller: emailController,
-                label: "Email",
+                label: 'Email',
                 icon: Icons.email_outlined,
               ),
 
@@ -62,7 +84,7 @@ class _LoginPageState extends State<LoginPage> {
 
               _buildTextField(
                 controller: passwordController,
-                label: "Hasło",
+                label: 'Hasło',
                 icon: Icons.lock_outline,
                 isPassword: true,
               ),
@@ -82,11 +104,10 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     elevation: 5,
                   ),
-                  child: const Text(
-                    "ZALOGUJ SIĘ",
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                  ),
-                ),
+                  child: _isLoading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : const Text('ZALOGUJ SIĘ', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                )
               ),
             ],
           ),
