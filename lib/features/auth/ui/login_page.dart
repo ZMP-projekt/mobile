@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_gym_app/features/auth/data/auth_repository.dart';
+import '../../../core/theme/app_colors.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -11,10 +12,6 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
-
-  final Color vividOrange = const Color(0xFFFF8C00);
-  final Color midnightBlue = const Color(0xFF162133);
-  final Color cloudWhite = const Color(0xFFE0E6ED);
 
   bool _isLoading = false;
 
@@ -32,7 +29,7 @@ class _LoginPageState extends State<LoginPage> {
       ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(success ? 'Zalogowano! (Mock)' : 'Blad polaczenia!'),
-            backgroundColor: success ? Colors.green : Colors.red,
+            backgroundColor: success ? AppColors.success : AppColors.error,
       ));
 
     } else {
@@ -40,8 +37,8 @@ class _LoginPageState extends State<LoginPage> {
         SnackBar(
             content:
             Text('Błędny email lub za krótkie hasło',
-              style: TextStyle(color: cloudWhite, fontSize: 14, fontWeight: FontWeight.bold)),
-            backgroundColor: Colors.red,
+              style: TextStyle(color: AppColors.textPrimary, fontSize: 14, fontWeight: FontWeight.bold)),
+            backgroundColor: AppColors.error,
         ),
       );
     }
@@ -50,6 +47,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 30.0),
@@ -61,7 +59,7 @@ class _LoginPageState extends State<LoginPage> {
               Text(
                 'Gotowy na trening?',
                 style: TextStyle(
-                  color: cloudWhite,
+                  color: AppColors.textPrimary,
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
                 ),
@@ -69,7 +67,7 @@ class _LoginPageState extends State<LoginPage> {
               const SizedBox(height: 10),
               Text(
                 'Zaloguj się, aby kontynuować',
-                style: TextStyle(color: cloudWhite.withValues(alpha: 0.6), fontSize: 16),
+                style: TextStyle(color: AppColors.textPrimary.withValues(alpha: 0.6), fontSize: 16),
               ),
 
               const SizedBox(height: 50),
@@ -91,24 +89,39 @@ class _LoginPageState extends State<LoginPage> {
 
               const SizedBox(height: 40),
 
-              SizedBox(
-                width: double.infinity,
-                height: 55,
-                child: ElevatedButton(
-                  onPressed: _handleLogin,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: vividOrange,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
+              Padding (
+                padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 5),
+                child:
+                GestureDetector(
+                  onTap: _isLoading ? null : _handleLogin,
+                  child: Container(
+                    width: double.infinity,
+                    height: 55,
+                    decoration: BoxDecoration(
+                      gradient: AppColors.primaryGradient,
+                      boxShadow: AppColors.primaryGlow,
                       borderRadius: BorderRadius.circular(15),
                     ),
-                    elevation: 5,
+                    child: Center(
+                      child: _isLoading
+                          ? const SizedBox(
+                        height: 24,
+                        width: 24,
+                        child: CircularProgressIndicator(color: AppColors.background, strokeWidth: 3),
+                        )
+                          : const Text(
+                        'ZALOGUJ SIĘ',
+                        style: TextStyle(
+                          color: AppColors.textPrimary,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          letterSpacing: 1.2,
+                        ),
+                      ),
+                    ),
                   ),
-                  child: _isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text('ZALOGUJ SIĘ', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                )
-              ),
+                ),
+              )
             ],
           ),
         ),
@@ -125,20 +138,20 @@ class _LoginPageState extends State<LoginPage> {
     return TextField(
       controller: controller,
       obscureText: isPassword,
-      style: TextStyle(color: cloudWhite),
+      style: TextStyle(color: AppColors.textPrimary),
       decoration: InputDecoration(
         filled: true,
-        fillColor: midnightBlue,
+        fillColor: AppColors.surface,
         labelText: label,
-        labelStyle: TextStyle(color: cloudWhite.withValues(alpha: 0.5)),
-        prefixIcon: Icon(icon, color: vividOrange),
-        border: OutlineInputBorder(
+        labelStyle: TextStyle(color: AppColors.textSecondary),
+        prefixIcon: Icon(icon, color: AppColors.primary),
+        enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(15),
-          borderSide: BorderSide.none,
+          borderSide: BorderSide(color: Colors.transparent),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(15),
-          borderSide: BorderSide(color: vividOrange, width: 1),
+          borderSide: BorderSide(color: AppColors.primary, width: 1.5),
         ),
       ),
     );
