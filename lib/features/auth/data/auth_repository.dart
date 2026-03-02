@@ -19,4 +19,21 @@ class AuthRepository {
       return false;
     }
   }
+
+  Future<bool> register(String name, String email, String password) async {
+    try {
+      final response = await _dio.post('/posts', data: {
+        'name': name,
+        'email' : email,
+        'password' : password,
+      });
+
+      if (response.statusCode == 201) {
+        return true;
+      }
+      return false;
+    } catch (e) {
+      return false;
+    }
+  }
 }

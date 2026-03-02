@@ -1,48 +1,50 @@
 import 'package:flutter/material.dart';
-import 'package:mobile_gym_app/features/auth/data/auth_repository.dart';
-import 'package:mobile_gym_app/features/auth/ui/registration_page.dart';
 import '../../../core/theme/app_colors.dart';
+import '../data/auth_repository.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class RegistrationPage extends StatefulWidget {
+  const RegistrationPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<RegistrationPage> createState() => _RegistrationPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _RegistrationPageState extends State<RegistrationPage> {
+  final nameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
   bool _isLoading = false;
 
-  void _handleLogin() async {
-    if (emailController.text.isNotEmpty && passwordController.text.length >= 6) {
+  void _handleRegister() async {
+    if (nameController.text.isNotEmpty &&
+        emailController.text.isNotEmpty &&
+        passwordController.text.length >= 6) {
       setState(() => _isLoading = true);
 
+      await Future.delayed(const Duration(seconds: 2));
       final repo = AuthRepository();
-      final success = await repo.login(emailController.text, passwordController.text);
+      final success = await repo.register(nameController.text, emailController.text, passwordController.text);
 
       if (!mounted) return;
-
       setState(() => _isLoading = false);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(success ? 'Zalogowano! (Mock)' : 'Blad polaczenia!'),
-            backgroundColor: success ? AppColors.success : AppColors.error,
-      ));
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(success ? 'Sukces' : 'Blad'),
+          backgroundColor: success ? AppColors.success : AppColors.error),
+        );
+      }
 
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            content:
-            Text('Błędny email lub za krótkie hasło',
+          content:
+          Text('Bład!',
               style: TextStyle(
                   color: AppColors.textPrimary,
                   fontSize: 14,
-                  fontWeight: FontWeight.bold,)
-            ),
+                  fontWeight: FontWeight.bold)),
               backgroundColor: AppColors.error,
         ),
       );
@@ -61,8 +63,8 @@ class _LoginPageState extends State<LoginPage> {
             children: [
               const SizedBox(height: 120),
 
-              Text(
-                'Gotowy na trening?',
+              const Text(
+                'Dołącz do Pulse',
                 style: TextStyle(
                   color: AppColors.textPrimary,
                   fontSize: 32,
@@ -71,18 +73,28 @@ class _LoginPageState extends State<LoginPage> {
               ),
               const SizedBox(height: 10),
               Text(
-                'Zaloguj się, aby kontynuować',
-                style: TextStyle(color: AppColors.textPrimary.withValues(alpha: 0.6), fontSize: 16),
+                'Zacznij analizować swoje postępy.',
+                style: TextStyle(
+                    color: AppColors.textPrimary.withValues(alpha: 0.6),
+                    fontSize: 16
+                ),
               ),
 
               const SizedBox(height: 50),
 
               _buildTextField(
+                controller: nameController,
+                label: 'Imię i nazwisko',
+                icon: Icons.person_outline,
+              ),
+              const SizedBox(height: 20),
+
+              _buildTextField(
                 controller: emailController,
                 label: 'Email',
                 icon: Icons.email_outlined,
+                keyboardType: TextInputType.emailAddress,
               ),
-
               const SizedBox(height: 20),
 
               _buildTextField(
@@ -94,18 +106,17 @@ class _LoginPageState extends State<LoginPage> {
 
               const SizedBox(height: 40),
 
-              Padding (
+              Padding(
                 padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 5),
-                child:
-                GestureDetector(
-                  onTap: _isLoading ? null : _handleLogin,
+                child: GestureDetector(
+                  onTap: _isLoading ? null : _handleRegister,
                   child: Container(
                     width: double.infinity,
                     height: 55,
                     decoration: BoxDecoration(
                       gradient: AppColors.primaryGradient,
-                      boxShadow: AppColors.primaryGlow,
                       borderRadius: BorderRadius.circular(15),
+                      boxShadow: AppColors.primaryGlow,
                     ),
                     child: Center(
                       child: _isLoading
@@ -114,10 +125,11 @@ class _LoginPageState extends State<LoginPage> {
                         width: 24,
                         child: CircularProgressIndicator(
                             color: AppColors.textPrimary,
-                            strokeWidth: 3),
-                        )
+                            strokeWidth: 3
+                        ),
+                      )
                           : const Text(
-                        'ZALOGUJ SIĘ',
+                        'ZAREJESTRUJ SIĘ',
                         style: TextStyle(
                           color: AppColors.textPrimary,
                           fontWeight: FontWeight.bold,
@@ -130,23 +142,18 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
 
-              const SizedBox(height: 10),
+              const SizedBox(height: 20),
 
               Center(
                 child: TextButton(
-                  onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (context) => const RegistrationPage()),
-                    );
-                  },
+                  onPressed: () => Navigator.pop(context),
                   child: RichText(
                     text: TextSpan(
-                      text: 'Nie masz konta? ',
+                      text: 'Masz już konto? ',
                       style: TextStyle(color: AppColors.textPrimary.withValues(alpha: 0.6)),
                       children: const [
                         TextSpan(
-                          text: 'Zarejestruj się',
+                          text: 'Zaloguj się',
                           style: TextStyle(
                             color: AppColors.primary,
                             fontWeight: FontWeight.bold,
@@ -157,6 +164,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
               ),
+              const SizedBox(height: 30),
             ],
           ),
         ),
@@ -169,24 +177,26 @@ class _LoginPageState extends State<LoginPage> {
     required String label,
     required IconData icon,
     bool isPassword = false,
+    TextInputType? keyboardType,
   }) {
     return TextField(
       controller: controller,
       obscureText: isPassword,
-      style: TextStyle(color: AppColors.textPrimary),
+      keyboardType: keyboardType,
+      style: const TextStyle(color: AppColors.textPrimary),
       decoration: InputDecoration(
         filled: true,
         fillColor: AppColors.surface,
         labelText: label,
-        labelStyle: TextStyle(color: AppColors.textSecondary),
+        labelStyle: const TextStyle(color: AppColors.textSecondary),
         prefixIcon: Icon(icon, color: AppColors.primary),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(15),
-          borderSide: BorderSide(color: Colors.transparent),
+          borderSide: const BorderSide(color: Colors.transparent),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(15),
-          borderSide: BorderSide(color: AppColors.primary, width: 1.5),
+          borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
         ),
       ),
     );
@@ -194,6 +204,7 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   void dispose() {
+    nameController.dispose();
     emailController.dispose();
     passwordController.dispose();
     super.dispose();
