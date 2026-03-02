@@ -1,39 +1,40 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/auth_provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../data/auth_repository.dart';
 
-class RegistrationPage extends StatefulWidget {
+class RegistrationPage extends ConsumerStatefulWidget {
   const RegistrationPage({super.key});
 
   @override
-  State<RegistrationPage> createState() => _RegistrationPageState();
+  ConsumerState<RegistrationPage> createState() => _RegistrationPageState();
 }
 
-class _RegistrationPageState extends State<RegistrationPage> {
+class _RegistrationPageState extends ConsumerState<RegistrationPage> {
   final nameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
-
-  bool _isLoading = false;
 
   void _handleRegister() async {
     if (nameController.text.isNotEmpty &&
         emailController.text.isNotEmpty &&
         passwordController.text.length >= 6) {
-      setState(() => _isLoading = true);
 
-      await Future.delayed(const Duration(seconds: 2));
-      final repo = AuthRepository();
-      final success = await repo.register(nameController.text, emailController.text, passwordController.text);
+      final success = await ref.read(authStateProvider.notifier).register(
+          nameController.text,
+          emailController.text,
+          passwordController.text);
 
       if (!mounted) return;
-      setState(() => _isLoading = false);
 
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(success ? 'Sukces' : 'Blad'),
           backgroundColor: success ? AppColors.success : AppColors.error),
         );
+
+        // Navigator.pushReplacement(context, DashboardPage());
       }
 
     } else {
@@ -53,6 +54,10 @@ class _RegistrationPageState extends State<RegistrationPage> {
 
   @override
   Widget build(BuildContext context) {
+
+    final auth = ref.watch(authStateProvider);
+    final isLoading = auth.isLoading;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -109,7 +114,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 5),
                 child: GestureDetector(
-                  onTap: _isLoading ? null : _handleRegister,
+                  onTap: isLoading ? null : _handleRegister,
                   child: Container(
                     width: double.infinity,
                     height: 55,
@@ -119,7 +124,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                       boxShadow: AppColors.primaryGlow,
                     ),
                     child: Center(
-                      child: _isLoading
+                      child: isLoading
                           ? const SizedBox(
                         height: 24,
                         width: 24,

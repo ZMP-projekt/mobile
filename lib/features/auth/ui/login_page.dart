@@ -1,37 +1,41 @@
 import 'package:flutter/material.dart';
-import 'package:mobile_gym_app/features/auth/data/auth_repository.dart';
-import 'package:mobile_gym_app/features/auth/ui/registration_page.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/auth_provider.dart';
+import 'registration_page.dart';
 import '../../../core/theme/app_colors.dart';
 
-class LoginPage extends StatefulWidget {
+class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  ConsumerState<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _LoginPageState extends ConsumerState<LoginPage> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
-  bool _isLoading = false;
-
   void _handleLogin() async {
     if (emailController.text.isNotEmpty && passwordController.text.length >= 6) {
-      setState(() => _isLoading = true);
 
-      final repo = AuthRepository();
-      final success = await repo.login(emailController.text, passwordController.text);
+      final success = await ref.read(authStateProvider.notifier).login(
+          emailController.text,
+          passwordController.text);
 
       if (!mounted) return;
 
-      setState(() => _isLoading = false);
 
       ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(success ? 'Zalogowano! (Mock)' : 'Blad polaczenia!'),
             backgroundColor: success ? AppColors.success : AppColors.error,
       ));
+
+      /*
+      if (success) {
+        Navigator.pushReplacement(context, DashboardPage());
+      }
+      */
 
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -51,6 +55,10 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+
+    final auth = ref.watch(authStateProvider);
+    final isLoading = auth.isLoading;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -98,7 +106,7 @@ class _LoginPageState extends State<LoginPage> {
                 padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 5),
                 child:
                 GestureDetector(
-                  onTap: _isLoading ? null : _handleLogin,
+                  onTap: isLoading ? null : _handleLogin,
                   child: Container(
                     width: double.infinity,
                     height: 55,
@@ -108,7 +116,7 @@ class _LoginPageState extends State<LoginPage> {
                       borderRadius: BorderRadius.circular(15),
                     ),
                     child: Center(
-                      child: _isLoading
+                      child: isLoading
                           ? const SizedBox(
                         height: 24,
                         width: 24,
@@ -135,7 +143,7 @@ class _LoginPageState extends State<LoginPage> {
               Center(
                 child: TextButton(
                   onPressed: () {
-                    Navigator.pushReplacement(
+                    Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => const RegistrationPage()),
                     );
