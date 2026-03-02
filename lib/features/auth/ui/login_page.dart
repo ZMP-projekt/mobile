@@ -31,12 +31,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             backgroundColor: success ? AppColors.success : AppColors.error,
       ));
 
-      /*
-      if (success) {
-        Navigator.pushReplacement(context, DashboardPage());
-      }
-      */
-
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

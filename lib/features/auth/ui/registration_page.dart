@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/auth_provider.dart';
 import '../../../core/theme/app_colors.dart';
-import '../data/auth_repository.dart';
 
 class RegistrationPage extends ConsumerStatefulWidget {
   const RegistrationPage({super.key});
@@ -33,8 +32,6 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
           SnackBar(content: Text(success ? 'Sukces' : 'Blad'),
           backgroundColor: success ? AppColors.success : AppColors.error),
         );
-
-        // Navigator.pushReplacement(context, DashboardPage());
       }
 
     } else {
