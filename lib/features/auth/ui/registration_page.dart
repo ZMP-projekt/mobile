@@ -21,7 +21,6 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
         passwordController.text.length >= 6) {
 
       final success = await ref.read(authStateProvider.notifier).register(
-          nameController.text,
           emailController.text,
           passwordController.text);
 
@@ -82,13 +81,15 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
                 ),
               ),
 
-              const SizedBox(height: 50),
+             /* const SizedBox(height: 50),
 
               _buildTextField(
                 controller: nameController,
                 label: 'Imię i nazwisko',
                 icon: Icons.person_outline,
               ),
+
+              */
               const SizedBox(height: 20),
 
               _buildTextField(

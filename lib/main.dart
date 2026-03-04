@@ -19,6 +19,12 @@ class AuthGate extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authStateProvider);
 
+    return Scaffold(
+      body: authState.isAuthenticated
+          ? const DashboardPage()
+          : const LoginPage(),
+    );
+
     if (authState.isAuthenticated) {
       return const DashboardPage();
     } else {

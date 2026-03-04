@@ -16,7 +16,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   final passwordController = TextEditingController();
 
   void _handleLogin() async {
-    if (emailController.text.isNotEmpty && passwordController.text.length >= 6) {
+    if (emailController.text.isNotEmpty && passwordController.text.length >= 2) {
 
       final success = await ref.read(authStateProvider.notifier).login(
           emailController.text,
@@ -24,12 +24,18 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
       if (!mounted) return;
 
-
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(success ? 'Zalogowano! (Mock)' : 'Blad polaczenia!'),
-            backgroundColor: success ? AppColors.success : AppColors.error,
-      ));
+      if (!success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Błąd logowania. Sprawdź dane.',
+              style: TextStyle(
+                color: AppColors.textPrimary),
+            ),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
 
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
