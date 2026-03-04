@@ -18,18 +18,25 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
   void _handleRegister() async {
     if (nameController.text.isNotEmpty &&
         emailController.text.isNotEmpty &&
-        passwordController.text.length >= 6) {
+        passwordController.text.length >= 2) {
 
       final success = await ref.read(authStateProvider.notifier).register(
+          nameController.text,
           emailController.text,
           passwordController.text);
 
       if (!mounted) return;
 
-      if (success) {
+      if (!success) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(success ? 'Sukces' : 'Blad'),
-          backgroundColor: success ? AppColors.success : AppColors.error),
+          const SnackBar(
+            content: Text(
+              'Błąd rejestracji. Sprawdź dane.',
+              style: TextStyle(
+                  color: AppColors.textPrimary),
+            ),
+            backgroundColor: AppColors.error,
+          ),
         );
       }
 
@@ -81,15 +88,14 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
                 ),
               ),
 
-             /* const SizedBox(height: 50),
+              const SizedBox(height: 50),
 
               _buildTextField(
                 controller: nameController,
-                label: 'Imię i nazwisko',
+                label: 'Imię',
                 icon: Icons.person_outline,
               ),
 
-              */
               const SizedBox(height: 20),
 
               _buildTextField(
@@ -207,7 +213,7 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
 
   @override
   void dispose() {
-    nameController.dispose();
+    //nameController.dispose();
     emailController.dispose();
     passwordController.dispose();
     super.dispose();

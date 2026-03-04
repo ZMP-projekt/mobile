@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
+import '../../auth/providers/auth_provider.dart';
+
 class DashboardPage extends ConsumerWidget {
   const DashboardPage({super.key});
 
@@ -31,7 +33,7 @@ class DashboardPage extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 10),
-                _buildHeader(context)
+                _buildHeader(context, ref)
                     .animate()
                     .fadeIn(duration: 600.ms)
                     .slideY(begin: -0.2),
@@ -90,10 +92,22 @@ class DashboardPage extends ConsumerWidget {
         ),
         child: FloatingActionButton(
           onPressed: () => _showQRModal(context),
-          backgroundColor: AppColors.primary,
-          shape: const CircleBorder(),
+          backgroundColor: Colors.transparent,
           elevation: 0,
-          child: const Icon(Icons.qr_code_scanner, color: Colors.white, size: 32),
+          shape: const CircleBorder(),
+          child: Ink(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: AppColors.primaryGradient,
+            ),
+            child: const Center(
+              child: Icon(
+                  Icons.qr_code_scanner,
+                  color: Colors.white,
+                  size: 32
+              ),
+            ),
+          ),
         )
             .animate(onPlay: (controller) => controller.repeat(reverse: true))
             .shimmer(duration: 3.seconds, color: Colors.white.withValues(alpha: 0.2)),
@@ -102,7 +116,7 @@ class DashboardPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
+  Widget _buildHeader(BuildContext context, WidgetRef ref) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -132,8 +146,10 @@ class DashboardPage extends ConsumerWidget {
           ],
         ),
         IconButton(
-          icon: const Icon(Icons.notifications_none, color: Colors.white, size: 28),
-          onPressed: () {},
+          icon: const Icon(Icons.logout, color: Colors.white, size: 28),
+          onPressed: () {
+            ref.read(authStateProvider.notifier).logout();
+          },
         ),
       ],
     );
