@@ -24,12 +24,6 @@ class AuthGate extends ConsumerWidget {
           ? const DashboardPage()
           : const LoginPage(),
     );
-
-    if (authState.isAuthenticated) {
-      return const DashboardPage();
-    } else {
-      return const LoginPage();
-    }
   }
 }
 

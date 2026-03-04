@@ -213,7 +213,7 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
 
   @override
   void dispose() {
-    //nameController.dispose();
+    nameController.dispose();
     emailController.dispose();
     passwordController.dispose();
     super.dispose();
