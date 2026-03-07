@@ -41,7 +41,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       return;
     }
 
-    final success = await ref.read(authStateProvider.notifier).login(
+    await ref.read(authStateProvider.notifier).login(
       emailController.text.trim(),
       passwordController.text,
     );

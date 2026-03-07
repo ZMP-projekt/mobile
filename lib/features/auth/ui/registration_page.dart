@@ -33,7 +33,7 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
       return;
     }
 
-    final success = await ref.read(authStateProvider.notifier).register(
+    await ref.read(authStateProvider.notifier).register(
       nameController.text.trim(),
       emailController.text.trim(),
       passwordController.text,

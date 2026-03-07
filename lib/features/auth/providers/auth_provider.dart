@@ -28,23 +28,21 @@ class AuthState {
   AuthState copyWith({
     bool? isLoading,
     bool? isAuthenticated,
-    _Value<String?>? errorMessage,
+    String? errorMessage,
+    bool clearError = false,
   }) {
     return AuthState(
       isLoading: isLoading ?? this.isLoading,
       isAuthenticated: isAuthenticated ?? this.isAuthenticated,
-      errorMessage: errorMessage != null ? errorMessage.value : this.errorMessage,
+      errorMessage: clearError
+          ? null
+          : (errorMessage ?? this.errorMessage),
     );
   }
 
   AuthState clearError() {
-    return copyWith(errorMessage: _Value(null));
+    return copyWith(clearError: true);
   }
-}
-
-class _Value<T> {
-  final T value;
-  _Value(this.value);
 }
 
 class AuthNotifier extends StateNotifier<AuthState> {
@@ -57,7 +55,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   Future<void> _checkInitialAuth() async {
     final token = await _storage.read(key: 'jwt_token');
-    AppLogger.i("TOKEN : $token");
 
     if (token != null) {
       state = state.copyWith(isAuthenticated: true);
@@ -81,7 +78,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       state = state.copyWith(
         isLoading: false,
         isAuthenticated: false,
-        errorMessage: _Value(result.error),
+        errorMessage: result.error,
       );
       AppLogger.e("❌ Błąd logowania: ${result.error}");
       return false;
@@ -105,7 +102,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       state = state.copyWith(
         isLoading: false,
         isAuthenticated: false,
-        errorMessage: _Value(result.error),
+        errorMessage: result.error,
       );
       AppLogger.e("❌ Błąd rejestracji: ${result.error}");
       return false;
