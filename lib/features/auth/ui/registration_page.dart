@@ -16,50 +16,66 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
   final passwordController = TextEditingController();
 
   void _handleRegister() async {
-    if (nameController.text.isNotEmpty &&
-        emailController.text.isNotEmpty &&
-        passwordController.text.length >= 2) {
 
-      final success = await ref.read(authStateProvider.notifier).register(
-          nameController.text,
-          emailController.text,
-          passwordController.text);
-
-      if (!mounted) return;
-
-      if (!success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Błąd rejestracji. Sprawdź dane.',
-              style: TextStyle(
-                  color: AppColors.textPrimary),
-            ),
-            backgroundColor: AppColors.error,
-          ),
-        );
-      }
-
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content:
-          Text('Bład!',
-              style: TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold)),
-              backgroundColor: AppColors.error,
-        ),
-      );
+    if (nameController.text.trim().isEmpty) {
+      _showError('Podaj imię');
+      return;
     }
+
+    final emailError = _validateEmail(emailController.text);
+    if (emailError != null) {
+      _showError(emailError);
+      return;
+    }
+
+    if (passwordController.text.length < 6) {
+      _showError('Hasło musi mieć minimum 6 znaków');
+      return;
+    }
+
+    final success = await ref.read(authStateProvider.notifier).register(
+      nameController.text.trim(),
+      emailController.text.trim(),
+      passwordController.text,
+    );
+
+    if (!mounted) return;
+
+  }
+
+  String? _validateEmail(String email) {
+    if (email.isEmpty) {
+      return 'Podaj adres email';
+    }
+
+    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    if (!emailRegex.hasMatch(email)) {
+      return 'Nieprawidłowy format email';
+    }
+
+    return null;
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: const TextStyle(color: AppColors.textPrimary),
+        ),
+        backgroundColor: AppColors.error,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-
-    final auth = ref.watch(authStateProvider);
-    final isLoading = auth.isLoading;
+    final authState = ref.watch(authStateProvider);
+    final isLoading = authState.isLoading;
+    final errorMessage = authState.errorMessage;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -83,8 +99,8 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
               Text(
                 'Zacznij analizować swoje postępy.',
                 style: TextStyle(
-                    color: AppColors.textPrimary.withValues(alpha: 0.6),
-                    fontSize: 16
+                  color: AppColors.textPrimary.withValues(alpha: 0.6),
+                  fontSize: 16,
                 ),
               ),
 
@@ -104,6 +120,7 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
                 icon: Icons.email_outlined,
                 keyboardType: TextInputType.emailAddress,
               ),
+
               const SizedBox(height: 20),
 
               _buildTextField(
@@ -112,6 +129,39 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
                 icon: Icons.lock_outline,
                 isPassword: true,
               ),
+
+              if (errorMessage != null) ...[
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.error.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: AppColors.error.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.error_outline,
+                        color: AppColors.error,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          errorMessage,
+                          style: const TextStyle(
+                            color: AppColors.error,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
 
               const SizedBox(height: 40),
 
@@ -133,8 +183,8 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
                         height: 24,
                         width: 24,
                         child: CircularProgressIndicator(
-                            color: AppColors.textPrimary,
-                            strokeWidth: 3
+                          color: AppColors.textPrimary,
+                          strokeWidth: 3,
                         ),
                       )
                           : const Text(
@@ -159,7 +209,9 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
                   child: RichText(
                     text: TextSpan(
                       text: 'Masz już konto? ',
-                      style: TextStyle(color: AppColors.textPrimary.withValues(alpha: 0.6)),
+                      style: TextStyle(
+                        color: AppColors.textPrimary.withValues(alpha: 0.6),
+                      ),
                       children: const [
                         TextSpan(
                           text: 'Zaloguj się',

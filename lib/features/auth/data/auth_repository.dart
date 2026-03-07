@@ -1,36 +1,54 @@
 import 'package:dio/dio.dart';
 import '../../../core/util/app_logger.dart';
+import '../../../core/models/result.dart';
 
 class AuthRepository {
   final Dio _dio;
 
   AuthRepository(this._dio);
 
-  Future<String?> login(String email, String password) async {
+  Future<Result<String>> login(String email, String password) async {
     try {
-      final response = await _dio.post('/auth/login', data: {
-        'email': email,
-        'password': password,
-      });
+      final response = await _dio.post(
+        '/auth/login',
+        data: {'email': email, 'password': password},
+      );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        return response.data['token'];
+        final token = response.data['token'];
+        return Result.success(token);
       }
+
+      return Result.failure('Nieoczekiwany błąd serwera');
+    } on DioException catch (e) {
+      AppLogger.e("Błąd logowania", e);
+
+      final errorMessage =
+          e.response?.data['message'] ??
+          e.response?.data['error'] ??
+          _getDefaultErrorMessage(e.type);
+
+      return Result.failure(errorMessage);
     } catch (e) {
-      AppLogger.e("Błąd logowania: $e");
+      AppLogger.e("Nieoczekiwany błąd", e);
+      return Result.failure('Wystąpił nieoczekiwany błąd');
     }
-    return null;
   }
 
-  Future<String?> register(String name, String email, String password) async {
+  Future<Result<String>> register(
+    String name,
+    String email,
+    String password,
+  ) async {
     try {
-      final response = await _dio.post('/auth/register',
-          data: {
-        'name': name,
-        'email': email.trim(),
-        'password': password.trim(),
-        'role': 'ROLE_USER',
-      },
+      final response = await _dio.post(
+        '/auth/register',
+        data: {
+          'name': name,
+          'email': email.trim(),
+          'password': password.trim(),
+          'role': 'ROLE_USER',
+        },
         options: Options(
           headers: {
             'Content-Type': 'application/json',
@@ -38,12 +56,43 @@ class AuthRepository {
           },
         ),
       );
-      return response.data['token'];
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final token = response.data['token'];
+        return Result.success(token);
+      }
+
+      return Result.failure('Nieoczekiwany błąd serwera');
     } on DioException catch (e) {
       AppLogger.e("STATUS: ${e.response?.statusCode}");
       AppLogger.e("DATA Z SERWERA: ${e.response?.data}");
-      AppLogger.e("TYP BŁĘDU: ${e.type}");
-      return null;
+
+      final errorMessage =
+          e.response?.data['message'] ??
+          e.response?.data['error'] ??
+          _getDefaultErrorMessage(e.type);
+
+      return Result.failure(errorMessage);
+    } catch (e) {
+      AppLogger.e("Nieoczekiwany błąd rejestracji", e);
+      return Result.failure('Wystąpił nieoczekiwany błąd');
+    }
+  }
+
+  String _getDefaultErrorMessage(DioExceptionType type) {
+    switch (type) {
+      case DioExceptionType.connectionTimeout:
+      case DioExceptionType.sendTimeout:
+      case DioExceptionType.receiveTimeout:
+        return 'Przekroczono czas połączenia. Sprawdź połączenie z internetem.';
+      case DioExceptionType.badResponse:
+        return 'Błąd serwera. Spróbuj ponownie później.';
+      case DioExceptionType.cancel:
+        return 'Żądanie zostało anulowane';
+      case DioExceptionType.connectionError:
+        return 'Brak połączenia z internetem';
+      default:
+        return 'Wystąpił nieoczekiwany błąd';
     }
   }
 }

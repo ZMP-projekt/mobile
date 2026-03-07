@@ -15,49 +15,61 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
-  void _handleLogin() async {
-    if (emailController.text.isNotEmpty && passwordController.text.length >= 2) {
-
-      final success = await ref.read(authStateProvider.notifier).login(
-          emailController.text,
-          passwordController.text);
-
-      if (!mounted) return;
-
-      if (!success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Błąd logowania. Sprawdź dane.',
-              style: TextStyle(
-                color: AppColors.textPrimary),
-            ),
-            backgroundColor: AppColors.error,
-          ),
-        );
-      }
-
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content:
-            Text('Błędny email lub za krótkie hasło',
-              style: TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,)
-            ),
-              backgroundColor: AppColors.error,
-        ),
-      );
+  String? _validateEmail(String email) {
+    if (email.isEmpty) {
+      return 'Podaj adres email';
     }
+
+    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    if (!emailRegex.hasMatch(email)) {
+      return 'Nieprawidłowy format email';
+    }
+
+    return null;
+  }
+
+  void _handleLogin() async {
+
+    final emailError = _validateEmail(emailController.text);
+    if (emailError != null) {
+      _showError(emailError);
+      return;
+    }
+
+    if (passwordController.text.length < 2) {
+      _showError('Hasło musi mieć minimum 2 znaków');
+      return;
+    }
+
+    final success = await ref.read(authStateProvider.notifier).login(
+      emailController.text.trim(),
+      passwordController.text,
+    );
+
+    if (!mounted) return;
+
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: const TextStyle(color: AppColors.textPrimary),
+        ),
+        backgroundColor: AppColors.error,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-
-    final auth = ref.watch(authStateProvider);
-    final isLoading = auth.isLoading;
+    final authState = ref.watch(authStateProvider);
+    final isLoading = authState.isLoading;
+    final errorMessage = authState.errorMessage;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -69,7 +81,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             children: [
               const SizedBox(height: 120),
 
-              Text(
+              const Text(
                 'Gotowy na trening?',
                 style: TextStyle(
                   color: AppColors.textPrimary,
@@ -80,7 +92,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               const SizedBox(height: 10),
               Text(
                 'Zaloguj się, aby kontynuować',
-                style: TextStyle(color: AppColors.textPrimary.withValues(alpha: 0.6), fontSize: 16),
+                style: TextStyle(
+                  color: AppColors.textPrimary.withValues(alpha: 0.6),
+                  fontSize: 16,
+                ),
               ),
 
               const SizedBox(height: 50),
@@ -89,6 +104,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 controller: emailController,
                 label: 'Email',
                 icon: Icons.email_outlined,
+                keyboardType: TextInputType.emailAddress,
               ),
 
               const SizedBox(height: 20),
@@ -100,12 +116,44 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 isPassword: true,
               ),
 
+              if (errorMessage != null) ...[
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.error.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: AppColors.error.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.error_outline,
+                        color: AppColors.error,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          errorMessage,
+                          style: const TextStyle(
+                            color: AppColors.error,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+
               const SizedBox(height: 40),
 
-              Padding (
+              Padding(
                 padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 5),
-                child:
-                GestureDetector(
+                child: GestureDetector(
                   onTap: isLoading ? null : _handleLogin,
                   child: Container(
                     width: double.infinity,
@@ -121,9 +169,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         height: 24,
                         width: 24,
                         child: CircularProgressIndicator(
-                            color: AppColors.textPrimary,
-                            strokeWidth: 3),
-                        )
+                          color: AppColors.textPrimary,
+                          strokeWidth: 3,
+                        ),
+                      )
                           : const Text(
                         'ZALOGUJ SIĘ',
                         style: TextStyle(
@@ -145,13 +194,17 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const RegistrationPage()),
+                      MaterialPageRoute(
+                        builder: (context) => const RegistrationPage(),
+                      ),
                     );
                   },
                   child: RichText(
                     text: TextSpan(
                       text: 'Nie masz konta? ',
-                      style: TextStyle(color: AppColors.textPrimary.withValues(alpha: 0.6)),
+                      style: TextStyle(
+                        color: AppColors.textPrimary.withValues(alpha: 0.6),
+                      ),
                       children: const [
                         TextSpan(
                           text: 'Zarejestruj się',
@@ -177,24 +230,26 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     required String label,
     required IconData icon,
     bool isPassword = false,
+    TextInputType? keyboardType,
   }) {
     return TextField(
       controller: controller,
       obscureText: isPassword,
-      style: TextStyle(color: AppColors.textPrimary),
+      keyboardType: keyboardType,
+      style: const TextStyle(color: AppColors.textPrimary),
       decoration: InputDecoration(
         filled: true,
         fillColor: AppColors.surface,
         labelText: label,
-        labelStyle: TextStyle(color: AppColors.textSecondary),
+        labelStyle: const TextStyle(color: AppColors.textSecondary),
         prefixIcon: Icon(icon, color: AppColors.primary),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(15),
-          borderSide: BorderSide(color: Colors.transparent),
+          borderSide: const BorderSide(color: Colors.transparent),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(15),
-          borderSide: BorderSide(color: AppColors.primary, width: 1.5),
+          borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
         ),
       ),
     );

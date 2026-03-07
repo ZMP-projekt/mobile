@@ -17,63 +17,104 @@ final authStateProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
 class AuthState {
   final bool isLoading;
   final bool isAuthenticated;
+  final String? errorMessage;
 
-  AuthState({this.isLoading = false, this.isAuthenticated = false});
+  AuthState({
+    this.isLoading = false,
+    this.isAuthenticated = false,
+    this.errorMessage,
+  });
 
-  AuthState copyWith({bool? isLoading, bool? isAuthenticated}) {
+  AuthState copyWith({
+    bool? isLoading,
+    bool? isAuthenticated,
+    _Value<String?>? errorMessage,
+  }) {
     return AuthState(
       isLoading: isLoading ?? this.isLoading,
       isAuthenticated: isAuthenticated ?? this.isAuthenticated,
+      errorMessage: errorMessage != null ? errorMessage.value : this.errorMessage,
     );
   }
+
+  AuthState clearError() {
+    return copyWith(errorMessage: _Value(null));
+  }
+}
+
+class _Value<T> {
+  final T value;
+  _Value(this.value);
 }
 
 class AuthNotifier extends StateNotifier<AuthState> {
   final AuthRepository _repo;
   final _storage = const FlutterSecureStorage();
 
-  AuthNotifier(this._repo) : super(AuthState()){
+  AuthNotifier(this._repo) : super(AuthState()) {
     _checkInitialAuth();
   }
 
   Future<void> _checkInitialAuth() async {
     final token = await _storage.read(key: 'jwt_token');
+    AppLogger.i("TOKEN : $token");
 
-    if (token != null ){
+    if (token != null) {
       state = state.copyWith(isAuthenticated: true);
     }
   }
 
   Future<bool> login(String email, String password) async {
-    state = state.copyWith(isLoading: true);
-    final token = await _repo.login(email, password);
+    state = state.clearError().copyWith(isLoading: true);
 
-    if (token != null) {
-      await _storage.write(key: 'jwt_token', value: token);
-      state = state.copyWith(isLoading: false, isAuthenticated: true);
+    final result = await _repo.login(email, password);
+
+    if (result.isSuccess) {
+      await _storage.write(key: 'jwt_token', value: result.data!);
+      state = state.copyWith(
+        isLoading: false,
+        isAuthenticated: true,
+      );
+      AppLogger.i("✅ Zalogowano pomyślnie");
       return true;
+    } else {
+      state = state.copyWith(
+        isLoading: false,
+        isAuthenticated: false,
+        errorMessage: _Value(result.error),
+      );
+      AppLogger.e("❌ Błąd logowania: ${result.error}");
+      return false;
     }
-
-    state = state.copyWith(isLoading: false, isAuthenticated: false);
-    return false;
   }
 
   Future<bool> register(String name, String email, String password) async {
-    state = state.copyWith(isLoading: true);
+    state = state.clearError().copyWith(isLoading: true);
 
-    final token = await _repo.register(name, email, password);
-    final success = token != null;
+    final result = await _repo.register(name, email, password);
 
-    if (success) {
-      AppLogger.i("Zarejestrowano pomyślnie.");
+    if (result.isSuccess) {
+      await _storage.write(key: 'jwt_token', value: result.data!);
+      state = state.copyWith(
+        isLoading: false,
+        isAuthenticated: true,
+      );
+      AppLogger.i("✅ Zarejestrowano pomyślnie");
+      return true;
+    } else {
+      state = state.copyWith(
+        isLoading: false,
+        isAuthenticated: false,
+        errorMessage: _Value(result.error),
+      );
+      AppLogger.e("❌ Błąd rejestracji: ${result.error}");
+      return false;
     }
-
-    state = state.copyWith(isLoading: false, isAuthenticated: success);
-    return success;
   }
 
-  Future <void> logout() async {
+  Future<void> logout() async {
     await _storage.delete(key: 'jwt_token');
     state = state.copyWith(isAuthenticated: false);
+    AppLogger.i("👋 Wylogowano");
   }
 }
