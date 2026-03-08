@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../user/providers/user_provider.dart';
+import '../../membership/providers/membership_provider.dart';
 
 class DashboardPage extends ConsumerWidget {
   const DashboardPage({super.key});
@@ -39,7 +41,7 @@ class DashboardPage extends ConsumerWidget {
 
                 const SizedBox(height: 25),
 
-                _buildMembershipCard()
+                _buildMembershipCard(ref)
                     .animate()
                     .fadeIn(delay: 200.ms, duration: 500.ms)
                     .scale(alignment: Alignment.center),
@@ -110,41 +112,66 @@ class DashboardPage extends ConsumerWidget {
   }
 
   Widget _buildHeader(BuildContext context, WidgetRef ref) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(2),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: AppColors.primary.withValues(alpha: 0.5), width: 2),
+    final userAsync = ref.watch(currentUserProvider);
+
+    return userAsync.when(
+
+      loading: () => const CircularProgressIndicator(),
+
+      error: (err, stack) => Text('Błąd: $err'),
+
+      data: (user) => Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(2),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                      color: AppColors.primary.withValues(alpha: 0.5),
+                      width: 2
+                  ),
+                ),
+                child: CircleAvatar(
+                  radius: 22,
+                  backgroundImage: NetworkImage(
+                      'https://i.pravatar.cc/150?u=${user.email}'
+                  ),
+                ),
               ),
-              child: const CircleAvatar(
-                radius: 22,
-                backgroundImage: NetworkImage('https://i.pravatar.cc/150?u=alex'),
+              const SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Cześć, ${user.name ?? "User"}!',
+                    style: const TextStyle(
+                        color: AppColors.textPrimary,
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold
+                    ),
+                  ),
+                  const Text(
+                    'Gotowy na trening? 🔥',
+                    style: TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 14
+                    ),
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(width: 12),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('Czesc, Alex!',
-                    style: TextStyle(color: AppColors.textPrimary, fontSize: 22, fontWeight: FontWeight.bold)),
-                Text('Gotowy na trening? 🔥',
-                    style: TextStyle(color: AppColors.textSecondary, fontSize: 14)),
-              ],
-            ),
-          ],
-        ),
-        IconButton(
-          icon: const Icon(Icons.logout, color: Colors.white, size: 28),
-          onPressed: () {
-            ref.read(authStateProvider.notifier).logout();
-          },
-        ),
-      ],
+            ],
+          ),
+          IconButton(
+            icon: const Icon(Icons.logout, color: Colors.white, size: 28),
+            onPressed: () {
+              ref.read(authStateProvider.notifier).logout();
+            },
+          ),
+        ],
+      ),
     );
   }
 
@@ -255,8 +282,13 @@ class DashboardPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildMembershipCard() {
-    return _withGlow(
+  Widget _buildMembershipCard(WidgetRef ref) {
+    final membershipAsync = ref.watch(currentMembershipProvider);
+
+    return membershipAsync.when(
+        loading: () => _buildMembershipCardSkeleton(),
+        error: (err, stack) => _buildMembershipCardError(),
+        data: (membership) => _withGlow(
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.all(20),
@@ -280,21 +312,38 @@ class DashboardPage extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 8),
-            const Text('Aktywny: 12 dni',
-                style: TextStyle(color: AppColors.textPrimary, fontSize: 22, fontWeight: FontWeight.bold)),
+            Text(
+              '${membership.status == 'ACTIVE' ? 'Aktywny' : 'Nieaktywny'}: ${membership.daysRemaining} dni',
+                style: TextStyle(color: AppColors.textPrimary, fontSize: 22, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 15),
             ClipRRect(
               borderRadius: BorderRadius.circular(10),
               child: LinearProgressIndicator(
-                value: 0.4,
+                value: membership.usagePercentage,
                 minHeight: 8,
-                backgroundColor: Colors.white10,
-                valueColor: AlwaysStoppedAnimation<Color>(AppColors.success),
+                backgroundColor: Colors.white.withValues(alpha: 0.1),
+                valueColor: const AlwaysStoppedAnimation<Color>(AppColors.success),
               ),
             ),
           ],
         ),
       )
+    )
+    );
+  }
+
+  Widget _buildMembershipCardSkeleton() {
+    return SizedBox(
+      height: 150,
+      child: Center(child: CircularProgressIndicator()),
+    );
+  }
+
+  Widget _buildMembershipCardError() {
+    return Container(
+      padding: EdgeInsets.all(20),
+      child: Text('Błąd pobierania karnetu', style: TextStyle(color: Colors.red)),
     );
   }
 
