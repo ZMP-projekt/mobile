@@ -21,21 +21,44 @@ class AppColors {
     colors: [primary, secondary],
   );
 
+  static List<BoxShadow> subtleGlow = [
+    BoxShadow(
+      color: primary.withValues(alpha: 0.15),
+      blurRadius: 20,
+      spreadRadius: -2,
+      offset: const Offset(0, 10),
+    ),
+  ];
+  static List<BoxShadow> mediumGlow = [
+    BoxShadow(
+      color: primary.withValues(alpha: 0.25),
+      blurRadius: 24,
+      spreadRadius: 0,
+      offset: const Offset(0, 8),
+    ),
+    BoxShadow(
+      color: secondary.withValues(alpha: 0.15),
+      blurRadius: 40,
+      spreadRadius: -4,
+      offset: const Offset(0, 12),
+    ),
+  ];
+
   static List<BoxShadow> primaryGlow = [
     BoxShadow(
-      color: primary.withValues(alpha: 0.7),
+      color: primary.withValues(alpha: 0.4),
       blurRadius: 12,
       spreadRadius: 2,
       offset: const Offset(0, 0),
     ),
     BoxShadow(
-      color: secondary.withValues(alpha: 0.5),
+      color: secondary.withValues(alpha: 0.3),
       blurRadius: 35,
       spreadRadius: 4,
       offset: const Offset(0, 6),
     ),
     BoxShadow(
-      color: primary.withValues(alpha: 0.25),
+      color: primary.withValues(alpha: 0.15),
       blurRadius: 80,
       spreadRadius: 8,
       offset: const Offset(0, 10),

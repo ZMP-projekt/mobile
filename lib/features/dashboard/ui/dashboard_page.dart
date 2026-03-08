@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-
 import '../../auth/providers/auth_provider.dart';
 
 class DashboardPage extends ConsumerWidget {
@@ -15,13 +14,13 @@ class DashboardPage extends ConsumerWidget {
       extendBody: true,
       body: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+          gradient: RadialGradient(
+            center: Alignment.topRight,
+            radius: 1.8,
             colors: [
-              Colors.purple.withValues(alpha: 0.08),
+              AppColors.primary.withValues(alpha: 0.12),
+              AppColors.secondary.withValues(alpha: 0.08),
               AppColors.background,
-              AppColors.primary.withValues(alpha: 0.05),
             ],
             stops: const [0.0, 0.5, 1.0],
           ),
@@ -82,13 +81,7 @@ class DashboardPage extends ConsumerWidget {
         width: 70,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.primary.withValues(alpha: 0.4),
-              blurRadius: 15,
-              spreadRadius: 2,
-            )
-          ],
+          boxShadow: AppColors.primaryGlow,
         ),
         child: FloatingActionButton(
           onPressed: () => _showQRModal(context),
@@ -96,21 +89,21 @@ class DashboardPage extends ConsumerWidget {
           elevation: 0,
           shape: const CircleBorder(),
           child: Ink(
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               shape: BoxShape.circle,
               gradient: AppColors.primaryGradient,
             ),
             child: const Center(
               child: Icon(
-                  Icons.qr_code_scanner,
-                  color: Colors.white,
-                  size: 32
+                Icons.qr_code_scanner,
+                color: Colors.white,
+                size: 32,
               ),
             ),
           ),
         )
-            .animate(onPlay: (controller) => controller.repeat(reverse: true))
-            .shimmer(duration: 3.seconds, color: Colors.white.withValues(alpha: 0.2)),
+          .animate(onPlay: (controller) => controller.repeat(reverse: true))
+          .shimmer(duration: 3.seconds, color: Colors.white.withValues(alpha: 0.2)),
       ),
       bottomNavigationBar: _buildBottomNav(),
     );
@@ -351,14 +344,7 @@ class DashboardPage extends ConsumerWidget {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(25),
-        boxShadow: [
-          BoxShadow(
-            color: (color ?? AppColors.primary).withValues(alpha: 0.15),
-            blurRadius: 20,
-            spreadRadius: -2,
-            offset: const Offset(0, 10),
-          ),
-        ],
+        boxShadow: AppColors.mediumGlow,
       ),
       child: child,
     );
