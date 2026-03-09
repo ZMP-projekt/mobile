@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mobile_gym_app/features/auth/providers/auth_provider.dart';
 import 'package:mobile_gym_app/features/auth/ui/login_page.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mobile_gym_app/features/dashboard/ui/dashboard_page.dart';
+import 'package:mobile_gym_app/features/main/main_screen.dart';
 
 void main() {
   runApp(
@@ -21,7 +21,7 @@ class AuthGate extends ConsumerWidget {
 
     return Scaffold(
       body: authState.isAuthenticated
-          ? const DashboardPage()
+          ? const MainScreen()
           : const LoginPage(),
     );
   }
