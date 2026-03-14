@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../dashboard/ui/dashboard_page.dart';
 import '../classes/ui/my_classes_page.dart';
@@ -123,7 +124,9 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             ),
           ),
         ),
-      ),
+      )
+          .animate(onPlay: (controller) => controller.repeat(reverse: true))
+          .shimmer(duration: 3.seconds, color: Colors.white.withValues(alpha: 0.2)),
     );
   }
 
