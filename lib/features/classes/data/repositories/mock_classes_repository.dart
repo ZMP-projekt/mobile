@@ -1,61 +1,46 @@
 import '../models/gym_class.dart';
 
-/// Mock Classes Repository - fake zajęcia na tydzień
-///
-/// UWAGA: Pamięta bookings w pamięci (Set<int> _bookedClassIds)
 class MockClassesRepository {
-  // Zapamiętaj które zajęcia user zarezerwował
-  final Set<int> _bookedClassIds = {1, 4, 9}; // Domyślnie: Yoga, Spinning, Yoga Power
+  final Set<int> _bookedClassIds = {1, 4, 9};
 
   Future<void> _simulateNetworkDelay() async {
     await Future.delayed(const Duration(milliseconds: 600));
   }
 
-  /// Pobierz wszystkie zajęcia w tym tygodniu
   Future<List<GymClass>> getAllClasses() async {
     await _simulateNetworkDelay();
     return _generateMockClasses();
   }
 
-  /// Pobierz zajęcia użytkownika (na które jest zapisany)
   Future<List<GymClass>> getMyClasses() async {
     await _simulateNetworkDelay();
     final allClasses = _generateMockClasses();
     return allClasses.where((c) => c.isBookedByUser).toList();
   }
 
-  /// Zapisz się na zajęcia
   Future<GymClass> bookClass(int classId) async {
     await _simulateNetworkDelay();
 
-    // Dodaj do zarezerwowanych
     _bookedClassIds.add(classId);
 
-    // Zwróć zaktualizowaną klasę
     final allClasses = _generateMockClasses();
     return allClasses.firstWhere((c) => c.id == classId);
   }
 
-  /// Wypisz się z zajęć
   Future<GymClass> cancelBooking(int classId) async {
     await _simulateNetworkDelay();
 
-    // Usuń z zarezerwowanych
     _bookedClassIds.remove(classId);
 
-    // Zwróć zaktualizowaną klasę
     final allClasses = _generateMockClasses();
     return allClasses.firstWhere((c) => c.id == classId);
   }
 
-  /// Generuj fake zajęcia na tydzień
-  /// UWAGA: Używa _bookedClassIds do ustawienia isBookedByUser
   List<GymClass> _generateMockClasses() {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
 
     return [
-      // DZISIAJ
       GymClass(
         id: 1,
         name: 'Yoga Relax',
@@ -93,7 +78,6 @@ class MockClassesRepository {
         description: 'Pilates na wzmocnienie mięśni głębokich',
       ),
 
-      // JUTRO
       GymClass(
         id: 4,
         name: 'Spinning',
@@ -119,7 +103,6 @@ class MockClassesRepository {
         description: 'Taneczny fitness w rytmie latino',
       ),
 
-      // POJUTRZE
       GymClass(
         id: 6,
         name: 'Body Pump',
@@ -145,7 +128,6 @@ class MockClassesRepository {
         description: 'Rozciąganie i elastyczność całego ciała',
       ),
 
-      // ZA 3 DNI
       GymClass(
         id: 8,
         name: 'Boxing',
@@ -154,8 +136,8 @@ class MockClassesRepository {
         trainerId: '6',
         trainerName: 'Jan Lewandowski',
         maxParticipants: 10,
-        currentParticipants: 10,  // ZAWSZE PEŁNE!
-        isBookedByUser: false,  // Nie można się zapisać
+        currentParticipants: 10,
+        isBookedByUser: false,
         description: 'Trening bokserski dla wszystkich poziomów',
       ),
       GymClass(
@@ -171,7 +153,6 @@ class MockClassesRepository {
         description: 'Dynamiczna joga budująca siłę',
       ),
 
-      // ZA 4 DNI
       GymClass(
         id: 10,
         name: 'TRX',

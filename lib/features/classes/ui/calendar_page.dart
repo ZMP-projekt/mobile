@@ -29,7 +29,6 @@ class CalendarPage extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header
             Padding(
               padding: const EdgeInsets.all(20.0),
               child: Column(
@@ -47,7 +46,7 @@ class CalendarPage extends ConsumerWidget {
                       .fadeIn(duration: 400.ms)
                       .slideX(begin: -0.2, end: 0),
                   const SizedBox(height: 8),
-                  Text(
+                  const Text(
                     'Wszystkie dostępne zajęcia',
                     style: TextStyle(
                       color: AppColors.textSecondary,
@@ -61,7 +60,6 @@ class CalendarPage extends ConsumerWidget {
               ),
             ),
 
-            // Content
             Expanded(
               child: classesAsync.when(
                 loading: () => const Center(
@@ -73,14 +71,14 @@ class CalendarPage extends ConsumerWidget {
                     children: [
                       const Icon(Icons.error_outline, color: AppColors.error, size: 48),
                       const SizedBox(height: 16),
-                      Text(
+                      const Text(
                         'Błąd pobierania zajęć',
                         style: TextStyle(color: AppColors.error, fontSize: 16),
                       ),
                       const SizedBox(height: 8),
                       Text(
                         err.toString(),
-                        style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                        style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
                         textAlign: TextAlign.center,
                       ),
                     ],
@@ -110,7 +108,6 @@ class CalendarPage extends ConsumerWidget {
                     );
                   }
 
-                  // Grupuj zajęcia po dniach
                   final groupedClasses = _groupClassesByDay(classes);
 
                   return ListView.builder(
@@ -124,7 +121,6 @@ class CalendarPage extends ConsumerWidget {
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Data header
                           _buildDateHeader(date)
                               .animate()
                               .fadeIn(delay: (100 * index).ms)
@@ -132,7 +128,6 @@ class CalendarPage extends ConsumerWidget {
 
                           const SizedBox(height: 12),
 
-                          // Lista zajęć w tym dniu
                           ...dayClasses.asMap().entries.map((classEntry) {
                             final classIndex = classEntry.key;
                             final gymClass = classEntry.value;
@@ -144,7 +139,7 @@ class CalendarPage extends ConsumerWidget {
                                   .fadeIn(delay: (100 * index + 50 * classIndex).ms)
                                   .slideX(begin: 0.1, end: 0),
                             );
-                          }).toList(),
+                          }),
 
                           const SizedBox(height: 20),
                         ],
@@ -176,7 +171,6 @@ class CalendarPage extends ConsumerWidget {
       grouped[date]!.add(gymClass);
     }
 
-    // Sortuj po dacie
     final sortedKeys = grouped.keys.toList()..sort();
     return Map.fromEntries(
       sortedKeys.map((key) => MapEntry(key, grouped[key]!)),
@@ -245,7 +239,6 @@ class CalendarPage extends ConsumerWidget {
           children: [
             Row(
               children: [
-                // Icon
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
@@ -260,7 +253,6 @@ class CalendarPage extends ConsumerWidget {
                 ),
                 const SizedBox(width: 12),
 
-                // Name & Time
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -276,7 +268,7 @@ class CalendarPage extends ConsumerWidget {
                       const SizedBox(height: 4),
                       Row(
                         children: [
-                          Icon(Icons.access_time, size: 14, color: AppColors.textSecondary),
+                          const Icon(Icons.access_time, size: 14, color: AppColors.textSecondary),
                           const SizedBox(width: 4),
                           Text(
                             '${gymClass.startTimeFormatted} • ${gymClass.durationMinutes} min',
@@ -291,7 +283,6 @@ class CalendarPage extends ConsumerWidget {
                   ),
                 ),
 
-                // Badge
                 if (gymClass.isBookedByUser)
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -313,10 +304,9 @@ class CalendarPage extends ConsumerWidget {
 
             const SizedBox(height: 12),
 
-            // Trainer & Spots
             Row(
               children: [
-                Icon(Icons.person_outline, size: 14, color: AppColors.textSecondary),
+                const Icon(Icons.person_outline, size: 14, color: AppColors.textSecondary),
                 const SizedBox(width: 4),
                 Text(
                   gymClass.trainerName,
@@ -358,16 +348,13 @@ class CalendarPage extends ConsumerWidget {
 
             const SizedBox(height: 12),
 
-            // Action Button
             SizedBox(
               width: double.infinity,
               child: gymClass.isBookedByUser
                   ? ElevatedButton(
                 onPressed: isProcessing
                     ? null
-                    : () {
-                  ref.read(bookingNotifierProvider.notifier).cancelBooking(gymClass.id);
-                },
+                    : () => _confirmCancel(context, ref, gymClass),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.error.withValues(alpha: 0.8),
                   foregroundColor: Colors.white,
@@ -440,6 +427,30 @@ class CalendarPage extends ConsumerWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _confirmCancel(BuildContext context, WidgetRef ref, GymClass gymClass) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: const Text('Zrezygnować?'),
+        content: Text('Czy na pewno chcesz się wypisać z zajęć: ${gymClass.name}?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Nie', style: TextStyle(color: AppColors.textSecondary)),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await ref.read(bookingNotifierProvider.notifier).cancelBooking(gymClass.id);
+            },
+            child: const Text('Tak, wypisz mnie', style: TextStyle(color: AppColors.error)),
+          ),
+        ],
       ),
     );
   }
