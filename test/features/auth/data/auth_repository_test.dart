@@ -89,7 +89,7 @@ void main() {
         requestOptions: RequestOptions(path: ''),
       ));
 
-      final result = await authRepository.register('John', 'john@test.pl', 'pass123');
+      final result = await authRepository.register('John', 'Smith', 'john@test.pl', 'pass123');
 
       expect(result.isSuccess, isTrue);
       expect(result.data, equals('new_user_token'));
@@ -109,7 +109,7 @@ void main() {
         ),
       ));
 
-      final result = await authRepository.register('John', 'existing@test.pl', 'pass');
+      final result = await authRepository.register('John', 'Smith', 'existing@test.pl', 'pass');
 
       expect(result.isFailure, isTrue);
       expect(result.error, equals('Email already registered'));

@@ -85,10 +85,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
-  Future<bool> register(String name, String email, String password) async {
+  Future<bool> register(String firstName, String lastName, String email, String password) async {
     state = state.clearError().copyWith(isLoading: true);
 
-    final result = await _repo.register(name, email, password);
+    final result = await _repo.register(firstName, lastName, email, password);
 
     if (result.isSuccess) {
       await _storage.write(key: 'jwt_token', value: result.data!);
