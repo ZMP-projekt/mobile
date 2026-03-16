@@ -173,6 +173,7 @@ class _AnimatedClassCardState extends ConsumerState<AnimatedClassCard> {
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppColors.primary.withValues(alpha: 0.1)),
+        boxShadow: AppColors.mediumGlow,
       ),
       child: Row(
         children: [

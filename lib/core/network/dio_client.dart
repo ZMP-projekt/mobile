@@ -3,7 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../util/app_logger.dart';
 
-final dioProvider = Provider<Dio>((ref) => DioClient().dio);
+final dioClientProvider = Provider<DioClient>((ref) => DioClient());
+
+final dioProvider = Provider<Dio>((ref) {
+  final client = ref.watch(dioClientProvider);
+  return client.dio;
+});
 
 class DioClient {
   final Dio _dio = Dio(
@@ -16,6 +21,13 @@ class DioClient {
   );
 
   DioClient() {
+    _dio.interceptors.add(LogInterceptor(
+      requestHeader: true,
+      responseHeader: true,
+      responseBody: true,
+      error: true,
+    ));
+
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
@@ -26,6 +38,7 @@ class DioClient {
             if (token != null) {
               options.headers['Authorization'] = 'Bearer $token';
               AppLogger.i("📡 Dodano token do zapytania: ${options.path}");
+              AppLogger.i(token);
             }
           } else {
             AppLogger.i("🔓 Publiczne zapytanie (bez tokena): ${options.path}");
@@ -35,6 +48,10 @@ class DioClient {
         },
       )
     );
+  }
+
+  Future<Response> get(String path, {Map<String, dynamic>? queryParameters}) {
+    return dio.get(path, queryParameters: queryParameters);
   }
 
   Dio get dio => _dio;

@@ -46,16 +46,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       passwordController.text,
     );
 
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Konto utworzone pomyślnie! Witamy w klubie.'),
-          backgroundColor: AppColors.success.withValues(alpha: 0.9),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    }
-
     if (!mounted) return;
 
   }

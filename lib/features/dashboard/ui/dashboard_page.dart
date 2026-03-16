@@ -84,7 +84,18 @@ class DashboardPage extends ConsumerWidget {
 
       loading: () => const CircularProgressIndicator(),
 
-      error: (err, stack) => Text('Błąd: $err'),
+      error: (err, stack) => AnimatedSwitcher(
+        duration: 300.ms,
+        child: FutureBuilder(
+          future: Future.delayed(1000.ms),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.done) {
+              return Text('Błąd: $err');
+            }
+            return const CircularProgressIndicator();
+          },
+        ),
+      ),
 
       data: (user) => Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -112,7 +123,7 @@ class DashboardPage extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Cześć, ${user.name ?? "User"}!',
+                    'Cześć, ${user.firstName}!',
                     style: const TextStyle(
                         color: AppColors.textPrimary,
                         fontSize: 22,
