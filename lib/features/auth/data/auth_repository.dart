@@ -36,7 +36,8 @@ class AuthRepository {
   }
 
   Future<Result<String>> register(
-    String name,
+    String firstName,
+    String lastName,
     String email,
     String password,
   ) async {
@@ -44,7 +45,8 @@ class AuthRepository {
       final response = await _dio.post(
         '/auth/register',
         data: {
-          'name': name,
+          'firstName': firstName,
+          'lastName': lastName,
           'email': email.trim(),
           'password': password.trim(),
           'role': 'ROLE_USER',

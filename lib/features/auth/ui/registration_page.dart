@@ -11,14 +11,20 @@ class RegistrationPage extends ConsumerStatefulWidget {
 }
 
 class _RegistrationPageState extends ConsumerState<RegistrationPage> {
-  final nameController = TextEditingController();
+  final firstNameController = TextEditingController();
+  final lastNameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
   void _handleRegister() async {
 
-    if (nameController.text.trim().isEmpty) {
+    if (firstNameController.text.trim().isEmpty) {
       _showError('Podaj imię');
+      return;
+    }
+
+    if (lastNameController.text.trim().isEmpty) {
+      _showError('Podaj nazwisko');
       return;
     }
 
@@ -28,16 +34,28 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
       return;
     }
 
-    if (passwordController.text.length < 6) {
+    if (passwordController.text.length < 2) {
       _showError('Hasło musi mieć minimum 6 znaków');
       return;
     }
 
-    await ref.read(authStateProvider.notifier).register(
-      nameController.text.trim(),
+    final success = await ref.read(authStateProvider.notifier).register(
+      firstNameController.text.trim(),
+      lastNameController.text.trim(),
       emailController.text.trim(),
       passwordController.text,
     );
+
+    if (success && mounted) {
+      Navigator.of(context).pop();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: const Text('Konto utworzone pomyślnie! Witamy w klubie.'),
+          backgroundColor: AppColors.success.withValues(alpha: 0.8),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
 
     if (!mounted) return;
 
@@ -107,9 +125,17 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
               const SizedBox(height: 50),
 
               _buildTextField(
-                controller: nameController,
+                controller: firstNameController,
                 label: 'Imię',
                 icon: Icons.person_outline,
+              ),
+
+              const SizedBox(height: 20),
+
+              _buildTextField(
+                controller: lastNameController,
+                label: 'Nazwisko',
+                icon: Icons.badge_outlined,
               ),
 
               const SizedBox(height: 20),
@@ -265,7 +291,8 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
 
   @override
   void dispose() {
-    nameController.dispose();
+    firstNameController.dispose();
+    lastNameController.dispose();
     emailController.dispose();
     passwordController.dispose();
     super.dispose();
