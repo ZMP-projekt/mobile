@@ -3,6 +3,7 @@ import '../../../core/network/dio_client.dart';
 import '../data/auth_repository.dart';
 import '../../../core/util/app_logger.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../../user/providers/user_provider.dart';
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   final dio = ref.watch(dioProvider);
@@ -11,7 +12,7 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
 
 final authStateProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   final repo = ref.watch(authRepositoryProvider);
-  return AuthNotifier(repo);
+  return AuthNotifier(repo, ref);
 });
 
 class AuthState {
@@ -48,8 +49,9 @@ class AuthState {
 class AuthNotifier extends StateNotifier<AuthState> {
   final AuthRepository _repo;
   final _storage = const FlutterSecureStorage();
+  final Ref ref;
 
-  AuthNotifier(this._repo) : super(AuthState()) {
+  AuthNotifier(this._repo, this.ref) : super(AuthState()) {
     _checkInitialAuth();
   }
 
@@ -68,11 +70,17 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
     if (result.isSuccess) {
       await _storage.write(key: 'jwt_token', value: result.data!);
+      ref.invalidate(currentUserProvider);
+      try {
+        await ref.read(currentUserProvider.future);
+      } catch (e) {
+        AppLogger.e("Błąd ", e);
+      }
       state = state.copyWith(
         isLoading: false,
         isAuthenticated: true,
       );
-      AppLogger.i("✅ Zalogowano pomyślnie");
+      AppLogger.i("✅ Zalogowano pomyślnie: $email");
       return true;
     } else {
       state = state.copyWith(
@@ -112,6 +120,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<void> logout() async {
     await _storage.delete(key: 'jwt_token');
     state = state.copyWith(isAuthenticated: false);
+    ref.invalidate(currentUserProvider);
     AppLogger.i("👋 Wylogowano");
   }
 }

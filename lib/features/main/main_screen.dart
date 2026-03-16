@@ -105,6 +105,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         boxShadow: AppColors.primaryGlow,
+        border: Border.all(color: AppColors.surface.withValues(alpha: 0.6), width: 3),
       ),
       child: FloatingActionButton(
         onPressed: () => _showQRModal(context),
