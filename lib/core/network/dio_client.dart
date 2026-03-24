@@ -1,58 +1,37 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import '../util/app_logger.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-final dioClientProvider = Provider<DioClient>((ref) => DioClient());
-
-final dioProvider = Provider<Dio>((ref) {
-  final client = ref.watch(dioClientProvider);
-  return client.dio;
+final secureStorageProvider = Provider<FlutterSecureStorage>((ref) {
+  return const FlutterSecureStorage();
 });
 
-class DioClient {
-  final Dio _dio = Dio(
+final dioProvider = Provider<Dio>((ref) {
+  final storage = ref.watch(secureStorageProvider);
+
+  final baseUrl = dotenv.env['API_BASE_URL'] ?? 'http://localhost:8080';
+
+  final dio = Dio(
     BaseOptions(
-      baseUrl: 'https://api-j6d6.onrender.com',
-      connectTimeout: const Duration(seconds: 15),
-      receiveTimeout: const Duration(seconds: 15),
-      responseType: ResponseType.json,
+      baseUrl: baseUrl,
+      connectTimeout: const Duration(seconds: 10),
+      receiveTimeout: const Duration(seconds: 10),
+      contentType: 'application/json',
     ),
   );
 
-  DioClient() {
-    _dio.interceptors.add(LogInterceptor(
-      requestHeader: true,
-      responseHeader: true,
-      responseBody: true,
-      error: true,
-    ));
+  dio.interceptors.add(
+    InterceptorsWrapper(
+      onRequest: (options, handler) async {
+        final token = await storage.read(key: 'jwt_token');
+        if (token != null) {
+          options.headers['Authorization'] = 'Bearer $token';
+        }
+        return handler.next(options);
+      },
+    ),
+  );
 
-    _dio.interceptors.add(
-      InterceptorsWrapper(
-        onRequest: (options, handler) async {
-          if (!options.path.contains('/auth/')) {
-            const storage = FlutterSecureStorage();
-            final token = await storage.read(key: 'jwt_token');
-
-            if (token != null) {
-              options.headers['Authorization'] = 'Bearer $token';
-              AppLogger.i("📡 Dodano token do zapytania: ${options.path}");
-              AppLogger.i(token);
-            }
-          } else {
-            AppLogger.i("🔓 Publiczne zapytanie (bez tokena): ${options.path}");
-          }
-
-          return handler.next(options);
-        },
-      )
-    );
-  }
-
-  Future<Response> get(String path, {Map<String, dynamic>? queryParameters}) {
-    return dio.get(path, queryParameters: queryParameters);
-  }
-
-  Dio get dio => _dio;
-}
+  return dio;
+});
