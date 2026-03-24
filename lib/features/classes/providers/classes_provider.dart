@@ -16,9 +16,36 @@ final myClassesProvider = FutureProvider<List<GymClass>>((ref) async {
   return await repo.getMyClasses();
 });
 
+
 final todayClassesProvider = FutureProvider<List<GymClass>>((ref) async {
   final allClasses = await ref.watch(allClassesProvider.future);
   return allClasses.where((c) => c.isToday && c.isFuture).toList();
+});
+
+final classesProvider = FutureProvider<Map<String, List<GymClass>>>((ref) async {
+  final allClasses = await ref.watch(allClassesProvider.future);
+  final grouped = <String, List<GymClass>>{};
+
+  final now = DateTime.now();
+  final tomorrow = now.add(const Duration(days: 1));
+
+  for (final gymClass in allClasses) {
+    String dateLabel;
+    if (gymClass.isToday) {
+      dateLabel = 'Dzisiaj';
+    } else if (gymClass.startTime.year == tomorrow.year && gymClass.startTime.month == tomorrow.month && gymClass.startTime.day == tomorrow.day) {
+      dateLabel = 'Jutro';
+    } else {
+      dateLabel = gymClass.dateFormatted;
+    }
+
+    if (!grouped.containsKey(dateLabel)) {
+      grouped[dateLabel] = [];
+    }
+    grouped[dateLabel]!.add(gymClass);
+  }
+
+  return grouped;
 });
 
 class BookingNotifier extends StateNotifier<bool> {
@@ -29,7 +56,6 @@ class BookingNotifier extends StateNotifier<bool> {
 
   Future<void> bookClass(int classId) async {
     state = true;
-
     try {
       await _repository.bookClass(classId);
 
@@ -46,7 +72,6 @@ class BookingNotifier extends StateNotifier<bool> {
 
   Future<void> cancelBooking(int classId) async {
     state = true;
-
     try {
       await _repository.cancelBooking(classId);
 

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/ui/widgets/custom_text_field.dart';
+import '../../../core/util/validators.dart';
 import '../providers/auth_provider.dart';
 import 'registration_page.dart';
-import '../../../core/theme/app_colors.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -12,253 +15,153 @@ class LoginPage extends ConsumerStatefulWidget {
 }
 
 class _LoginPageState extends ConsumerState<LoginPage> {
-  final emailController = TextEditingController();
-  final passwordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  bool _isPasswordVisible = false;
 
-  String? _validateEmail(String email) {
-    if (email.isEmpty) {
-      return 'Podaj adres email';
-    }
-
-    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-    if (!emailRegex.hasMatch(email)) {
-      return 'Nieprawidłowy format email';
-    }
-
-    return null;
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 
-  void _handleLogin() async {
-
-    final emailError = _validateEmail(emailController.text);
-    if (emailError != null) {
-      _showError(emailError);
-      return;
+  void _handleLogin() {
+    if (_formKey.currentState!.validate()) {
+      FocusScope.of(context).unfocus();
+      ref.read(authStateProvider.notifier).login(
+        _emailController.text.trim(),
+        _passwordController.text,
+      );
     }
-
-    if (passwordController.text.length < 2) {
-      _showError('Hasło musi mieć minimum 2 znaków');
-      return;
-    }
-
-    await ref.read(authStateProvider.notifier).login(
-      emailController.text.trim(),
-      passwordController.text,
-    );
-
-    if (!mounted) return;
-
-  }
-
-  void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          message,
-          style: const TextStyle(color: AppColors.textPrimary),
-        ),
-        backgroundColor: AppColors.error,
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.all(16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      ),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authStateProvider);
-    final isLoading = authState.isLoading;
-    final errorMessage = authState.errorMessage;
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 30.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 120),
-
-              const Text(
-                'Gotowy na trening?',
-                style: TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                ),
+      body: Stack(
+        children: [
+          Positioned(
+            top: -100, right: -100,
+            child: Container(
+              width: 300, height: 300,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.primary.withValues(alpha: 0.15),
+                boxShadow: const [BoxShadow(blurRadius: 100, spreadRadius: 50, color: AppColors.primary)],
               ),
-              const SizedBox(height: 10),
-              Text(
-                'Zaloguj się, aby kontynuować',
-                style: TextStyle(
-                  color: AppColors.textPrimary.withValues(alpha: 0.6),
-                  fontSize: 16,
-                ),
-              ),
+            ),
+          ),
 
-              const SizedBox(height: 50),
-
-              _buildTextField(
-                controller: emailController,
-                label: 'Email',
-                icon: Icons.email_outlined,
-                keyboardType: TextInputType.emailAddress,
-              ),
-
-              const SizedBox(height: 20),
-
-              _buildTextField(
-                controller: passwordController,
-                label: 'Hasło',
-                icon: Icons.lock_outline,
-                isPassword: true,
-              ),
-
-              if (errorMessage != null) ...[
-                const SizedBox(height: 16),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppColors.error.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                      color: AppColors.error.withValues(alpha: 0.3),
-                    ),
-                  ),
-                  child: Row(
+          SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      const Icon(
-                        Icons.error_outline,
-                        color: AppColors.error,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          errorMessage,
-                          style: const TextStyle(
-                            color: AppColors.error,
-                            fontSize: 14,
-                          ),
+                      const SizedBox(height: 32),
+
+                      const Text(
+                        'Witaj ponownie',
+                        style: TextStyle(color: AppColors.textPrimary, fontSize: 32, fontWeight: FontWeight.w800, letterSpacing: -1.0),
+                        textAlign: TextAlign.center,
+                      ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.2, end: 0),
+
+                      const SizedBox(height: 8),
+
+                      const Text(
+                        'Zaloguj się, aby kontynuować',
+                        style: TextStyle(color: AppColors.textSecondary, fontSize: 16),
+                        textAlign: TextAlign.center,
+                      ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.2, end: 0),
+
+                      const SizedBox(height: 48),
+
+                      CustomTextField(
+                        label: 'Email',
+                        icon: Icons.email_outlined,
+                        controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        validator: AppValidators.validateEmail,
+                      ).animate().fadeIn(delay: 400.ms).slideX(begin: 0.1, end: 0),
+
+                      const SizedBox(height: 20),
+
+                      CustomTextField(
+                        label: 'Hasło',
+                        icon: Icons.lock_outline_rounded,
+                        controller: _passwordController,
+                        isPassword: true,
+                        isPasswordVisible: _isPasswordVisible,
+                        onTogglePassword: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
+                        validator: AppValidators.validatePassword,
+                      ).animate().fadeIn(delay: 500.ms).slideX(begin: 0.1, end: 0),
+
+                      const SizedBox(height: 12),
+
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          onPressed: () {
+                          },
+                          child: const Text('Zapomniałeś hasła?', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600)),
                         ),
-                      ),
+                      ).animate().fadeIn(delay: 600.ms),
+
+                      const SizedBox(height: 32),
+
+                      Container(
+                        height: 56,
+                        decoration: BoxDecoration(
+                          gradient: AppColors.primaryGradient,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(color: AppColors.primary.withValues(alpha: 0.3), blurRadius: 20, offset: const Offset(0, 8)),
+                          ],
+                        ),
+                        child: ElevatedButton(
+                          onPressed: authState.isLoading ? null : _handleLogin,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            shadowColor: Colors.transparent,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          ),
+                          child: authState.isLoading
+                              ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                              : const Text('Zaloguj się', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                        ),
+                      ).animate().fadeIn(delay: 700.ms).slideY(begin: 0.2, end: 0),
+
+                      const SizedBox(height: 24),
+
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text('Nie masz konta? ', style: TextStyle(color: AppColors.textSecondary)),
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(context, MaterialPageRoute(builder: (context) => const RegistrationPage()));
+                            },
+                            child: const Text('Zarejestruj się', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
+                          ),
+                        ],
+                      ).animate().fadeIn(delay: 800.ms),
                     ],
                   ),
                 ),
-              ],
-
-              const SizedBox(height: 40),
-
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 5),
-                child: GestureDetector(
-                  onTap: isLoading ? null : _handleLogin,
-                  child: Container(
-                    width: double.infinity,
-                    height: 55,
-                    decoration: BoxDecoration(
-                      gradient: AppColors.primaryGradient,
-                      boxShadow: AppColors.primaryGlow,
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    child: Center(
-                      child: isLoading
-                          ? const SizedBox(
-                        height: 24,
-                        width: 24,
-                        child: CircularProgressIndicator(
-                          color: AppColors.textPrimary,
-                          strokeWidth: 3,
-                        ),
-                      )
-                          : const Text(
-                        'ZALOGUJ SIĘ',
-                        style: TextStyle(
-                          color: AppColors.textPrimary,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          letterSpacing: 1.2,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
               ),
-
-              const SizedBox(height: 10),
-
-              Center(
-                child: TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const RegistrationPage(),
-                      ),
-                    );
-                  },
-                  child: RichText(
-                    text: TextSpan(
-                      text: 'Nie masz konta? ',
-                      style: TextStyle(
-                        color: AppColors.textPrimary.withValues(alpha: 0.6),
-                      ),
-                      children: const [
-                        TextSpan(
-                          text: 'Zarejestruj się',
-                          style: TextStyle(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
-  }
-
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String label,
-    required IconData icon,
-    bool isPassword = false,
-    TextInputType? keyboardType,
-  }) {
-    return TextField(
-      controller: controller,
-      obscureText: isPassword,
-      keyboardType: keyboardType,
-      style: const TextStyle(color: AppColors.textPrimary),
-      decoration: InputDecoration(
-        filled: true,
-        fillColor: AppColors.surface,
-        labelText: label,
-        labelStyle: const TextStyle(color: AppColors.textSecondary),
-        prefixIcon: Icon(icon, color: AppColors.primary),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(15),
-          borderSide: const BorderSide(color: Colors.transparent),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(15),
-          borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
-        ),
-      ),
-    );
-  }
-
-  @override
-  void dispose() {
-    emailController.dispose();
-    passwordController.dispose();
-    super.dispose();
   }
 }

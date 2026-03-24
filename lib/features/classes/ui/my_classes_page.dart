@@ -1,9 +1,12 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../core/theme/app_colors.dart';
 import '../providers/classes_provider.dart';
 import '../data/models/gym_class.dart';
+import '../../main/main_screen.dart';
+import 'class_details_page.dart';
 
 class MyClassesPage extends ConsumerWidget {
   const MyClassesPage({super.key});
@@ -12,218 +15,217 @@ class MyClassesPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final myClassesAsync = ref.watch(myClassesProvider);
 
-    return Container(
-      decoration: BoxDecoration(
-        gradient: RadialGradient(
-          center: Alignment.topRight,
-          radius: 1.8,
-          colors: [
-            AppColors.primary.withValues(alpha: 0.12),
-            AppColors.secondary.withValues(alpha: 0.08),
-            AppColors.background,
-          ],
-          stops: const [0.0, 0.5, 1.0],
-        ),
-      ),
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Moje Zajęcia',
-                style: TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                ),
-              )
-                  .animate()
-                  .fadeIn(duration: 400.ms)
-                  .slideY(begin: -0.2, end: 0),
-              const SizedBox(height: 20),
-              Expanded(
-                child: myClassesAsync.when(
-                  loading: () => const Center(child: CircularProgressIndicator()),
-                  error: (err, stack) => Center(child: Text('Błąd: $err')),
-                  data: (classes) {
-                    if (classes.isEmpty) {
-                      return _buildEmptyState();
-                    }
-                    return ListView.builder(
-                      itemCount: classes.length,
-                      itemBuilder: (context, index) {
-                        final gymClass = classes[index];
-                        return AnimatedClassCard(
-                          gymClass: gymClass,
-                          index: index,
-                        );
-                      },
-                    );
-                  },
-                ),
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        bottom: false,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+              child: const Text(
+                'Moje Treningi',
+                style: TextStyle(color: AppColors.textPrimary, fontSize: 34, fontWeight: FontWeight.w800, letterSpacing: -1.0),
+              ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.1, end: 0),
+            ),
+            Expanded(
+              child: myClassesAsync.when(
+                loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
+                error: (err, stack) => Center(child: Text('Błąd: $err', style: const TextStyle(color: AppColors.error))),
+                data: (classes) {
+                  if (classes.isEmpty) return _buildEmptyState(ref);
+                  return ListView.builder(
+                    padding: const EdgeInsets.fromLTRB(20, 10, 20, 130),
+                    itemCount: classes.length,
+                    itemBuilder: (context, index) {
+                      return FeaturedCard(gymClass: classes[index], index: index);
+                    },
+                  );
+                },
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(WidgetRef ref) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.event_busy,
-            size: 80,
-            color: AppColors.primary.withValues(alpha: 0.7),
-          ).animate().scale(duration: 600.ms, curve: Curves.easeOutBack),
-          const SizedBox(height: 20),
-          const Text(
-            'Brak zapisów',
-            style: TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'Nie jesteś zapisany na żadne zajęcia.\nPrzejdź do kalendarza, aby dołączyć!',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: AppColors.textSecondary),
+          Icon(Icons.event_note_rounded, size: 80, color: AppColors.surface),
+          const SizedBox(height: 24),
+          const Text('Brak zaplanowanych zajęć', style: TextStyle(color: AppColors.textPrimary, fontSize: 22, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 12),
+          const Text('Znajdź coś dla siebie w grafiku', style: TextStyle(color: AppColors.textSecondary, fontSize: 16)),
+          const SizedBox(height: 32),
+          ElevatedButton(
+            onPressed: () => ref.read(mainNavigationProvider.notifier).state = 1,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.surface,
+              foregroundColor: AppColors.primary,
+              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            ),
+            child: const Text('Przejdź do grafiku', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
           ),
         ],
-      ),
+      ).animate().fadeIn(),
     );
   }
 }
-class AnimatedClassCard extends ConsumerStatefulWidget {
+
+class FeaturedCard extends ConsumerWidget {
   final GymClass gymClass;
   final int index;
 
-  const AnimatedClassCard({
-    super.key,
-    required this.gymClass,
-    required this.index,
-  });
+  const FeaturedCard({super.key, required this.gymClass, required this.index});
 
   @override
-  ConsumerState<AnimatedClassCard> createState() => _AnimatedClassCardState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isLoading = ref.watch(bookingNotifierProvider);
+    final imageUrl = _getImageForClass(gymClass.name);
 
-class _AnimatedClassCardState extends ConsumerState<AnimatedClassCard> {
-  bool _isExiting = false;
-  void _confirmCancel() {
+    return InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ClassDetailsPage(gymClass: gymClass, imageUrl: imageUrl),
+            ),
+          );
+        },
+    child: Container(
+      height: 180,
+      margin: const EdgeInsets.only(bottom: 20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(28),
+        image: DecorationImage(
+          image: NetworkImage(_getImageForClass(gymClass.name)),
+          fit: BoxFit.cover,
+        ),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withValues(alpha: 0.4), blurRadius: 20, offset: const Offset(0, 10)),
+        ],
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(28),
+          gradient: const LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Colors.black12, Colors.black87],
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Align(
+              alignment: Alignment.topRight,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      color: Colors.white.withValues(alpha: 0.15),
+                      child: Text(
+                        '${gymClass.dateFormatted} • ${gymClass.startTimeFormatted}',
+                        style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+            ClipRRect(
+              borderRadius: const BorderRadius.vertical(bottom: Radius.circular(28)),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  color: Colors.black.withValues(alpha: 0.4),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              gymClass.name,
+                              style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w700, letterSpacing: -0.5),
+                              maxLines: 1, overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Trener: ${gymClass.trainer.fullName}',
+                              style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 13),
+                            ),
+                          ],
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: isLoading ? null : () => _confirmCancel(context, ref, gymClass),
+                        child: Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.close_rounded, color: Colors.white70, size: 20),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ).animate().fadeIn(delay: (index * 100).ms, duration: 400.ms).slideY(begin: 0.1, end: 0)
+    );
+  }
+
+  void _confirmCancel(BuildContext context, WidgetRef ref, GymClass gymClass) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surface,
-        title: const Text('Zrezygnować?'),
-        content: Text('Czy na pewno chcesz się wypisać z zajęć: ${widget.gymClass.name}?'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text('Zrezygnować?', style: TextStyle(color: AppColors.textPrimary)),
+        content: Text('Czy na pewno chcesz anulować:\n${gymClass.name}?', style: const TextStyle(color: AppColors.textSecondary)),
         actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Anuluj', style: TextStyle(color: AppColors.textSecondary))),
           TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Nie', style: TextStyle(color: AppColors.textSecondary)),
-          ),
-          TextButton(
-            onPressed: () async {
+            onPressed: () {
               Navigator.pop(ctx);
-
-              setState(() {
-                _isExiting = true;
-              });
-
-              await Future.delayed(const Duration(milliseconds: 300));
-
-              if (mounted) {
-                ref.read(bookingNotifierProvider.notifier).cancelBooking(widget.gymClass.id);
-              }
+              ref.read(bookingNotifierProvider.notifier).cancelBooking(gymClass.id);
             },
-            child: const Text('Tak, wypisz mnie', style: TextStyle(color: AppColors.error)),
+            child: const Text('Odwołaj', style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final isLoading = ref.watch(bookingNotifierProvider);
-
-    return AnimatedSize(
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-      child: _isExiting
-          ? const SizedBox(width: double.infinity, height: 0)
-          : _buildCardContent(isLoading)
-          .animate()
-          .fadeIn(delay: (widget.index * 100).ms, duration: 400.ms)
-          .slideX(begin: 0.1, end: 0)
-          .animate(target: _isExiting ? 1 : 0)
-          .slideX(begin: 0, end: -0.5, duration: 250.ms)
-          .fadeOut(duration: 250.ms),
-    );
-  }
-
-  Widget _buildCardContent(bool isLoading) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.1)),
-        boxShadow: AppColors.mediumGlow,
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Column(
-              children: [
-                Text(
-                  widget.gymClass.startTime.day.toString(),
-                  style: const TextStyle(color: AppColors.primary, fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                Text(
-                  _getMonthName(widget.gymClass.startTime.month),
-                  style: const TextStyle(color: AppColors.primary, fontSize: 12),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 15),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  widget.gymClass.name,
-                  style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 16),
-                ),
-                Text(
-                  '${widget.gymClass.startTimeFormatted} - ${widget.gymClass.trainerName}',
-                  style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
-                ),
-              ],
-            ),
-          ),
-          IconButton(
-            onPressed: isLoading ? null : _confirmCancel,
-            icon: const Icon(Icons.cancel_outlined, color: AppColors.error),
-            tooltip: 'Wypisz się',
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _getMonthName(int month) {
-    const months = ['STYZ', 'LUT', 'MAR', 'KWI', 'MAJ', 'CZE', 'LIP', 'SIE', 'WRZ', 'PAZ', 'LIS', 'GRU'];
-    return months[month - 1];
+  String _getImageForClass(String name) {
+    final nameLower = name.toLowerCase();
+    if (nameLower.contains('yoga')) return 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&w=600&q=80';
+    if (nameLower.contains('crossfit') || nameLower.contains('hiit')) return 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=600&q=80';
+    if (nameLower.contains('pilates') || nameLower.contains('stretch')) return 'https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&q=80';
+    if (nameLower.contains('spinning')) return 'https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=600&q=80';
+    if (nameLower.contains('zumba')) return 'https://images.unsplash.com/photo-1518609878373-06d740f60d8b?auto=format&fit=crop&w=600&q=80';
+    if (nameLower.contains('boxing')) return 'https://images.unsplash.com/photo-1549719386-74dfcbf7dbed?auto=format&fit=crop&w=600&q=80';
+    if (nameLower.contains('trx')) return 'https://images.unsplash.com/photo-1526506114842-8395dc559384?auto=format&fit=crop&w=600&q=80';
+    return 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=600&q=80';
   }
 }
