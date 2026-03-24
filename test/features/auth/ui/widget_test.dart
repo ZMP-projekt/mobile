@@ -29,9 +29,11 @@ void main() {
       ),
     );
 
-    expect(find.textContaining('Gotowy na trening'), findsOneWidget);
-    expect(find.text('ZALOGUJ SIĘ'), findsOneWidget);
+    expect(find.textContaining('Witaj ponownie'), findsOneWidget);
+    expect(find.text('Zaloguj się'), findsOneWidget);
 
     expect(find.byType(TextField), findsNWidgets(2));
+
+    await tester.pumpAndSettle();
   });
 }
