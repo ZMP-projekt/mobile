@@ -1,10 +1,13 @@
+import 'trainer.dart';
+
 class GymClass {
   final int id;
   final String name;
   final DateTime startTime;
   final DateTime endTime;
-  final String trainerId;
-  final String trainerName;
+
+  final Trainer trainer;
+
   final int maxParticipants;
   final int currentParticipants;
   final bool isBookedByUser;
@@ -16,8 +19,7 @@ class GymClass {
     required this.name,
     required this.startTime,
     required this.endTime,
-    required this.trainerId,
-    required this.trainerName,
+    required this.trainer,
     required this.maxParticipants,
     required this.currentParticipants,
     required this.isBookedByUser,
@@ -72,13 +74,24 @@ class GymClass {
   }
 
   factory GymClass.fromJson(Map<String, dynamic> json) {
+    Trainer parsedTrainer;
+    if (json['trainer'] != null) {
+      parsedTrainer = Trainer.fromJson(json['trainer']);
+    } else {
+      final fullName = (json['trainerName'] as String?) ?? 'Nieznany Trener';
+      final nameParts = fullName.split(' ');
+      parsedTrainer = Trainer(
+        firstName: nameParts.first,
+        lastName: nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '',
+      );
+    }
+
     return GymClass(
       id: json['id'],
       name: json['name'],
       startTime: DateTime.parse(json['startTime']),
       endTime: DateTime.parse(json['endTime']),
-      trainerId: json['trainerId'].toString(),
-      trainerName: json['trainerName'],
+      trainer: parsedTrainer,
       maxParticipants: json['maxParticipants'],
       currentParticipants: json['currentParticipants'],
       isBookedByUser: json['isBookedByUser'] ?? false,
@@ -92,8 +105,7 @@ class GymClass {
     String? name,
     DateTime? startTime,
     DateTime? endTime,
-    String? trainerId,
-    String? trainerName,
+    Trainer? trainer,
     int? maxParticipants,
     int? currentParticipants,
     bool? isBookedByUser,
@@ -105,8 +117,7 @@ class GymClass {
       name: name ?? this.name,
       startTime: startTime ?? this.startTime,
       endTime: endTime ?? this.endTime,
-      trainerId: trainerId ?? this.trainerId,
-      trainerName: trainerName ?? this.trainerName,
+      trainer: trainer ?? this.trainer,
       maxParticipants: maxParticipants ?? this.maxParticipants,
       currentParticipants: currentParticipants ?? this.currentParticipants,
       isBookedByUser: isBookedByUser ?? this.isBookedByUser,
