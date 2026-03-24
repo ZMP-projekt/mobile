@@ -7,22 +7,14 @@ class UserRepository {
   UserRepository(this._dio);
 
   Future<User> getMe() async {
-    try {
-
     final response = await _dio.get('/api/users/me');
 
-      if (response.statusCode == 200) {
-        return User.fromJson(response.data);
-      } else {
-        throw Exception('Nie udało się pobrać danych użytkownika');
-      }
-    } catch (e) {
-      rethrow;
-    }
+    return User.fromJson(response.data);
   }
 
   Future<User> getUserById(int id) async {
-    final response = await _dio.get('/users/$id');
+    final response = await _dio.get('/api/users/$id');
     return User.fromJson(response.data);
   }
+
 }

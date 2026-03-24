@@ -7,6 +7,8 @@ import '../classes/ui/calendar_page.dart';
 import '../profile/ui/profile_page.dart';
 import '../../core/theme/app_colors.dart';
 
+final mainNavigationProvider = StateProvider<int>((ref) => 0);
+
 class MainScreen extends ConsumerStatefulWidget {
   const MainScreen({super.key});
 
@@ -15,13 +17,12 @@ class MainScreen extends ConsumerStatefulWidget {
 }
 
 class _MainScreenState extends ConsumerState<MainScreen> {
-  int _currentIndex = 0;
   late PageController _pageController;
 
   @override
   void initState() {
     super.initState();
-    _pageController = PageController();
+    _pageController = PageController(initialPage: ref.read(mainNavigationProvider));
   }
 
   @override
@@ -30,26 +31,26 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     super.dispose();
   }
 
-  void _onPageChanged(int index) {
-    setState(() {
-      _currentIndex = index;
-    });
-  }
-
-  void _onNavTapped(int index) {
-    _pageController.animateToPage(
-      index,
-      duration: const Duration(milliseconds: 400),
-      curve: Curves.easeInOutCubic,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
+    ref.listen<int>(mainNavigationProvider, (previous, next) {
+      if (_pageController.hasClients && _pageController.page?.round() != next) {
+        _pageController.animateToPage(
+          next,
+          duration: const Duration(milliseconds: 400),
+          curve: Curves.easeInOutCubic,
+        );
+      }
+    });
+
+    final currentIndex = ref.watch(mainNavigationProvider);
+
     return Scaffold(
       body: PageView(
         controller: _pageController,
-        onPageChanged: _onPageChanged,
+        onPageChanged: (index) {
+          ref.read(mainNavigationProvider.notifier).state = index;
+        },
         children: const [
           DashboardPage(),
           CalendarPage(),
@@ -59,11 +60,11 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: _buildFAB(context),
-      bottomNavigationBar: _buildBottomNav(),
+      bottomNavigationBar: _buildBottomNav(currentIndex),
     );
   }
 
-  Widget _buildBottomNav() {
+  Widget _buildBottomNav(int currentIndex) {
     return BottomAppBar(
       color: AppColors.surface,
       shape: const CircularNotchedRectangle(),
@@ -74,19 +75,19 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            _buildNavItem(Icons.home_filled, 0),
-            _buildNavItem(Icons.calendar_today, 1),
+            _buildNavItem(Icons.home_filled, 0, currentIndex),
+            _buildNavItem(Icons.calendar_today, 1, currentIndex),
             const SizedBox(width: 40),
-            _buildNavItem(Icons.emoji_people, 2),
-            _buildNavItem(Icons.person_outline, 3),
+            _buildNavItem(Icons.bookmark_outline, 2, currentIndex),
+            _buildNavItem(Icons.person_outline, 3, currentIndex),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildNavItem(IconData icon, int index) {
-    final isSelected = _currentIndex == index;
+  Widget _buildNavItem(IconData icon, int index, int currentIndex) {
+    final isSelected = currentIndex == index;
 
     return IconButton(
       icon: Icon(
@@ -94,18 +95,30 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         color: isSelected ? AppColors.primary : Colors.white38,
         size: isSelected ? 28 : 24,
       ),
-      onPressed: () => _onNavTapped(index),
+      onPressed: () {
+        ref.read(mainNavigationProvider.notifier).state = index;
+      },
     );
   }
 
   Widget _buildFAB(BuildContext context) {
     return Container(
-      height: 70,
-      width: 70,
+      height: 72,
+      width: 72,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        boxShadow: AppColors.primaryGlow,
-        border: Border.all(color: AppColors.surface.withValues(alpha: 0.6), width: 3),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withValues(alpha: 0.4),
+            blurRadius: 12,
+            spreadRadius: 0,
+            offset: const Offset(0, 4),
+          ),
+        ],
+        border: Border.all(
+          color: AppColors.surface,
+          width: 4,
+        ),
       ),
       child: FloatingActionButton(
         onPressed: () => _showQRModal(context),
@@ -115,7 +128,11 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         child: Ink(
           decoration: const BoxDecoration(
             shape: BoxShape.circle,
-            gradient: AppColors.primaryGradient,
+            gradient: LinearGradient(
+              colors: [AppColors.primary, AppColors.secondary],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
           ),
           child: const Center(
             child: Icon(
@@ -127,7 +144,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         ),
       )
           .animate(onPlay: (controller) => controller.repeat(reverse: true))
-          .shimmer(duration: 3.seconds, color: Colors.white.withValues(alpha: 0.2)),
+          .shimmer(duration: 3.seconds, color: Colors.white.withValues(alpha: 0.3)),
     );
   }
 
@@ -161,10 +178,11 @@ class _MainScreenState extends ConsumerState<MainScreen> {
               child: const Icon(Icons.qr_code_2, size: 200, color: Colors.black),
             ),
             const SizedBox(height: 20),
-            const Text(
+            Text(
               'Zeskanuj kod przy bramce',
-              style: TextStyle(color: AppColors.textSecondary),
+              style: TextStyle(color: AppColors.textSecondary.withValues(alpha: 0.8)),
             ),
+            const SizedBox(height: 20),
           ],
         ),
       ),

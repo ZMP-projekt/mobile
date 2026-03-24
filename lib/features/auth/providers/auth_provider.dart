@@ -70,7 +70,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
     if (result.isSuccess) {
       await _storage.write(key: 'jwt_token', value: result.data!);
-      ref.invalidate(currentUserProvider);
       try {
         await ref.read(currentUserProvider.future);
       } catch (e) {
@@ -120,7 +119,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<void> logout() async {
     await _storage.delete(key: 'jwt_token');
     state = state.copyWith(isAuthenticated: false);
-    ref.invalidate(currentUserProvider);
     AppLogger.i("👋 Wylogowano");
   }
 }
