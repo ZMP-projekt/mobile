@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../dashboard/ui/dashboard_page.dart';
-import '../classes/ui/my_classes_page.dart';
+import '../trainings/ui/personal_trainings_page.dart';
 import '../classes/ui/calendar_page.dart';
 import '../profile/ui/profile_page.dart';
+
+import '../trainer/ui/trainer_dashboard.dart';
+import '../trainer/ui/personal_trainings.dart';
+import '../user/providers/user_provider.dart';
+
 import '../../core/theme/app_colors.dart';
 
 final mainNavigationProvider = StateProvider<int>((ref) => 0);
@@ -45,26 +51,42 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
     final currentIndex = ref.watch(mainNavigationProvider);
 
+    final userAsync = ref.watch(currentUserProvider);
+    final isTrainer = userAsync.valueOrNull?.isTrainer ?? false;
+
+    final List<Widget> screens = isTrainer
+        ? const [
+      TrainerDashboardPage(),
+      CalendarPage(),
+      TrainerPersonalTrainingsPage(),
+      ProfilePage(),
+    ]
+        : const [
+      DashboardPage(),
+      CalendarPage(),
+      PersonalTrainingsPage(),
+      ProfilePage(),
+    ];
+
+    final safeIndex = currentIndex >= screens.length ? 0 : currentIndex;
+
     return Scaffold(
+      backgroundColor: AppColors.background,
       body: PageView(
         controller: _pageController,
+        physics: const NeverScrollableScrollPhysics(),
         onPageChanged: (index) {
           ref.read(mainNavigationProvider.notifier).state = index;
         },
-        children: const [
-          DashboardPage(),
-          CalendarPage(),
-          MyClassesPage(),
-          ProfilePage(),
-        ],
+        children: screens,
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: _buildFAB(context),
-      bottomNavigationBar: _buildBottomNav(currentIndex),
+      bottomNavigationBar: _buildBottomNav(safeIndex, isTrainer),
     );
   }
 
-  Widget _buildBottomNav(int currentIndex) {
+  Widget _buildBottomNav(int currentIndex, bool isTrainer) {
     return BottomAppBar(
       color: AppColors.surface,
       shape: const CircularNotchedRectangle(),
@@ -74,11 +96,19 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         height: 60,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
+          children: isTrainer
+              ? [
+            _buildNavItem(Icons.home_filled, 0, currentIndex),
+            _buildNavItem(Icons.calendar_month_outlined, 1, currentIndex),
+            const SizedBox(width: 40),
+            _buildNavItem(Icons.people_alt_outlined, 2, currentIndex),
+            _buildNavItem(Icons.person_outline, 3, currentIndex),
+          ]
+              : [
             _buildNavItem(Icons.home_filled, 0, currentIndex),
             _buildNavItem(Icons.calendar_today, 1, currentIndex),
             const SizedBox(width: 40),
-            _buildNavItem(Icons.bookmark_outline, 2, currentIndex),
+            _buildNavItem(Icons.fitness_center_rounded, 2, currentIndex),
             _buildNavItem(Icons.person_outline, 3, currentIndex),
           ],
         ),
