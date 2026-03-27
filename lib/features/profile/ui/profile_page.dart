@@ -62,7 +62,7 @@ class ProfilePage extends ConsumerWidget {
                     content: Row(
                       children: [
                         Icon(
-                          user.role == 'ROLE_TRAINER' ? Icons.sports : Icons.person,
+                          user.role == 'ROLE_TRAINER' ? Icons.fitness_center_rounded : Icons.person,
                           color: AppColors.primary,
                         ),
                         const SizedBox(width: 12),

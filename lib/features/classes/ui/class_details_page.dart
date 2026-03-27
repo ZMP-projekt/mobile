@@ -23,16 +23,13 @@ class ClassDetailsPage extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: Stack( // ZMIANA: Wracamy do Stack, żeby tekst płynnie wchodził pod przycisk
+      body: Stack(
         children: [
-          // 1. GŁÓWNA ZAWARTOŚĆ (Przewijana przez cały ekran)
           SingleChildScrollView(
-            // Duży padding na dole, żeby można było przewinąć tekst do samego końca nad przyciskiem
             padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom + 140),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ZDJĘCIE Z HERO I PŁYNNYM GRADIENTEM
                 Stack(
                   children: [
                     Hero(
@@ -64,7 +61,6 @@ class ClassDetailsPage extends ConsumerWidget {
                         ),
                       ),
                     ),
-                    // PRZYCISK WSTECZ
                     SafeArea(
                       child: Padding(
                         padding: const EdgeInsets.fromLTRB(20, 10, 0, 0),
@@ -89,7 +85,6 @@ class ClassDetailsPage extends ConsumerWidget {
                   ],
                 ),
 
-                // TREŚĆ WŁAŚCIWA
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24.0),
                   child: Column(
@@ -130,7 +125,7 @@ class ClassDetailsPage extends ConsumerWidget {
                               backgroundColor: AppColors.background,
                               backgroundImage: gymClass.trainer.photoUrl != null
                                   ? NetworkImage(gymClass.trainer.photoUrl!)
-                                  : NetworkImage('https://api.dicebear.com/9.x/thumbs/png?seed=${gymClass.trainer.firstName}${gymClass.trainer.lastName}&shapeColor=00d2d3,ff2a7a,ff8a00,b721ff&backgroundColor=0a0a14'),
+                                  : NetworkImage(gymClass.trainer.displayAvatarUrl),
                             ),
                             const SizedBox(width: 16),
                             Expanded(
