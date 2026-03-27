@@ -71,7 +71,6 @@ class PersonalTrainingsPage extends StatelessWidget {
                 ),
                 child: ElevatedButton(
                   onPressed: () {
-                    // TODO: Tutaj w przyszłości otworzymy listę trenerów do wyboru
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Wkrótce: Lista dostępnych trenerów!'), backgroundColor: AppColors.surface),
                     );

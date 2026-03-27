@@ -116,7 +116,6 @@ class MembershipPurchaseModal extends ConsumerWidget {
                         ),
                       ),
 
-                      // Cena
                       Text(
                         plan['price'] as String,
                         style: TextStyle(color: isSelected ? AppColors.primary : AppColors.textPrimary, fontSize: 20, fontWeight: FontWeight.w900),

@@ -20,7 +20,6 @@ class TrainerDashboardPage extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 1. NAGŁÓWEK TRENERA
               userAsync.when(
                 data: (user) => Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -56,12 +55,11 @@ class TrainerDashboardPage extends ConsumerWidget {
                   ],
                 ).animate().fadeIn(duration: 400.ms).slideX(begin: -0.05),
                 loading: () => const CircularProgressIndicator(),
-                error: (_, __) => const SizedBox(),
+                error: (_, _) => const SizedBox(),
               ),
 
               const SizedBox(height: 35),
 
-              // 2. NAJBLIŻSZE WYDARZENIE (Highlight)
               const Text(
                 'Zaraz zaczynasz',
                 style: TextStyle(color: AppColors.textPrimary, fontSize: 20, fontWeight: FontWeight.bold, letterSpacing: -0.5),
@@ -103,7 +101,6 @@ class TrainerDashboardPage extends ConsumerWidget {
 
               const SizedBox(height: 40),
 
-              // 3. PLAN NA DZIŚ (Oś czasu)
               const Text(
                 'Twój plan na dziś',
                 style: TextStyle(color: AppColors.textPrimary, fontSize: 20, fontWeight: FontWeight.bold, letterSpacing: -0.5),
@@ -111,13 +108,12 @@ class TrainerDashboardPage extends ConsumerWidget {
 
               const SizedBox(height: 20),
 
-              // Przykładowa oś czasu
               _buildTimelineItem('10:00', 'Trening Personalny', 'Anna Nowak', isPast: true),
               _buildTimelineItem('12:30', 'Trening Personalny', 'Michał Kowalski', isActive: true),
               _buildTimelineItem('15:00', 'Zajęcia Grupowe', 'Crossfit (Sala A)'),
               _buildTimelineItem('17:00', 'Konsultacja', 'Nowy klient: Jan'),
 
-              const SizedBox(height: 120), // Margines na FAB
+              const SizedBox(height: 120),
             ],
           ),
         ),
@@ -125,7 +121,6 @@ class TrainerDashboardPage extends ConsumerWidget {
     );
   }
 
-  // WIDGET POMOCNICZY: Element osi czasu (Timeline)
   Widget _buildTimelineItem(String time, String title, String subtitle, {bool isPast = false, bool isActive = false}) {
     final color = isPast ? AppColors.textSecondary.withValues(alpha: 0.3) : (isActive ? AppColors.primary : AppColors.textPrimary);
 
@@ -133,7 +128,6 @@ class TrainerDashboardPage extends ConsumerWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Kolumna z godziną i linią
           SizedBox(
             width: 50,
             child: Column(
@@ -150,7 +144,6 @@ class TrainerDashboardPage extends ConsumerWidget {
             ),
           ),
 
-          // Kropka na osi czasu
           Column(
             children: [
               const SizedBox(height: 2),
@@ -168,10 +161,9 @@ class TrainerDashboardPage extends ConsumerWidget {
 
           const SizedBox(width: 16),
 
-          // Karta z informacją
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.only(bottom: 24.0), // Odstęp między elementami
+              padding: const EdgeInsets.only(bottom: 24.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
