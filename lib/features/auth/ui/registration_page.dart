@@ -40,16 +40,17 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
       FocusScope.of(context).unfocus();
 
       try {
-        await ref.read(authStateProvider.notifier).register(
+        final success = await ref.read(authStateProvider.notifier).register(
           _firstNameController.text.trim(),
           _lastNameController.text.trim(),
           _emailController.text.trim(),
           _passwordController.text,
         );
 
-        if (mounted && Navigator.canPop(context)) {
+        if (success && mounted && Navigator.canPop(context)) {
           Navigator.pop(context);
         }
+
       } catch (e) {
         AppLogger.e('Blad: ', e);
       }
@@ -59,6 +60,22 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authStateProvider);
+
+    ref.listen<AuthState>(authStateProvider, (previous, next) {
+      if (next.errorMessage != null && next.errorMessage != previous?.errorMessage) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              next.errorMessage!,
+              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            ),
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          ),
+        );
+      }
+    });
 
     return Scaffold(
       backgroundColor: AppColors.background,
