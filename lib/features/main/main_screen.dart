@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../membership/ui/widgets/membership_guard.dart';
+import '../membership/ui/widgets/membership_purchase_modal.dart'; // Dodano import
+import '../membership/providers/membership_provider.dart'; // Dodano import
+
 import '../dashboard/ui/dashboard_page.dart';
 import '../trainings/ui/personal_trainings_page.dart';
 import '../classes/ui/calendar_page.dart';
@@ -50,7 +54,6 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     });
 
     final currentIndex = ref.watch(mainNavigationProvider);
-
     final userAsync = ref.watch(currentUserProvider);
     final isTrainer = userAsync.valueOrNull?.isTrainer ?? false;
 
@@ -61,11 +64,11 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       TrainerPersonalTrainingsPage(),
       ProfilePage(),
     ]
-        : const [
-      DashboardPage(),
-      CalendarPage(),
-      PersonalTrainingsPage(),
-      ProfilePage(),
+        : [
+      const DashboardPage(),
+      const MembershipGuard(child: CalendarPage()),
+      const MembershipGuard(child: PersonalTrainingsPage()),
+      const ProfilePage(),
     ];
 
     final safeIndex = currentIndex >= screens.length ? 0 : currentIndex;
@@ -75,13 +78,10 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       body: PageView(
         controller: _pageController,
         physics: const NeverScrollableScrollPhysics(),
-        onPageChanged: (index) {
-          ref.read(mainNavigationProvider.notifier).state = index;
-        },
         children: screens,
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: _buildFAB(context),
+      floatingActionButton: _buildFAB(context, isTrainer),
       bottomNavigationBar: _buildBottomNav(safeIndex, isTrainer),
     );
   }
@@ -96,19 +96,11 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         height: 60,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: isTrainer
-              ? [
+          children: [
             _buildNavItem(Icons.home_filled, 0, currentIndex),
-            _buildNavItem(Icons.calendar_month_outlined, 1, currentIndex),
+            _buildNavItem(isTrainer ? Icons.calendar_month_outlined : Icons.calendar_today, 1, currentIndex),
             const SizedBox(width: 40),
-            _buildNavItem(Icons.people_alt_outlined, 2, currentIndex),
-            _buildNavItem(Icons.person_outline, 3, currentIndex),
-          ]
-              : [
-            _buildNavItem(Icons.home_filled, 0, currentIndex),
-            _buildNavItem(Icons.calendar_today, 1, currentIndex),
-            const SizedBox(width: 40),
-            _buildNavItem(Icons.fitness_center_rounded, 2, currentIndex),
+            _buildNavItem(isTrainer ? Icons.people_alt_outlined : Icons.fitness_center_rounded, 2, currentIndex),
             _buildNavItem(Icons.person_outline, 3, currentIndex),
           ],
         ),
@@ -118,20 +110,17 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
   Widget _buildNavItem(IconData icon, int index, int currentIndex) {
     final isSelected = currentIndex == index;
-
     return IconButton(
       icon: Icon(
         icon,
         color: isSelected ? AppColors.primary : Colors.white38,
         size: isSelected ? 28 : 24,
       ),
-      onPressed: () {
-        ref.read(mainNavigationProvider.notifier).state = index;
-      },
+      onPressed: () => ref.read(mainNavigationProvider.notifier).state = index,
     );
   }
 
-  Widget _buildFAB(BuildContext context) {
+  Widget _buildFAB(BuildContext context, bool isTrainer) {
     return Container(
       height: 72,
       width: 72,
@@ -141,17 +130,13 @@ class _MainScreenState extends ConsumerState<MainScreen> {
           BoxShadow(
             color: AppColors.primary.withValues(alpha: 0.4),
             blurRadius: 12,
-            spreadRadius: 0,
             offset: const Offset(0, 4),
           ),
         ],
-        border: Border.all(
-          color: AppColors.surface,
-          width: 4,
-        ),
+        border: Border.all(color: AppColors.surface, width: 4),
       ),
       child: FloatingActionButton(
-        onPressed: () => _showQRModal(context),
+        onPressed: () => _handleQRAction(context, isTrainer),
         backgroundColor: Colors.transparent,
         elevation: 0,
         shape: const CircleBorder(),
@@ -165,17 +150,41 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             ),
           ),
           child: const Center(
-            child: Icon(
-              Icons.qr_code_scanner,
-              color: Colors.white,
-              size: 32,
-            ),
+            child: Icon(Icons.qr_code_scanner, color: Colors.white, size: 32),
           ),
         ),
       )
           .animate(onPlay: (controller) => controller.repeat(reverse: true))
           .shimmer(duration: 3.seconds, color: Colors.white.withValues(alpha: 0.3)),
     );
+  }
+
+  void _handleQRAction(BuildContext context, bool isTrainer) {
+    if (isTrainer) {
+      _showQRModal(context);
+      return;
+    }
+
+    final membership = ref.read(currentMembershipProvider).valueOrNull;
+    final hasActiveMembership = membership != null && membership.active && membership.daysRemaining > 0;
+
+    if (hasActiveMembership) {
+      _showQRModal(context);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Wymagany aktywny karnet, aby wejść do klubu.'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (context) => const MembershipPurchaseModal(),
+      );
+    }
   }
 
   void _showQRModal(BuildContext context) {
@@ -192,26 +201,16 @@ class _MainScreenState extends ConsumerState<MainScreen> {
           children: [
             const Text(
               'Twój kod wejścia',
-              style: TextStyle(
-                color: AppColors.textPrimary,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(color: AppColors.textPrimary, fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
             Container(
               padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-              ),
+              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
               child: const Icon(Icons.qr_code_2, size: 200, color: Colors.black),
             ),
             const SizedBox(height: 20),
-            Text(
-              'Zeskanuj kod przy bramce',
-              style: TextStyle(color: AppColors.textSecondary.withValues(alpha: 0.8)),
-            ),
+            Text('Zeskanuj kod przy bramce', style: TextStyle(color: AppColors.textSecondary.withValues(alpha: 0.8))),
             const SizedBox(height: 20),
           ],
         ),

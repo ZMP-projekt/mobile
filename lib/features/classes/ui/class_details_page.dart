@@ -5,6 +5,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../../../core/theme/app_colors.dart';
 import '../data/models/gym_class.dart';
 import '../providers/classes_provider.dart';
+import '../../user/providers/user_provider.dart';
 
 class ClassDetailsPage extends ConsumerWidget {
   final GymClass gymClass;
@@ -19,7 +20,16 @@ class ClassDetailsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isProcessing = ref.watch(bookingNotifierProvider);
+    final userAsync = ref.watch(currentUserProvider);
+    final isTrainer = userAsync.valueOrNull?.isTrainer ?? false;
     final size = MediaQuery.of(context).size;
+
+    final participants = [
+      {'name': 'Anna Nowak', 'avatar': 'https://api.dicebear.com/9.x/thumbs/png?seed=Anna&backgroundColor=0a0a14'},
+      {'name': 'Michał K.', 'avatar': 'https://api.dicebear.com/9.x/thumbs/png?seed=Michal&backgroundColor=0a0a14'},
+      {'name': 'Kasia W.', 'avatar': 'https://api.dicebear.com/9.x/thumbs/png?seed=Kasia&backgroundColor=0a0a14'},
+      {'name': 'Janek P.', 'avatar': 'https://api.dicebear.com/9.x/thumbs/png?seed=Janek&backgroundColor=0a0a14'},
+    ];
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -111,45 +121,77 @@ class ClassDetailsPage extends ConsumerWidget {
 
                       const SizedBox(height: 35),
 
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
+                      if (isTrainer) ...[
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text('Zapisani uczestnicy', style: TextStyle(color: AppColors.textPrimary, fontSize: 22, fontWeight: FontWeight.bold, letterSpacing: -0.5)),
+                            Text('${participants.length}/${gymClass.maxParticipants}', style: const TextStyle(color: AppColors.primary, fontSize: 16, fontWeight: FontWeight.bold)),
+                          ],
+                        ).animate().fadeIn(delay: 300.ms),
+                        const SizedBox(height: 16),
+
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
                             color: AppColors.surface,
                             borderRadius: BorderRadius.circular(24),
-                            border: Border.all(color: Colors.white.withValues(alpha: 0.05))
-                        ),
-                        child: Row(
-                          children: [
-                            CircleAvatar(
-                              radius: 30,
-                              backgroundColor: AppColors.background,
-                              backgroundImage: gymClass.trainer.photoUrl != null
-                                  ? NetworkImage(gymClass.trainer.photoUrl!)
-                                  : NetworkImage(gymClass.trainer.displayAvatarUrl),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                            border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+                          ),
+                          child: Column(
+                            children: participants.map((p) => Padding(
+                              padding: const EdgeInsets.only(bottom: 12.0),
+                              child: Row(
                                 children: [
-                                  const Text('Instruktor', style: TextStyle(color: AppColors.textSecondary, fontSize: 14, fontWeight: FontWeight.w500)),
-                                  const SizedBox(height: 4),
-                                  Text(gymClass.trainer.fullName, style: const TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.bold)),
+                                  CircleAvatar(radius: 20, backgroundImage: NetworkImage(p['avatar']!), backgroundColor: AppColors.background),
+                                  const SizedBox(width: 16),
+                                  Text(p['name']!, style: const TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w600)),
                                 ],
                               ),
-                            ),
-                          ],
-                        ),
-                      ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.1, end: 0),
+                            )).toList(),
+                          ),
+                        ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.1, end: 0),
+                      ] else ...[
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                              color: AppColors.surface,
+                              borderRadius: BorderRadius.circular(24),
+                              border: Border.all(color: Colors.white.withValues(alpha: 0.05))
+                          ),
+                          child: Row(
+                            children: [
+                              CircleAvatar(
+                                radius: 30,
+                                backgroundColor: AppColors.background,
+                                backgroundImage: gymClass.trainer.photoUrl != null
+                                    ? NetworkImage(gymClass.trainer.photoUrl!)
+                                    : NetworkImage(gymClass.trainer.displayAvatarUrl),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text('Instruktor', style: TextStyle(color: AppColors.textSecondary, fontSize: 14, fontWeight: FontWeight.w500)),
+                                    const SizedBox(height: 4),
+                                    Text(gymClass.trainer.fullName, style: const TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.bold)),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.1, end: 0),
 
-                      const SizedBox(height: 35),
+                        const SizedBox(height: 35),
 
-                      const Text('O treningu', style: TextStyle(color: AppColors.textPrimary, fontSize: 22, fontWeight: FontWeight.bold, letterSpacing: -0.5)).animate().fadeIn(delay: 400.ms),
-                      const SizedBox(height: 12),
-                      Text(
-                          gymClass.description ?? 'Dołącz do nas i poczuj energię grupowego treningu. Idealne dla każdego poziomu zaawansowania.',
-                          style: TextStyle(color: AppColors.textSecondary.withValues(alpha: 0.8), fontSize: 16, height: 1.6)
-                      ).animate().fadeIn(delay: 450.ms),
+                        const Text('O treningu', style: TextStyle(color: AppColors.textPrimary, fontSize: 22, fontWeight: FontWeight.bold, letterSpacing: -0.5)).animate().fadeIn(delay: 400.ms),
+                        const SizedBox(height: 12),
+                        Text(
+                            gymClass.description ?? 'Dołącz do nas i poczuj energię grupowego treningu. Idealne dla każdego poziomu zaawansowania.',
+                            style: TextStyle(color: AppColors.textSecondary.withValues(alpha: 0.8), fontSize: 16, height: 1.6)
+                        ).animate().fadeIn(delay: 450.ms),
+                      ]
                     ],
                   ),
                 ),
@@ -168,7 +210,9 @@ class ClassDetailsPage extends ConsumerWidget {
                     color: AppColors.background.withValues(alpha: 0.75),
                     border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.05), width: 1)),
                   ),
-                  child: _buildMainActionButton(context, ref, isProcessing),
+                  child: isTrainer
+                      ? _buildTrainerActionButtons(context)
+                      : _buildMainActionButton(context, ref, isProcessing),
                 ),
               ),
             ).animate().fadeIn(delay: 500.ms).slideY(begin: 0.5, end: 0),
@@ -264,6 +308,38 @@ class ClassDetailsPage extends ConsumerWidget {
     );
   }
 
+  Widget _buildTrainerActionButtons(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          flex: 1,
+          child: OutlinedButton(
+            onPressed: () => _showRescheduleModal(context),
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              side: BorderSide(color: Colors.white.withValues(alpha: 0.3)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            ),
+            child: const Text('Przełóż', style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.bold)),
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          flex: 2,
+          child: ElevatedButton(
+            onPressed: () => _showCancelClassDialog(context),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.error,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            ),
+            child: const Text('Odwołaj zajęcia', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+          ),
+        ),
+      ],
+    );
+  }
+
   void _confirmCancel(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,
@@ -283,6 +359,66 @@ class ClassDetailsPage extends ConsumerWidget {
             child: const Text('Zrezygnuj', style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold)),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showCancelClassDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: const Text('Odwołać zajęcia?', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold)),
+        content: const Text('Zapisani uczestnicy otrzymają powiadomienie o odwołaniu tych zajęć. Tej operacji nie można cofnąć.', style: TextStyle(color: AppColors.textSecondary, height: 1.5)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Wróć', style: TextStyle(color: AppColors.textSecondary)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Zajęcia zostały odwołane!'), backgroundColor: AppColors.error));
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.error, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+            child: const Text('Tak, odwołaj', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showRescheduleModal(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Przełóż zajęcia', style: TextStyle(color: AppColors.textPrimary, fontSize: 24, fontWeight: FontWeight.bold, letterSpacing: -0.5)),
+            const SizedBox(height: 16),
+            const Text('Wybierz nową datę i godzinę. Uczestnicy zostaną powiadomieni o zmianie.', style: TextStyle(color: AppColors.textSecondary, fontSize: 16, height: 1.5)),
+            const SizedBox(height: 32),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Zajęcia zostały przełożone!'), backgroundColor: AppColors.primary));
+              },
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 56),
+                backgroundColor: AppColors.primary,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              ),
+              child: const Text('Zatwierdź zmianę', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: -0.5)),
+            ),
+            const SizedBox(height: 20),
+          ],
+        ),
       ),
     );
   }

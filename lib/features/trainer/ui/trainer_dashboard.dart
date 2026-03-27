@@ -3,7 +3,6 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../user/providers/user_provider.dart';
-import '../../dashboard/ui/widgets/gym_location.dart';
 
 class TrainerDashboardPage extends ConsumerWidget {
   const TrainerDashboardPage({super.key});
@@ -21,6 +20,7 @@ class TrainerDashboardPage extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // 1. NAGŁÓWEK TRENERA
               userAsync.when(
                 data: (user) => Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -49,37 +49,21 @@ class TrainerDashboardPage extends ConsumerWidget {
                         ),
                       ],
                     ),
-                    Stack(
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.notifications_none_rounded, color: Colors.white, size: 28),
-                          onPressed: () {},
-                        ),
-                        Positioned(
-                          top: 10,
-                          right: 12,
-                          child: Container(
-                            width: 10,
-                            height: 10,
-                            decoration: BoxDecoration(
-                              color: AppColors.error,
-                              shape: BoxShape.circle,
-                              border: Border.all(color: AppColors.background, width: 2),
-                            ),
-                          ),
-                        ),
-                      ],
+                    IconButton(
+                      icon: const Icon(Icons.notifications_none_rounded, color: Colors.white, size: 28),
+                      onPressed: () {},
                     ),
                   ],
                 ).animate().fadeIn(duration: 400.ms).slideX(begin: -0.05),
                 loading: () => const CircularProgressIndicator(),
-                error: (_, _) => const SizedBox(),
+                error: (_, __) => const SizedBox(),
               ),
 
               const SizedBox(height: 35),
 
+              // 2. NAJBLIŻSZE WYDARZENIE (Highlight)
               const Text(
-                'Twój następny krok',
+                'Zaraz zaczynasz',
                 style: TextStyle(color: AppColors.textPrimary, fontSize: 20, fontWeight: FontWeight.bold, letterSpacing: -0.5),
               ).animate().fadeIn(delay: 100.ms).slideY(begin: 0.1),
 
@@ -103,7 +87,7 @@ class TrainerDashboardPage extends ConsumerWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(8)),
-                          child: const Text('ZA 45 MIN', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                          child: const Text('ZA 15 MIN', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1)),
                         ),
                         const Spacer(),
                         const Icon(Icons.fitness_center, color: Colors.white),
@@ -112,25 +96,94 @@ class TrainerDashboardPage extends ConsumerWidget {
                     const SizedBox(height: 20),
                     const Text('Trening Personalny', style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w900, letterSpacing: -0.5)),
                     const SizedBox(height: 4),
-                    const Text('z: Anna Nowak', style: TextStyle(color: Colors.white70, fontSize: 16, fontWeight: FontWeight.w500)),
+                    const Text('z: Michał Kowalski', style: TextStyle(color: Colors.white70, fontSize: 16, fontWeight: FontWeight.w500)),
                   ],
                 ),
               ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.1),
 
-              const SizedBox(height: 35),
+              const SizedBox(height: 40),
 
+              // 3. PLAN NA DZIŚ (Oś czasu)
               const Text(
-                'Twoje miejsce pracy',
+                'Twój plan na dziś',
                 style: TextStyle(color: AppColors.textPrimary, fontSize: 20, fontWeight: FontWeight.bold, letterSpacing: -0.5),
               ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.1),
-              const SizedBox(height: 16),
-              const GymLocationCard().animate().fadeIn(delay: 400.ms).slideY(begin: 0.1),
 
-              const SizedBox(height: 120),
+              const SizedBox(height: 20),
+
+              // Przykładowa oś czasu
+              _buildTimelineItem('10:00', 'Trening Personalny', 'Anna Nowak', isPast: true),
+              _buildTimelineItem('12:30', 'Trening Personalny', 'Michał Kowalski', isActive: true),
+              _buildTimelineItem('15:00', 'Zajęcia Grupowe', 'Crossfit (Sala A)'),
+              _buildTimelineItem('17:00', 'Konsultacja', 'Nowy klient: Jan'),
+
+              const SizedBox(height: 120), // Margines na FAB
             ],
           ),
         ),
       ),
     );
+  }
+
+  // WIDGET POMOCNICZY: Element osi czasu (Timeline)
+  Widget _buildTimelineItem(String time, String title, String subtitle, {bool isPast = false, bool isActive = false}) {
+    final color = isPast ? AppColors.textSecondary.withValues(alpha: 0.3) : (isActive ? AppColors.primary : AppColors.textPrimary);
+
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Kolumna z godziną i linią
+          SizedBox(
+            width: 50,
+            child: Column(
+              children: [
+                Text(time, style: TextStyle(color: color, fontWeight: isActive ? FontWeight.bold : FontWeight.normal)),
+                const SizedBox(height: 4),
+                Expanded(
+                  child: Container(
+                    width: 2,
+                    color: isPast ? AppColors.surface : (isActive ? AppColors.primary.withValues(alpha: 0.5) : AppColors.surface),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Kropka na osi czasu
+          Column(
+            children: [
+              const SizedBox(height: 2),
+              Container(
+                width: 12,
+                height: 12,
+                decoration: BoxDecoration(
+                  color: isActive ? AppColors.primary : AppColors.background,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: color, width: 2),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(width: 16),
+
+          // Karta z informacją
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 24.0), // Odstęp między elementami
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: TextStyle(color: color, fontSize: 16, fontWeight: FontWeight.bold, decoration: isPast ? TextDecoration.lineThrough : null)),
+                  const SizedBox(height: 4),
+                  Text(subtitle, style: TextStyle(color: isPast ? color : AppColors.textSecondary, fontSize: 13)),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    ).animate().fadeIn(delay: 400.ms);
   }
 }
