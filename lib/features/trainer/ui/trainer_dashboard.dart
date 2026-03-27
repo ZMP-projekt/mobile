@@ -21,7 +21,6 @@ class TrainerDashboardPage extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 1. NAGŁÓWEK TRENERA
               userAsync.when(
                 data: (user) => Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -74,12 +73,11 @@ class TrainerDashboardPage extends ConsumerWidget {
                   ],
                 ).animate().fadeIn(duration: 400.ms).slideX(begin: -0.05),
                 loading: () => const CircularProgressIndicator(),
-                error: (_, __) => const SizedBox(),
+                error: (_, _) => const SizedBox(),
               ),
 
               const SizedBox(height: 35),
 
-              // 2. KARTA "NAJBLIŻSZE ZADANIE"
               const Text(
                 'Twój następny krok',
                 style: TextStyle(color: AppColors.textPrimary, fontSize: 20, fontWeight: FontWeight.bold, letterSpacing: -0.5),
@@ -121,7 +119,6 @@ class TrainerDashboardPage extends ConsumerWidget {
 
               const SizedBox(height: 35),
 
-              // 3. LOKALIZACJA SIŁOWNI (Używamy gotowego widgetu z Dashboardu!)
               const Text(
                 'Twoje miejsce pracy',
                 style: TextStyle(color: AppColors.textPrimary, fontSize: 20, fontWeight: FontWeight.bold, letterSpacing: -0.5),
@@ -129,7 +126,7 @@ class TrainerDashboardPage extends ConsumerWidget {
               const SizedBox(height: 16),
               const GymLocationCard().animate().fadeIn(delay: 400.ms).slideY(begin: 0.1),
 
-              const SizedBox(height: 120), // Miejsce na FAB
+              const SizedBox(height: 120),
             ],
           ),
         ),
