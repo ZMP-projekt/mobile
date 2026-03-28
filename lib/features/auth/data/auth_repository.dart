@@ -23,12 +23,9 @@ class AuthRepository {
     } on DioException catch (e) {
       AppLogger.e("Błąd logowania", e);
 
-      final errorMessage =
-          e.response?.data['message'] ??
-          e.response?.data['error'] ??
-          _getDefaultErrorMessage(e.type);
-
+      final errorMessage = _extractErrorMessage(e.response, e.type);
       return Result.failure(errorMessage);
+
     } catch (e) {
       AppLogger.e("Nieoczekiwany błąd", e);
       return Result.failure('Wystąpił nieoczekiwany błąd');
@@ -36,11 +33,11 @@ class AuthRepository {
   }
 
   Future<Result<String>> register(
-    String firstName,
-    String lastName,
-    String email,
-    String password,
-  ) async {
+      String firstName,
+      String lastName,
+      String email,
+      String password,
+      ) async {
     try {
       final response = await _dio.post(
         '/auth/register',
@@ -69,16 +66,28 @@ class AuthRepository {
       AppLogger.e("STATUS: ${e.response?.statusCode}");
       AppLogger.e("DATA Z SERWERA: ${e.response?.data}");
 
-      final errorMessage =
-          e.response?.data['message'] ??
-          e.response?.data['error'] ??
-          _getDefaultErrorMessage(e.type);
-
+      final errorMessage = _extractErrorMessage(e.response, e.type);
       return Result.failure(errorMessage);
+
     } catch (e) {
       AppLogger.e("Nieoczekiwany błąd rejestracji", e);
       return Result.failure('Wystąpił nieoczekiwany błąd');
     }
+  }
+
+  String _extractErrorMessage(Response? response, DioExceptionType type) {
+    if (response != null && response.data != null) {
+      final data = response.data;
+
+      if (data is Map<String, dynamic>) {
+        return data['message'] ?? data['error'] ?? _getDefaultErrorMessage(type);
+      }
+      else if (data is String && data.isNotEmpty) {
+        return data;
+      }
+    }
+
+    return _getDefaultErrorMessage(type);
   }
 
   String _getDefaultErrorMessage(DioExceptionType type) {

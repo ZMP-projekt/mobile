@@ -18,4 +18,6 @@ class Trainer {
       photoUrl: json['photoUrl'],
     );
   }
+
+  String get displayAvatarUrl => photoUrl ?? 'https://api.dicebear.com/9.x/thumbs/png?seed=$firstName&shapeColor=00d2d3,ff2a7a,b721ff&backgroundColor=0a0a14';
 }

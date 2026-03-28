@@ -144,10 +144,10 @@ class ClassCard extends ConsumerWidget {
       onTap: isProcessing ? null : () => ref.read(bookingNotifierProvider.notifier).bookClass(gymClass.id),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.9), borderRadius: BorderRadius.circular(14)),
+        decoration: BoxDecoration(gradient: AppColors.primaryGradient.withOpacity(0.9), borderRadius: BorderRadius.circular(14)),
         child: isProcessing
             ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.background))
-            : const Text('Zapisz', style: TextStyle(color: AppColors.background, fontWeight: FontWeight.bold, fontSize: 13)),
+            : const Text('Zapisz', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 13)),
       ),
     );
   }

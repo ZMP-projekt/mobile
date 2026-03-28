@@ -11,10 +11,4 @@ class UserRepository {
 
     return User.fromJson(response.data);
   }
-
-  Future<User> getUserById(int id) async {
-    final response = await _dio.get('/api/users/$id');
-    return User.fromJson(response.data);
-  }
-
 }

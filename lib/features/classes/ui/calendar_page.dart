@@ -112,10 +112,14 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                 ),
               ).animate().fadeIn(delay: (50 * index).ms),
 
-              ...dayClasses.map((gymClass) => Padding(
+              ...dayClasses.asMap().entries.map((entry) => Padding(
                 padding: const EdgeInsets.only(bottom: 16),
-                child: ClassCard(gymClass: gymClass),
+                child: ClassCard(gymClass: entry.value)
+                    .animate()
+                    .fadeIn(delay: (100 + (index * 50) + (entry.key * 50)).ms, duration: 300.ms)
+                    .slideX(begin: 0.05, curve: Curves.easeOutQuad),
               )),
+
               const SizedBox(height: 10),
             ],
           ),
@@ -130,11 +134,32 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.event_note_rounded, size: 60, color: AppColors.textSecondary.withValues(alpha: 0.5)),
+          Container(
+            padding: const EdgeInsets.all(35),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppColors.surface,
+              border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+              boxShadow: AppColors.subtleGlow,
+            ),
+            child: const Icon(Icons.event_note_rounded, size: 70, color: AppColors.primary),
+          ).animate().scale(delay: 200.ms, duration: 400.ms, curve: Curves.easeOutBack),
+
+          const SizedBox(height: 35),
+
+          Text(
+            _showOnlyMyClasses ? 'Brak zaplanowanych\nzajęć' : 'Brak zajęć\nw grafiku',
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: AppColors.textPrimary, fontSize: 24, fontWeight: FontWeight.bold, height: 1.2, letterSpacing: -0.5),
+          ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.1),
+
           const SizedBox(height: 16),
-          Text(_showOnlyMyClasses ? 'Brak zaplanowanych zajęć' : 'Brak zajęć w grafiku', style: const TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 8),
-          Text(_showOnlyMyClasses ? 'Przełącz na "Wszystkie", aby coś znaleźć.' : 'Zajrzyj tu później!', style: const TextStyle(color: AppColors.textSecondary, fontSize: 14)),
+
+          Text(
+            _showOnlyMyClasses ? 'Przełącz na "Wszystkie", aby coś znaleźć.' : 'Zajrzyj tu później!',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: AppColors.textSecondary.withValues(alpha: 0.8), fontSize: 16, height: 1.5),
+          ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.1),
         ],
       ),
     );

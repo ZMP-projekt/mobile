@@ -41,6 +41,22 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   Widget build(BuildContext context) {
     final authState = ref.watch(authStateProvider);
 
+    ref.listen<AuthState>(authStateProvider, (previous, next) {
+      if (next.errorMessage != null && next.errorMessage != previous?.errorMessage) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+                next.errorMessage!,
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)
+            ),
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          ),
+        );
+      }
+    });
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Stack(

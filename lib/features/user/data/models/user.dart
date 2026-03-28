@@ -48,4 +48,7 @@ class User {
   String get fullName => '$firstName $lastName';
 
   String get avatarUrl => 'https://api.dicebear.com/9.x/thumbs/png?seed=$email&shapeColor=00d2d3,ff2a7a,b721ff&backgroundColor=0a0a14';
+
+  bool get isTrainer => role == 'ROLE_TRAINER' || role == 'ROLE_ADMIN';
 }
+
