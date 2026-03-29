@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mobile_gym_app/features/auth/data/auth_repository.dart';
+import 'package:mobile_gym_app/core/models/result.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:dio/dio.dart';
 
@@ -15,54 +16,58 @@ void main() {
       authRepository = AuthRepository(mockDio);
     });
 
-    test('login returns Result.success with token when API call succeeds', () async {
+    test('login returns Success with token when API call succeeds', () async {
+      const token = 'super_tajny_token';
       when(() => mockDio.post(any(), data: any(named: 'data')))
           .thenAnswer((_) async => Response(
-        data: {'token': 'super_tajny_token'},
+        data: {'token': token},
         statusCode: 200,
         requestOptions: RequestOptions(path: ''),
       ));
 
       final result = await authRepository.login('test@test.pl', 'password123');
 
-      expect(result.isSuccess, isTrue);
-      expect(result.data, equals('super_tajny_token'));
-      expect(result.error, isNull);
+      expect(result, isA<Success<String>>());
+      final success = result as Success<String>;
+      expect(success.data, equals(token));
     });
 
-    test('login returns Result.failure with message when API returns 403', () async {
+    test('login returns Failure with message when API returns 403', () async {
+      const errorMessage = 'Invalid credentials';
       when(() => mockDio.post(any(), data: any(named: 'data')))
           .thenThrow(DioException(
         requestOptions: RequestOptions(path: ''),
         response: Response(
           statusCode: 403,
-          data: {'message': 'Invalid credentials'},
+          data: {'message': errorMessage},
           requestOptions: RequestOptions(path: ''),
         ),
       ));
 
       final result = await authRepository.login('zly@email.pl', 'zle');
 
-      expect(result.isFailure, isTrue);
-      expect(result.error, equals('Invalid credentials'));
-      expect(result.data, isNull);
+      expect(result, isA<Failure<String>>());
+      final failure = result as Failure<String>;
+      expect(failure.error, equals(errorMessage));
     });
 
-    test('login returns Result.failure when backend returns error field instead of message', () async {
+    test('login returns Failure when backend returns error field instead of message', () async {
+      const errorMessage = 'Email already exists';
       when(() => mockDio.post(any(), data: any(named: 'data')))
           .thenThrow(DioException(
         requestOptions: RequestOptions(path: ''),
         response: Response(
           statusCode: 400,
-          data: {'error': 'Email already exists'},
+          data: {'error': errorMessage},
           requestOptions: RequestOptions(path: ''),
         ),
       ));
 
       final result = await authRepository.login('test@test.pl', 'pass');
 
-      expect(result.isFailure, isTrue);
-      expect(result.error, equals('Email already exists'));
+      expect(result, isA<Failure<String>>());
+      final failure = result as Failure<String>;
+      expect(failure.error, equals(errorMessage));
     });
 
     test('login returns default error message on connection timeout', () async {
@@ -74,28 +79,31 @@ void main() {
 
       final result = await authRepository.login('test@test.pl', 'pass');
 
-      expect(result.isFailure, isTrue);
-      expect(result.error, contains('czas połączenia'));
+      expect(result, isA<Failure<String>>());
+      final failure = result as Failure<String>;
+      expect(failure.error, contains('czas połączenia'));
     });
 
-    test('register returns Result.success with token when successful', () async {
+    test('register returns Success with token when successful', () async {
+      const token = 'new_user_token';
       when(() => mockDio.post(
         any(),
         data: any(named: 'data'),
         options: any(named: 'options'),
       )).thenAnswer((_) async => Response(
-        data: {'token': 'new_user_token'},
+        data: {'token': token},
         statusCode: 201,
         requestOptions: RequestOptions(path: ''),
       ));
 
       final result = await authRepository.register('John', 'Smith', 'john@test.pl', 'pass123');
 
-      expect(result.isSuccess, isTrue);
-      expect(result.data, equals('new_user_token'));
+      expect(result, isA<Success<String>>());
+      expect((result as Success<String>).data, equals(token));
     });
 
-    test('register returns Result.failure when email already exists', () async {
+    test('register returns Failure when email already exists', () async {
+      const errorMessage = 'Email already registered';
       when(() => mockDio.post(
         any(),
         data: any(named: 'data'),
@@ -104,15 +112,15 @@ void main() {
         requestOptions: RequestOptions(path: ''),
         response: Response(
           statusCode: 409,
-          data: {'message': 'Email already registered'},
+          data: {'message': errorMessage},
           requestOptions: RequestOptions(path: ''),
         ),
       ));
 
       final result = await authRepository.register('John', 'Smith', 'existing@test.pl', 'pass');
 
-      expect(result.isFailure, isTrue);
-      expect(result.error, equals('Email already registered'));
+      expect(result, isA<Failure<String>>());
+      expect((result as Failure<String>).error, equals(errorMessage));
     });
   });
 }

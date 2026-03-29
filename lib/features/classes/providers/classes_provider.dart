@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/models/gym_class.dart';
-import '../data/repositories/mock_classes_repository.dart';
+import '../data/repositories/class_repository.dart';
 
 final classesRepositoryProvider = Provider<MockClassesRepository>((ref) {
   return MockClassesRepository();

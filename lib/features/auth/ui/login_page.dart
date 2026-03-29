@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/ui/widgets/custom_text_field.dart';
 import '../../../core/util/validators.dart';
 import '../providers/auth_provider.dart';
-import 'registration_page.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -163,9 +163,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         children: [
                           const Text('Nie masz konta? ', style: TextStyle(color: AppColors.textSecondary)),
                           GestureDetector(
-                            onTap: () {
-                              Navigator.push(context, MaterialPageRoute(builder: (context) => const RegistrationPage()));
-                            },
+                            onTap: () => context.push('/register'),
                             child: const Text('Zarejestruj się', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
                           ),
                         ],

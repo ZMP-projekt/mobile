@@ -1,49 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:mobile_gym_app/features/auth/providers/auth_provider.dart';
-import 'package:mobile_gym_app/features/auth/ui/login_page.dart';
-import 'package:mobile_gym_app/features/main/main_screen.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'core/router/app_router.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  await dotenv.load(fileName: ".env");
+  await initializeDateFormatting('pl_PL', null);
 
   runApp(
-      const ProviderScope(
-        child: MyApp(),
-      )
+    const ProviderScope(
+      child: MyApp(),
+    ),
   );
 }
 
-class AuthGate extends ConsumerWidget {
-  const AuthGate({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authStateProvider);
-
-    return Scaffold(
-      body: authState.isAuthenticated
-          ? const MainScreen()
-          : const LoginPage(),
-    );
-  }
-}
-
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
+  Widget build(BuildContext context, WidgetRef ref) {
+
+    final router = ref.watch(routerProvider);
+
+    return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         brightness: Brightness.dark,
         scaffoldBackgroundColor: const Color(0xFF0B121E),
       ),
-      home: const AuthGate(),
+      routerConfig: router,
     );
   }
 }

@@ -1,10 +1,9 @@
-class Result<T> {
-  final T? data;
-  final String? error;
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-  Result.success(this.data) : error = null;
-  Result.failure(this.error) : data = null;
+part 'result.freezed.dart';
 
-  bool get isSuccess => error == null;
-  bool get isFailure => error != null;
+@freezed
+class Result<T> with _$Result<T> {
+  const factory Result.success(T data) = Success<T>;
+  const factory Result.failure(String error) = Failure<T>;
 }

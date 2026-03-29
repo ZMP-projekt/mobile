@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../providers/membership_provider.dart';
 
@@ -138,7 +139,7 @@ class MembershipPurchaseModal extends ConsumerWidget {
                   if (!context.mounted) return;
 
                   if (success) {
-                    Navigator.pop(context);
+                    context.pop();
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text('Karnet zakupiony pomyślnie! 🎉'),

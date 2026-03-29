@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import '../config/env.dart';
 
 final secureStorageProvider = Provider<FlutterSecureStorage>((ref) {
   return const FlutterSecureStorage();
@@ -10,7 +10,7 @@ final secureStorageProvider = Provider<FlutterSecureStorage>((ref) {
 final dioProvider = Provider<Dio>((ref) {
   final storage = ref.watch(secureStorageProvider);
 
-  final baseUrl = dotenv.env['API_BASE_URL'] ?? 'http://localhost:8080';
+  final baseUrl = Env.apiUrl;
 
   final dio = Dio(
     BaseOptions(
