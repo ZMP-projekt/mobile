@@ -1,54 +1,26 @@
-class User {
-  final int id;
-  final String email;
-  final String role;
-  final String firstName;
-  final String lastName;
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-  User({
-    required this.id,
-    required this.email,
-    required this.role,
-    required this.firstName,
-    required this.lastName,
-  });
+part 'user.freezed.dart';
+part 'user.g.dart';
 
+@freezed
+class User with _$User {
+  const User._();
 
-  factory User.fromJson(Map <String, dynamic> json){
-    return User(
-      id: json['id'],
-      email: json['email'],
-      role: json['role'],
-      firstName: json['firstName'],
-      lastName: json['lastName'],
-    );
-  }
+  const factory User({
+    required int id,
+    required String email,
+    required String role,
+    required String firstName,
+    required String lastName,
+  }) = _User;
 
-  @override
-  String toString() {
-    return 'User(id: $id, email: $email, role: $role, firstName: $firstName, lastName: $lastName)';
-  }
-
-  User copyWith ({
-    int? id,
-    String? email,
-    String? role,
-    String? firstName,
-    String? lastName,
-  }) {
-    return User (
-      id: id ?? this.id,
-      email: email ?? this.email,
-      role: role ?? this.role,
-      firstName: firstName ?? this.firstName,
-      lastName: lastName ?? this.lastName,
-    );
-  }
+  factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
 
   String get fullName => '$firstName $lastName';
 
-  String get avatarUrl => 'https://api.dicebear.com/9.x/thumbs/png?seed=$email&shapeColor=00d2d3,ff2a7a,b721ff&backgroundColor=0a0a14';
+  String get avatarUrl =>
+      'https://api.dicebear.com/9.x/thumbs/png?seed=$email&shapeColor=00d2d3,ff2a7a,b721ff&backgroundColor=0a0a14';
 
   bool get isTrainer => role == 'ROLE_TRAINER' || role == 'ROLE_ADMIN';
 }
-

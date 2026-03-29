@@ -1,5 +1,5 @@
+import '../../../trainer/models/trainer.dart';
 import '../models/gym_class.dart';
-import '../models/trainer.dart';
 
 class MockClassesRepository {
   final Set<int> _bookedClassIds = {1, 4, 9};

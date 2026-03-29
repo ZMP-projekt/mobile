@@ -1,24 +1,20 @@
-class Membership {
-  final bool active;
-  final DateTime endDate;
-  final double price;
-  final String type;
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-  Membership({
-    required this.active,
-    required this.endDate,
-    required this.price,
-    required this.type,
-  });
+part 'membership.freezed.dart';
+part 'membership.g.dart';
 
-  factory Membership.fromJson(Map<String, dynamic> json) {
-    return Membership(
-      active: json['active'] ?? false,
-      endDate: DateTime.parse(json['endDate']),
-      price: (json['price'] as num).toDouble(),
-      type: json['type'] ?? 'UNKNOWN',
-    );
-  }
+@freezed
+class Membership with _$Membership {
+  const Membership._(); // Niezbędne dla własnych getterów
+
+  const factory Membership({
+    @Default(false) bool active,
+    required DateTime endDate,
+    required double price,
+    @Default('UNKNOWN') String type,
+  }) = _Membership;
+
+  factory Membership.fromJson(Map<String, dynamic> json) => _$MembershipFromJson(json);
 
   int get daysRemaining {
     final remaining = endDate.difference(DateTime.now()).inDays;

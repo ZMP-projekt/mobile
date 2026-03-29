@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:intl/intl.dart';
 import '../../../core/theme/app_colors.dart';
 import '../providers/classes_provider.dart';
 import '../data/models/gym_class.dart';
 import 'widgets/class_card.dart';
 import 'widgets/calendar_view_toggle.dart';
+
+final selectedDateProvider = StateProvider<DateTime>((ref) {
+  final now = DateTime.now();
+  return DateTime(now.year, now.month, now.day);
+});
 
 class CalendarPage extends ConsumerStatefulWidget {
   const CalendarPage({super.key});
@@ -20,6 +26,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
   @override
   Widget build(BuildContext context) {
     final classesAsync = ref.watch(allClassesProvider);
+    final selectedDate = ref.watch(selectedDateProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -33,9 +40,22 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Grafik', style: TextStyle(color: AppColors.textPrimary, fontSize: 34, fontWeight: FontWeight.w800, letterSpacing: -1.0))
-                      .animate().fadeIn(duration: 400.ms).slideY(begin: 0.1, end: 0),
+                  const Text('Grafik',
+                      style: TextStyle(
+                          color: AppColors.textPrimary,
+                          fontSize: 34,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -1.0
+                      )
+                  ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.1, end: 0),
+
                   const SizedBox(height: 20),
+
+                  // SEKTYCJA: Horyzontalny wybór daty
+                  _buildHorizontalCalendar(ref, selectedDate),
+
+                  const SizedBox(height: 20),
+
                   CalendarViewToggle(
                     isMyClassesSelected: _showOnlyMyClasses,
                     onToggle: (value) => setState(() => _showOnlyMyClasses = value),
@@ -48,28 +68,29 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                 loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
                 error: (err, stack) => Center(child: Text('Błąd: $err', style: const TextStyle(color: AppColors.error))),
                 data: (allClasses) {
-                  final displayedClasses = _showOnlyMyClasses
-                      ? allClasses.where((c) => c.isBookedByUser).toList()
-                      : allClasses;
+                  // Filtrowanie po wybranej dacie oraz filtrze "Moje rezerwacje"
+                  final displayedClasses = allClasses.where((c) {
+                    final isSameDay = c.startTime.year == selectedDate.year &&
+                        c.startTime.month == selectedDate.month &&
+                        c.startTime.day == selectedDate.day;
+
+                    if (!isSameDay) return false;
+                    return _showOnlyMyClasses ? c.isBookedByUser : true;
+                  }).toList();
 
                   Widget content = displayedClasses.isEmpty
-                      ? _buildEmptyState(key: ValueKey('empty_$_showOnlyMyClasses'))
-                      : _buildClassesList(displayedClasses, key: ValueKey('list_$_showOnlyMyClasses'));
+                      ? _buildEmptyState(key: ValueKey('empty_${selectedDate}_$_showOnlyMyClasses'))
+                      : _buildClassesList(displayedClasses, selectedDate, key: ValueKey('list_${selectedDate}_$_showOnlyMyClasses'));
 
                   return AnimatedSwitcher(
                     duration: const Duration(milliseconds: 400),
                     switchInCurve: Curves.easeOutQuart,
                     switchOutCurve: Curves.easeInQuart,
                     transitionBuilder: (child, animation) {
-                      final offsetAnimation = Tween<Offset>(
-                          begin: const Offset(0.1, 0.0),
-                          end: Offset.zero
-                      ).animate(animation);
-
                       return FadeTransition(
                         opacity: animation,
                         child: SlideTransition(
-                          position: offsetAnimation,
+                          position: Tween<Offset>(begin: const Offset(0.05, 0.0), end: Offset.zero).animate(animation),
                           child: child,
                         ),
                       );
@@ -85,44 +106,104 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     );
   }
 
-  Widget _buildClassesList(List<GymClass> classes, {required Key key}) {
-    final groupedClasses = _groupClassesByDay(classes);
+  // Widget poziomego paska dat
+  Widget _buildHorizontalCalendar(WidgetRef ref, DateTime selectedDate) {
+    final today = DateTime.now();
+    final normalizedToday = DateTime(today.year, today.month, today.day);
+    // Generujemy listę 14 nadchodzących dni
+    final days = List.generate(14, (index) => normalizedToday.add(Duration(days: index)));
 
+    return SizedBox(
+      height: 85,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        clipBehavior: Clip.none,
+        itemCount: days.length,
+        itemBuilder: (context, index) {
+          final date = days[index];
+          final isSelected = date.isAtSameMomentAs(selectedDate);
+          final dayName = DateFormat('E', 'pl_PL').format(date).toLowerCase();
+
+          return GestureDetector(
+            onTap: () => ref.read(selectedDateProvider.notifier).state = date,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 250),
+              width: 65,
+              margin: const EdgeInsets.only(right: 12),
+              decoration: BoxDecoration(
+                color: isSelected ? AppColors.primary : AppColors.surface,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: isSelected ? [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.3),
+                    blurRadius: 12,
+                    offset: const Offset(0, 6),
+                  )
+                ] : [],
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    dayName,
+                    style: TextStyle(
+                      color: isSelected ? Colors.white : AppColors.textSecondary,
+                      fontSize: 14,
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    '${date.day}',
+                    style: TextStyle(
+                      color: isSelected ? Colors.white : AppColors.textPrimary,
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ).animate().fadeIn(delay: (index * 30).ms).slideX(begin: 0.1);
+        },
+      ),
+    );
+  }
+
+  Widget _buildClassesList(List<GymClass> classes, DateTime selectedDate, {required Key key}) {
     return ListView.builder(
       key: key,
-      padding: const EdgeInsets.only(bottom: 130),
-      itemCount: groupedClasses.length,
+      padding: const EdgeInsets.fromLTRB(20, 10, 20, 130),
+      itemCount: classes.length,
       itemBuilder: (context, index) {
-        final date = groupedClasses.keys.elementAt(index);
-        final dayClasses = groupedClasses[date]!;
+        final gymClass = classes[index];
 
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (index == 0)
               Padding(
-                padding: const EdgeInsets.only(bottom: 12, top: 10),
+                padding: const EdgeInsets.only(bottom: 16, top: 5),
                 child: Row(
                   children: [
                     Container(width: 4, height: 16, decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(2))),
                     const SizedBox(width: 8),
-                    Text(_getDateLabel(date).toUpperCase(), style: const TextStyle(color: AppColors.textPrimary, fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1.0)),
+                    Text(
+                        _getDateLabel(selectedDate).toUpperCase(),
+                        style: const TextStyle(color: AppColors.textPrimary, fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1.2)
+                    ),
                   ],
                 ),
-              ).animate().fadeIn(delay: (50 * index).ms),
+              ).animate().fadeIn(),
 
-              ...dayClasses.asMap().entries.map((entry) => Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: ClassCard(gymClass: entry.value)
-                    .animate()
-                    .fadeIn(delay: (100 + (index * 50) + (entry.key * 50)).ms, duration: 300.ms)
-                    .slideX(begin: 0.05, curve: Curves.easeOutQuad),
-              )),
-
-              const SizedBox(height: 10),
-            ],
-          ),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: ClassCard(gymClass: gymClass)
+                  .animate()
+                  .fadeIn(delay: (index * 50).ms, duration: 300.ms)
+                  .slideX(begin: 0.05, curve: Curves.easeOutQuad),
+            ),
+          ],
         );
       },
     );
@@ -140,50 +221,23 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
               shape: BoxShape.circle,
               color: AppColors.surface,
               border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
-              boxShadow: AppColors.subtleGlow,
             ),
-            child: const Icon(Icons.event_note_rounded, size: 70, color: AppColors.primary),
-          ).animate().scale(delay: 200.ms, duration: 400.ms, curve: Curves.easeOutBack),
-
-          const SizedBox(height: 35),
-
-          Text(
-            _showOnlyMyClasses ? 'Brak zaplanowanych\nzajęć' : 'Brak zajęć\nw grafiku',
-            textAlign: TextAlign.center,
-            style: const TextStyle(color: AppColors.textPrimary, fontSize: 24, fontWeight: FontWeight.bold, height: 1.2, letterSpacing: -0.5),
-          ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.1),
-
-          const SizedBox(height: 16),
-
-          Text(
-            _showOnlyMyClasses ? 'Przełącz na "Wszystkie", aby coś znaleźć.' : 'Zajrzyj tu później!',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: AppColors.textSecondary.withValues(alpha: 0.8), fontSize: 16, height: 1.5),
-          ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.1),
+            child: const Icon(Icons.event_busy_rounded, size: 70, color: AppColors.textSecondary),
+          ).animate().scale(duration: 400.ms, curve: Curves.easeOutBack),
+          const SizedBox(height: 25),
+          const Text(
+            'Brak zajęć w tym dniu',
+            style: TextStyle(color: AppColors.textPrimary, fontSize: 20, fontWeight: FontWeight.bold),
+          ),
         ],
       ),
     );
   }
 
-  Map<DateTime, List<GymClass>> _groupClassesByDay(List<GymClass> classes) {
-    final Map<DateTime, List<GymClass>> grouped = {};
-    for (final gymClass in classes) {
-      final date = DateTime(gymClass.startTime.year, gymClass.startTime.month, gymClass.startTime.day);
-      if (!grouped.containsKey(date)) grouped[date] = [];
-      grouped[date]!.add(gymClass);
-    }
-    final sortedKeys = grouped.keys.toList()..sort();
-    return Map.fromEntries(sortedKeys.map((key) => MapEntry(key, grouped[key]!)));
-  }
-
   String _getDateLabel(DateTime date) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    final tomorrow = today.add(const Duration(days: 1));
-    if (date == today) return 'Dzisiaj';
-    if (date == tomorrow) return 'Jutro';
-    final days = ['Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek', 'Sobota', 'Niedziela'];
-    final months = ['Sty', 'Lut', 'Mar', 'Kwi', 'Maj', 'Cze', 'Lip', 'Sie', 'Wrz', 'Paź', 'Lis', 'Gru'];
-    return '${days[date.weekday - 1]}, ${date.day} ${months[date.month - 1]}';
+    if (date.isAtSameMomentAs(today)) return 'Dzisiaj';
+    return DateFormat('EEEE, d MMMM', 'pl_PL').format(date);
   }
 }

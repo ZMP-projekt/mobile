@@ -1,11 +1,11 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../data/models/gym_class.dart';
 import '../../providers/classes_provider.dart';
 import '../../utils/gym_class_extension.dart';
-import '../class_details_page.dart';
 
 class ClassCard extends ConsumerWidget {
   final GymClass gymClass;
@@ -19,9 +19,9 @@ class ClassCard extends ConsumerWidget {
 
     return GestureDetector(
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => ClassDetailsPage(gymClass: gymClass, imageUrl: imageUrl)),
+        context.push(
+          '/class-details',
+          extra: {'gymClass': gymClass, 'imageUrl': imageUrl},
         );
       },
       child: Container(

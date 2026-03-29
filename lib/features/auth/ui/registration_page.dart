@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:mobile_gym_app/core/util/app_logger.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/ui/widgets/custom_text_field.dart';
 import '../../../core/util/validators.dart';
@@ -47,8 +48,8 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
           _passwordController.text,
         );
 
-        if (success && mounted && Navigator.canPop(context)) {
-          Navigator.pop(context);
+        if (success && mounted) {
+          context.pop();
         }
 
       } catch (e) {
@@ -84,7 +85,7 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => context.pop(),
         ),
       ),
       extendBodyBehindAppBar: true,
@@ -211,7 +212,7 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
                         children: [
                           const Text('Masz już konto? ', style: TextStyle(color: AppColors.textSecondary)),
                           GestureDetector(
-                            onTap: () => Navigator.pop(context),
+                            onTap: () => context.pop(),
                             child: const Text('Zaloguj się', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
                           ),
                         ],

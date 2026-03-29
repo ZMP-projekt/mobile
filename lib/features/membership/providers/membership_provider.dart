@@ -24,16 +24,17 @@ class PurchaseMembershipNotifier extends AutoDisposeAsyncNotifier<void> {
     final repo = ref.read(membershipRepositoryProvider);
     final result = await repo.purchaseMembership(type);
 
-    if (result.isSuccess) {
-      state = const AsyncData(null);
-
-      ref.invalidate(currentMembershipProvider);
-
-      return true;
-    } else {
-      state = AsyncError(result.error!, StackTrace.current);
-      return false;
-    }
+    return result.when(
+      success: (_) {
+        state = const AsyncData(null);
+        ref.invalidate(currentMembershipProvider);
+        return true;
+      },
+      failure: (error) {
+        state = AsyncError(error, StackTrace.current);
+        return false;
+      },
+    );
   }
 }
 
