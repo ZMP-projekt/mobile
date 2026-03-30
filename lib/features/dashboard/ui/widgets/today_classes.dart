@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../classes/providers/classes_provider.dart';
-import '../../../classes/ui/class_details_page.dart';
 import '../../../classes/utils/gym_class_extension.dart';
 
 class TodayClassesCarousel extends ConsumerWidget {
