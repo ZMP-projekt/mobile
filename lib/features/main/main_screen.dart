@@ -3,8 +3,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../membership/ui/widgets/membership_guard.dart';
-import '../membership/ui/widgets/membership_purchase_modal.dart'; // Dodano import
-import '../membership/providers/membership_provider.dart'; // Dodano import
+import '../membership/ui/widgets/membership_purchase_modal.dart';
+import '../membership/providers/membership_provider.dart';
 
 import '../dashboard/ui/dashboard_page.dart';
 import '../trainings/ui/personal_trainings_page.dart';
@@ -17,7 +17,7 @@ import '../user/providers/user_provider.dart';
 
 import '../../core/theme/app_colors.dart';
 
-final mainNavigationProvider = StateProvider<int>((ref) => 0);
+final mainNavigationProvider = StateProvider.autoDispose<int>((ref) => 0);
 
 class MainScreen extends ConsumerStatefulWidget {
   const MainScreen({super.key});
@@ -55,6 +55,14 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
     final currentIndex = ref.watch(mainNavigationProvider);
     final userAsync = ref.watch(currentUserProvider);
+
+    if (userAsync.isLoading && !userAsync.hasValue) {
+      return const Scaffold(
+        backgroundColor: AppColors.background,
+        body: Center(child: CircularProgressIndicator(color: AppColors.primary)),
+      );
+    }
+
     final isTrainer = userAsync.valueOrNull?.isTrainer ?? false;
 
     final List<Widget> screens = isTrainer
@@ -171,12 +179,6 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     if (hasActiveMembership) {
       _showQRModal(context);
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Wymagany aktywny karnet, aby wejść do klubu.'),
-          backgroundColor: AppColors.error,
-        ),
-      );
 
       showModalBottomSheet(
         context: context,

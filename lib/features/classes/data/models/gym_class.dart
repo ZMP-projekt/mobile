@@ -16,7 +16,7 @@ class GymClass with _$GymClass {
     required Trainer trainer,
     required int maxParticipants,
     required int currentParticipants,
-    @Default(false) bool isBookedByUser,
+    @Default(false) bool userEnrolled,
     String? description,
     String? imageUrl,
   }) = _GymClass;
@@ -48,7 +48,7 @@ class GymClass with _$GymClass {
 
   @override
   String toString() {
-    return 'GymClass(id: $id, name: $name, startTime: $startTimeFormatted, spots: $spotsLeft/$maxParticipants, booked: $isBookedByUser)';
+    return 'GymClass(id: $id, name: $name, startTime: $startTimeFormatted, spots: $spotsLeft/$maxParticipants, booked: $userEnrolled)';
   }
 
   factory GymClass.fromJson(Map<String, dynamic> json) =>

@@ -113,7 +113,7 @@ class ClassDetailsPage extends ConsumerWidget {
                   ),
                   child: IconButton(
                     icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
-                    onPressed: () => context.pop(), // POPRAWKA: GoRouter
+                    onPressed: () => context.pop(),
                   ),
                 ),
               ),
@@ -245,7 +245,7 @@ class ClassDetailsPage extends ConsumerWidget {
   }
 
   Widget _buildMainActionButton(BuildContext context, WidgetRef ref, bool isProcessing) {
-    if (gymClass.isBookedByUser) {
+    if (gymClass.userEnrolled) {
       return SizedBox(
         height: 58,
         width: double.infinity,
@@ -281,16 +281,23 @@ class ClassDetailsPage extends ConsumerWidget {
         ],
       ),
       child: ElevatedButton(
-        onPressed: (isProcessing || isDisabled) ? null : () {
-          ref.read(bookingNotifierProvider.notifier).bookClass(gymClass.id).then((_) {
+        onPressed: (isProcessing || isDisabled) ? null : () async {
+          try {
+            await ref.read(bookingNotifierProvider.notifier).bookClass(gymClass.id);
             if (!context.mounted) return;
 
-            SuccessOverlay.show(context, "Zapisano na\nzajęcia!");
+            await SuccessOverlay.show(context, "Zapisano na\nzajęcia!");
 
-            Future.delayed(const Duration(milliseconds: 2300), () {
-              if (context.mounted) context.pop();
-            });
-          });
+            if (!context.mounted) return;
+            if (context.canPop()) {
+              context.pop();
+            }
+          } catch (e) {
+            if (!context.mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Błąd rezerwacji: $e'), backgroundColor: AppColors.error),
+            );
+          }
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.transparent,

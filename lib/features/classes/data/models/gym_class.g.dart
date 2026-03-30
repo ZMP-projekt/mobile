@@ -15,7 +15,7 @@ _$GymClassImpl _$$GymClassImplFromJson(Map<String, dynamic> json) =>
       trainer: Trainer.fromJson(json['trainer'] as Map<String, dynamic>),
       maxParticipants: (json['maxParticipants'] as num).toInt(),
       currentParticipants: (json['currentParticipants'] as num).toInt(),
-      isBookedByUser: json['isBookedByUser'] as bool? ?? false,
+      userEnrolled: json['userEnrolled'] as bool? ?? false,
       description: json['description'] as String?,
       imageUrl: json['imageUrl'] as String?,
     );
@@ -29,7 +29,7 @@ Map<String, dynamic> _$$GymClassImplToJson(_$GymClassImpl instance) =>
       'trainer': instance.trainer,
       'maxParticipants': instance.maxParticipants,
       'currentParticipants': instance.currentParticipants,
-      'isBookedByUser': instance.isBookedByUser,
+      'userEnrolled': instance.userEnrolled,
       'description': instance.description,
       'imageUrl': instance.imageUrl,
     };

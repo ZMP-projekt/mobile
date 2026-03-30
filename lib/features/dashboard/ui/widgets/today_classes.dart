@@ -1,9 +1,9 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../classes/providers/classes_provider.dart';
-import '../../../classes/ui/class_details_page.dart';
 import '../../../classes/utils/gym_class_extension.dart';
 
 class TodayClassesCarousel extends ConsumerWidget {
@@ -46,11 +46,9 @@ class TodayClassesCarousel extends ConsumerWidget {
 
               return GestureDetector(
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ClassDetailsPage(gymClass: gymClass, imageUrl: imageUrl),
-                    ),
+                  context.push(
+                    '/class-details',
+                    extra: {'gymClass': gymClass, 'imageUrl': imageUrl},
                   );
                 },
                 child: Container(

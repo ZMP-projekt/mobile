@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/ui/success_overlay.dart';
 import '../../data/models/gym_class.dart';
 import '../../providers/classes_provider.dart';
 import '../../utils/gym_class_extension.dart';
@@ -93,7 +94,7 @@ class ClassCard extends ConsumerWidget {
                             ],
                           ),
                         ),
-                        _buildQuickActionButton(ref, isProcessing),
+                        _buildQuickActionButton(context, ref, isProcessing),
                       ],
                     ),
                   ),
@@ -107,7 +108,7 @@ class ClassCard extends ConsumerWidget {
   }
 
   Widget _buildStatusTag() {
-    if (gymClass.isBookedByUser) {
+    if (gymClass.userEnrolled) {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
@@ -131,8 +132,8 @@ class ClassCard extends ConsumerWidget {
     return const SizedBox.shrink();
   }
 
-  Widget _buildQuickActionButton(WidgetRef ref, bool isProcessing) {
-    if (gymClass.isBookedByUser || gymClass.isFull || gymClass.isPast) {
+  Widget _buildQuickActionButton(BuildContext context, WidgetRef ref, bool isProcessing) {
+    if (gymClass.userEnrolled || gymClass.isFull || gymClass.isPast) {
       return Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.1), shape: BoxShape.circle),
@@ -141,12 +142,25 @@ class ClassCard extends ConsumerWidget {
     }
 
     return GestureDetector(
-      onTap: isProcessing ? null : () => ref.read(bookingNotifierProvider.notifier).bookClass(gymClass.id),
+      onTap: isProcessing ? null : () async {
+        try {
+          await ref.read(bookingNotifierProvider.notifier).bookClass(gymClass.id);
+          if (!context.mounted) return;
+
+          await SuccessOverlay.show(context, "Zapisano na\nzajęcia!");
+
+        } catch (e) {
+          if (!context.mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Błąd rezerwacji: $e'), backgroundColor: AppColors.error),
+          );
+        }
+      },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(gradient: AppColors.primaryGradient.withOpacity(0.9), borderRadius: BorderRadius.circular(14)),
         child: isProcessing
-            ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.background))
+            ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.textPrimary))
             : const Text('Zapisz', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 13)),
       ),
     );

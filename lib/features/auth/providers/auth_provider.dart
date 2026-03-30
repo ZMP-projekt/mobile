@@ -35,12 +35,19 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   AuthNotifier(this._repo, this.ref) : super(const AuthState()) {
     _checkInitialAuth();
+
+    ref.listen<String?>(authTokenProvider, (previous, next) {
+      if (previous != null && next == null) {
+        logout();
+      }
+    });
   }
 
   Future<void> _checkInitialAuth() async {
     final token = await _storage.read(key: 'jwt_token');
 
     if (token != null) {
+      ref.read(authTokenProvider.notifier).state = token;
       state = state.copyWith(isAuthenticated: true);
     }
   }
@@ -53,11 +60,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
     return result.when(
       success: (token) async {
         await _storage.write(key: 'jwt_token', value: token);
+        ref.read(authTokenProvider.notifier).state = token;
+
         try {
           await ref.read(currentUserProvider.future);
         } catch (e) {
           AppLogger.e("Błąd pobierania usera", e);
         }
+
         state = state.copyWith(isLoading: false, isAuthenticated: true);
         AppLogger.i("✅ Zalogowano: $email");
         return true;
@@ -78,6 +88,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
     return result.when(
       success: (token) async {
         await _storage.write(key: 'jwt_token', value: token);
+        ref.read(authTokenProvider.notifier).state = token;
+
         state = state.copyWith(isLoading: false, isAuthenticated: true);
         return true;
       },
@@ -90,6 +102,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   Future<void> logout() async {
     await _storage.delete(key: 'jwt_token');
+    ref.read(authTokenProvider.notifier).state = null;
+
     state = state.copyWith(isAuthenticated: false);
     AppLogger.i("👋 Wylogowano");
   }

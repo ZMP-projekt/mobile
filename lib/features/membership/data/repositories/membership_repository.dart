@@ -10,9 +10,16 @@ class MembershipRepository {
   Future<Membership> getMyMembership() async {
     try {
       final response = await _dio.get('/api/memberships/me');
-
       return Membership.fromJson(response.data);
     } on DioException catch (e) {
+      if (e.response?.statusCode == 404 || e.response?.statusCode == 403) {
+        return Membership(
+          active: false,
+          endDate: DateTime.now().subtract(const Duration(days: 1)),
+          price: 0.0,
+          type: 'BRAK',
+        );
+      }
       throw Exception(e.response?.data['message'] ?? 'Nie udało się pobrać karnetu.');
     } catch (e) {
       throw Exception('Wystąpił nieoczekiwany błąd podczas pobierania karnetu.');
@@ -25,7 +32,6 @@ class MembershipRepository {
         '/api/memberships/purchase',
         queryParameters: {'type': type},
       );
-
       return Result.success(null);
     } on DioException catch (e) {
       final backendError = e.response?.data?['message'];

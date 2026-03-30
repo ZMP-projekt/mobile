@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../auth/providers/auth_provider.dart';
-import '../../main/main_screen.dart';
 import '../../user/providers/user_provider.dart';
 
 class ProfilePage extends ConsumerWidget {
@@ -98,8 +97,6 @@ class ProfilePage extends ConsumerWidget {
                       width: double.infinity,
                       child: ElevatedButton.icon(
                         onPressed: () {
-                          ref.read(mainNavigationProvider.notifier).state = 0;
-
                           ref.read(authStateProvider.notifier).logout();
                         },
                         icon: const Icon(Icons.logout_rounded, size: 22),

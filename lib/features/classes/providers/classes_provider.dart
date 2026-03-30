@@ -1,55 +1,31 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/network/dio_client.dart';
 import '../data/models/gym_class.dart';
 import '../data/repositories/class_repository.dart';
 
-final classesRepositoryProvider = Provider<MockClassesRepository>((ref) {
-  return MockClassesRepository();
+final classesRepositoryProvider = Provider<IClassesRepository>((ref) {
+  return ApiClassesRepository(ref.watch(dioProvider));
 });
 
-final allClassesProvider = FutureProvider<List<GymClass>>((ref) async {
+final selectedDateProvider = StateProvider<DateTime>((ref) {
+  final now = DateTime.now();
+  return DateTime(now.year, now.month, now.day);
+});
+
+final classesForDateProvider = FutureProvider.family<List<GymClass>, DateTime>((ref, date) async {
   final repo = ref.watch(classesRepositoryProvider);
-  return await repo.getAllClasses();
+  return await repo.getClassesByDate(date);
 });
-
-final myClassesProvider = FutureProvider<List<GymClass>>((ref) async {
-  final repo = ref.watch(classesRepositoryProvider);
-  return await repo.getMyClasses();
-});
-
 
 final todayClassesProvider = FutureProvider<List<GymClass>>((ref) async {
-  final allClasses = await ref.watch(allClassesProvider.future);
-  return allClasses.where((c) => c.isToday && c.isFuture).toList();
-});
-
-final classesProvider = FutureProvider<Map<String, List<GymClass>>>((ref) async {
-  final allClasses = await ref.watch(allClassesProvider.future);
-  final grouped = <String, List<GymClass>>{};
-
   final now = DateTime.now();
-  final tomorrow = now.add(const Duration(days: 1));
-
-  for (final gymClass in allClasses) {
-    String dateLabel;
-    if (gymClass.isToday) {
-      dateLabel = 'Dzisiaj';
-    } else if (gymClass.startTime.year == tomorrow.year && gymClass.startTime.month == tomorrow.month && gymClass.startTime.day == tomorrow.day) {
-      dateLabel = 'Jutro';
-    } else {
-      dateLabel = gymClass.dateFormatted;
-    }
-
-    if (!grouped.containsKey(dateLabel)) {
-      grouped[dateLabel] = [];
-    }
-    grouped[dateLabel]!.add(gymClass);
-  }
-
-  return grouped;
+  final today = DateTime(now.year, now.month, now.day);
+  final classes = await ref.watch(classesForDateProvider(today).future);
+  return classes.where((c) => c.isFuture).toList();
 });
 
 class BookingNotifier extends StateNotifier<bool> {
-  final MockClassesRepository _repository;
+  final IClassesRepository _repository;
   final Ref _ref;
 
   BookingNotifier(this._repository, this._ref) : super(false);
@@ -58,11 +34,7 @@ class BookingNotifier extends StateNotifier<bool> {
     state = true;
     try {
       await _repository.bookClass(classId);
-
-      _ref.invalidate(allClassesProvider);
-      _ref.invalidate(myClassesProvider);
-      _ref.invalidate(todayClassesProvider);
-
+      _ref.invalidate(classesForDateProvider);
       state = false;
     } catch (error) {
       state = false;
@@ -74,11 +46,19 @@ class BookingNotifier extends StateNotifier<bool> {
     state = true;
     try {
       await _repository.cancelBooking(classId);
+      _ref.invalidate(classesForDateProvider);
+      state = false;
+    } catch (error) {
+      state = false;
+      rethrow;
+    }
+  }
 
-      _ref.invalidate(allClassesProvider);
-      _ref.invalidate(myClassesProvider);
-      _ref.invalidate(todayClassesProvider);
-
+  Future<void> deleteClass(int classId) async {
+    state = true;
+    try {
+      await _repository.deleteClass(classId);
+      _ref.invalidate(classesForDateProvider);
       state = false;
     } catch (error) {
       state = false;

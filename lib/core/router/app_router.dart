@@ -11,7 +11,8 @@ import '../../features/classes/data/models/gym_class.dart';
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 
 final routerProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authStateProvider);
+
+  final isAuthenticated = ref.watch(authStateProvider.select((state) => state.isAuthenticated));
 
   return GoRouter(
     navigatorKey: rootNavigatorKey,
@@ -19,7 +20,7 @@ final routerProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final isLoggingIn = state.matchedLocation == '/login' || state.matchedLocation == '/register';
 
-      if (!authState.isAuthenticated) {
+      if (!isAuthenticated) {
         return isLoggingIn ? null : '/login';
       }
 
@@ -45,7 +46,6 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/class-details',
         builder: (context, state) {
-          // Pobieramy dane przekazane w extra (obiekt GymClass i URL zdjęcia)
           final extra = state.extra as Map<String, dynamic>;
           return ClassDetailsPage(
             gymClass: extra['gymClass'] as GymClass,

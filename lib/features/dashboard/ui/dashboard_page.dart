@@ -35,8 +35,12 @@ class DashboardPage extends ConsumerWidget {
         child: SafeArea(
           child: RefreshIndicator(
             onRefresh: () async {
-              ref.invalidate(currentUserProvider);
-              ref.invalidate(allClassesProvider);
+              ref.invalidate(classesForDateProvider);
+
+              await Future.wait([
+                ref.refresh(currentUserProvider.future),
+                ref.read(todayClassesProvider.future),
+              ]);
             },
             color: AppColors.primary,
             child: SingleChildScrollView(

@@ -25,8 +25,8 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
 
   @override
   Widget build(BuildContext context) {
-    final classesAsync = ref.watch(allClassesProvider);
     final selectedDate = ref.watch(selectedDateProvider);
+    final classesAsync = ref.watch(classesForDateProvider(selectedDate));
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -51,7 +51,6 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
 
                   const SizedBox(height: 20),
 
-                  // SEKTYCJA: Horyzontalny wybór daty
                   _buildHorizontalCalendar(ref, selectedDate),
 
                   const SizedBox(height: 20),
@@ -67,15 +66,9 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
               child: classesAsync.when(
                 loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
                 error: (err, stack) => Center(child: Text('Błąd: $err', style: const TextStyle(color: AppColors.error))),
-                data: (allClasses) {
-                  // Filtrowanie po wybranej dacie oraz filtrze "Moje rezerwacje"
-                  final displayedClasses = allClasses.where((c) {
-                    final isSameDay = c.startTime.year == selectedDate.year &&
-                        c.startTime.month == selectedDate.month &&
-                        c.startTime.day == selectedDate.day;
-
-                    if (!isSameDay) return false;
-                    return _showOnlyMyClasses ? c.isBookedByUser : true;
+                data: (dayClasses) {
+                  final displayedClasses = dayClasses.where((c) {
+                    return _showOnlyMyClasses ? c.userEnrolled : true;
                   }).toList();
 
                   Widget content = displayedClasses.isEmpty
@@ -106,11 +99,9 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     );
   }
 
-  // Widget poziomego paska dat
   Widget _buildHorizontalCalendar(WidgetRef ref, DateTime selectedDate) {
     final today = DateTime.now();
     final normalizedToday = DateTime(today.year, today.month, today.day);
-    // Generujemy listę 14 nadchodzących dni
     final days = List.generate(14, (index) => normalizedToday.add(Duration(days: index)));
 
     return SizedBox(

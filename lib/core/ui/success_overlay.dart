@@ -8,13 +8,13 @@ class SuccessOverlay extends StatelessWidget {
   final String message;
   const SuccessOverlay({super.key, required this.message});
 
-  static void show(BuildContext context, String message) {
-    showDialog(
+  static Future<void> show(BuildContext context, String message) {
+    return showDialog(
       context: context,
       barrierColor: Colors.black54,
       barrierDismissible: false,
       builder: (context) {
-        Future.delayed(const Duration(milliseconds: 2200), () {
+        Future.delayed(const Duration(milliseconds: 2000), () {
           if (context.mounted) context.pop();
         });
         return SuccessOverlay(message: message);
