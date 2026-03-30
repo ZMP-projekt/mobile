@@ -25,7 +25,7 @@ class MembershipGuard extends ConsumerWidget {
         backgroundColor: AppColors.background,
         body: Center(child: CircularProgressIndicator(color: AppColors.primary)),
       ),
-      error: (_, _) => _buildLockedScreen(context),
+      error: (err, stack) => _buildErrorScreen(context, ref),
       data: (membership) {
         if (membership.active && membership.daysRemaining > 0) {
           return child;
@@ -34,6 +34,46 @@ class MembershipGuard extends ConsumerWidget {
       },
     );
   }
+
+  Widget _buildErrorScreen(BuildContext context, WidgetRef ref) {
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.wifi_off_rounded, size: 64, color: AppColors.textSecondary),
+              const SizedBox(height: 24),
+              const Text(
+                'Problem z połączeniem',
+                style: TextStyle(color: AppColors.textPrimary, fontSize: 22, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+              const Text(
+                'Nie udało się zweryfikować statusu karnetu. Sprawdź połączenie z internetem.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: AppColors.textSecondary, fontSize: 16),
+              ),
+              const SizedBox(height: 32),
+              OutlinedButton.icon(
+                onPressed: () => ref.invalidate(currentMembershipProvider),
+                icon: const Icon(Icons.refresh, color: AppColors.primary),
+                label: const Text('Spróbuj ponownie', style: TextStyle(color: AppColors.primary)),
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: AppColors.primary),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                ),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildLockedScreen(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -49,6 +89,7 @@ class MembershipGuard extends ConsumerWidget {
                   color: AppColors.surface,
                   shape: BoxShape.circle,
                   border: Border.all(color: AppColors.primary.withValues(alpha: 0.3), width: 2),
+                  boxShadow: AppColors.mediumGlow,
                 ),
                 child: const Icon(Icons.lock_outline, size: 64, color: AppColors.primary),
               ).animate().scale(delay: 100.ms, duration: 400.ms, curve: Curves.easeOutBack),
@@ -70,9 +111,14 @@ class MembershipGuard extends ConsumerWidget {
 
               const SizedBox(height: 48),
 
-              SizedBox(
+              Container(
                 width: double.infinity,
                 height: 56,
+                decoration: BoxDecoration(
+                  gradient: AppColors.primaryGradient,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: AppColors.primaryGlow,
+                ),
                 child: ElevatedButton(
                   onPressed: () {
                     showModalBottomSheet(
@@ -83,12 +129,13 @@ class MembershipGuard extends ConsumerWidget {
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
+                    backgroundColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   ),
                   child: const Text('Kup karnet teraz', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
                 ),
-              ).animate().fadeIn(delay: 500.ms).slideY(begin: 0.2),
+              ).animate().fadeIn(delay: 500.ms).slideY(begin: 0.2)
             ],
           ),
         ),

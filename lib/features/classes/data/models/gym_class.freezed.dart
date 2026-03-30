@@ -28,7 +28,7 @@ mixin _$GymClass {
   Trainer get trainer => throw _privateConstructorUsedError;
   int get maxParticipants => throw _privateConstructorUsedError;
   int get currentParticipants => throw _privateConstructorUsedError;
-  bool get isBookedByUser => throw _privateConstructorUsedError;
+  bool get userEnrolled => throw _privateConstructorUsedError;
   String? get description => throw _privateConstructorUsedError;
   String? get imageUrl => throw _privateConstructorUsedError;
 
@@ -55,7 +55,7 @@ abstract class $GymClassCopyWith<$Res> {
     Trainer trainer,
     int maxParticipants,
     int currentParticipants,
-    bool isBookedByUser,
+    bool userEnrolled,
     String? description,
     String? imageUrl,
   });
@@ -85,7 +85,7 @@ class _$GymClassCopyWithImpl<$Res, $Val extends GymClass>
     Object? trainer = null,
     Object? maxParticipants = null,
     Object? currentParticipants = null,
-    Object? isBookedByUser = null,
+    Object? userEnrolled = null,
     Object? description = freezed,
     Object? imageUrl = freezed,
   }) {
@@ -119,9 +119,9 @@ class _$GymClassCopyWithImpl<$Res, $Val extends GymClass>
                 ? _value.currentParticipants
                 : currentParticipants // ignore: cast_nullable_to_non_nullable
                       as int,
-            isBookedByUser: null == isBookedByUser
-                ? _value.isBookedByUser
-                : isBookedByUser // ignore: cast_nullable_to_non_nullable
+            userEnrolled: null == userEnrolled
+                ? _value.userEnrolled
+                : userEnrolled // ignore: cast_nullable_to_non_nullable
                       as bool,
             description: freezed == description
                 ? _value.description
@@ -164,7 +164,7 @@ abstract class _$$GymClassImplCopyWith<$Res>
     Trainer trainer,
     int maxParticipants,
     int currentParticipants,
-    bool isBookedByUser,
+    bool userEnrolled,
     String? description,
     String? imageUrl,
   });
@@ -194,7 +194,7 @@ class __$$GymClassImplCopyWithImpl<$Res>
     Object? trainer = null,
     Object? maxParticipants = null,
     Object? currentParticipants = null,
-    Object? isBookedByUser = null,
+    Object? userEnrolled = null,
     Object? description = freezed,
     Object? imageUrl = freezed,
   }) {
@@ -228,9 +228,9 @@ class __$$GymClassImplCopyWithImpl<$Res>
             ? _value.currentParticipants
             : currentParticipants // ignore: cast_nullable_to_non_nullable
                   as int,
-        isBookedByUser: null == isBookedByUser
-            ? _value.isBookedByUser
-            : isBookedByUser // ignore: cast_nullable_to_non_nullable
+        userEnrolled: null == userEnrolled
+            ? _value.userEnrolled
+            : userEnrolled // ignore: cast_nullable_to_non_nullable
                   as bool,
         description: freezed == description
             ? _value.description
@@ -256,7 +256,7 @@ class _$GymClassImpl extends _GymClass {
     required this.trainer,
     required this.maxParticipants,
     required this.currentParticipants,
-    this.isBookedByUser = false,
+    this.userEnrolled = false,
     this.description,
     this.imageUrl,
   }) : super._();
@@ -280,7 +280,7 @@ class _$GymClassImpl extends _GymClass {
   final int currentParticipants;
   @override
   @JsonKey()
-  final bool isBookedByUser;
+  final bool userEnrolled;
   @override
   final String? description;
   @override
@@ -301,8 +301,8 @@ class _$GymClassImpl extends _GymClass {
                 other.maxParticipants == maxParticipants) &&
             (identical(other.currentParticipants, currentParticipants) ||
                 other.currentParticipants == currentParticipants) &&
-            (identical(other.isBookedByUser, isBookedByUser) ||
-                other.isBookedByUser == isBookedByUser) &&
+            (identical(other.userEnrolled, userEnrolled) ||
+                other.userEnrolled == userEnrolled) &&
             (identical(other.description, description) ||
                 other.description == description) &&
             (identical(other.imageUrl, imageUrl) ||
@@ -320,7 +320,7 @@ class _$GymClassImpl extends _GymClass {
     trainer,
     maxParticipants,
     currentParticipants,
-    isBookedByUser,
+    userEnrolled,
     description,
     imageUrl,
   );
@@ -348,7 +348,7 @@ abstract class _GymClass extends GymClass {
     required final Trainer trainer,
     required final int maxParticipants,
     required final int currentParticipants,
-    final bool isBookedByUser,
+    final bool userEnrolled,
     final String? description,
     final String? imageUrl,
   }) = _$GymClassImpl;
@@ -372,7 +372,7 @@ abstract class _GymClass extends GymClass {
   @override
   int get currentParticipants;
   @override
-  bool get isBookedByUser;
+  bool get userEnrolled;
   @override
   String? get description;
   @override

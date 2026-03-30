@@ -1,153 +1,83 @@
-import '../../../trainer/models/trainer.dart';
+import 'package:dio/dio.dart';
 import '../models/gym_class.dart';
 
-class MockClassesRepository {
-  final Set<int> _bookedClassIds = {1, 4, 9};
+abstract class IClassesRepository {
+  Future<List<GymClass>> getClassesByDate(DateTime date);
+  Future<void> bookClass(int classId);
+  Future<void> cancelBooking(int classId);
 
-  Future<void> _simulateNetworkDelay() async {
-    await Future.delayed(const Duration(milliseconds: 600));
+  Future<void> createClass(Map<String, dynamic> classData);
+  Future<void> rescheduleClass(int classId, DateTime newStart, DateTime newEnd);
+  Future<void> deleteClass(int classId);
+}
+
+class ApiClassesRepository implements IClassesRepository {
+  final Dio _dio;
+
+  ApiClassesRepository(this._dio);
+
+  @override
+  Future<List<GymClass>> getClassesByDate(DateTime date) async {
+    try {
+      final dateString = "${date.toIso8601String().substring(0, 10)}T00:00:00";
+
+      final response = await _dio.get(
+        '/api/classes',
+        queryParameters: {'date': dateString},
+      );
+
+      final List<dynamic> data = response.data;
+      return data.map((json) => GymClass.fromJson(json)).toList();
+    } on DioException catch (e) {
+      throw Exception(e.response?.data['message'] ?? 'Nie udało się pobrać grafiku zajęć.');
+    }
   }
 
-  Future<List<GymClass>> getAllClasses() async {
-    await _simulateNetworkDelay();
-    return _generateMockClasses();
+  @override
+  Future<void> bookClass(int classId) async {
+    try {
+      await _dio.post('/api/classes/$classId/book');
+    } on DioException catch (e) {
+      throw Exception(e.response?.data['message'] ?? 'Nie udało się zarezerwować zajęć.');
+    }
   }
 
-  Future<List<GymClass>> getMyClasses() async {
-    await _simulateNetworkDelay();
-    final allClasses = _generateMockClasses();
-    return allClasses.where((c) => c.isBookedByUser).toList();
+  @override
+  Future<void> cancelBooking(int classId) async {
+    try {
+      await _dio.delete('/api/classes/$classId/cancel');
+    } on DioException catch (e) {
+      throw Exception(e.response?.data['message'] ?? 'Nie udało się anulować rezerwacji.');
+    }
   }
 
-  Future<GymClass> bookClass(int classId) async {
-    await _simulateNetworkDelay();
-    _bookedClassIds.add(classId);
-    final allClasses = _generateMockClasses();
-    return allClasses.firstWhere((c) => c.id == classId);
+  @override
+  Future<void> createClass(Map<String, dynamic> classData) async {
+    try {
+      await _dio.post('/api/classes', data: classData);
+    } on DioException catch (e) {
+      throw Exception(e.response?.data['message'] ?? 'Błąd tworzenia zajęć.');
+    }
   }
 
-  Future<GymClass> cancelBooking(int classId) async {
-    await _simulateNetworkDelay();
-    _bookedClassIds.remove(classId);
-    final allClasses = _generateMockClasses();
-    return allClasses.firstWhere((c) => c.id == classId);
+  @override
+  Future<void> rescheduleClass(int classId, DateTime newStart, DateTime newEnd) async {
+    try {
+      await _dio.patch('/api/classes/$classId/reschedule', data: {
+        'startTime': newStart.toIso8601String(),
+        'endTime': newEnd.toIso8601String(),
+      });
+    } on DioException catch (e) {
+      throw Exception(e.response?.data['message'] ?? 'Błąd przekładania zajęć.');
+    }
   }
 
-  List<GymClass> _generateMockClasses() {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-
-    return [
-      GymClass(
-        id: 1,
-        name: 'Yoga Relax',
-        startTime: today.add(const Duration(hours: 18)),
-        endTime: today.add(const Duration(hours: 19)),
-        trainer: Trainer(firstName: 'Anna', lastName: 'Kowalska'),
-        maxParticipants: 15,
-        currentParticipants: _bookedClassIds.contains(1) ? 9 : 8,
-        isBookedByUser: _bookedClassIds.contains(1),
-        description: 'Relaksacyjna sesja jogi dla początkujących',
-      ),
-      GymClass(
-        id: 2,
-        name: 'CrossFit HIIT',
-        startTime: today.add(const Duration(hours: 19, minutes: 30)),
-        endTime: today.add(const Duration(hours: 20, minutes: 30)),
-        trainer: Trainer(firstName: 'Michał', lastName: 'Nowak'),
-        maxParticipants: 12,
-        currentParticipants: _bookedClassIds.contains(2) ? 11 : 10,
-        isBookedByUser: _bookedClassIds.contains(2),
-        description: 'Intensywny trening interwałowy wysokiej intensywności',
-      ),
-      GymClass(
-        id: 3,
-        name: 'Pilates',
-        startTime: today.add(const Duration(hours: 17)),
-        endTime: today.add(const Duration(hours: 18)),
-        trainer: Trainer(firstName: 'Karolina', lastName: 'Wiśniewska'),
-        maxParticipants: 10,
-        currentParticipants: _bookedClassIds.contains(3) ? 8 : 7,
-        isBookedByUser: _bookedClassIds.contains(3),
-        description: 'Pilates na wzmocnienie mięśni głębokich',
-      ),
-      GymClass(
-        id: 4,
-        name: 'Spinning',
-        startTime: today.add(const Duration(days: 1, hours: 18)),
-        endTime: today.add(const Duration(days: 1, hours: 19)),
-        trainer: Trainer(firstName: 'Piotr', lastName: 'Kowalczyk'),
-        maxParticipants: 20,
-        currentParticipants: _bookedClassIds.contains(4) ? 16 : 15,
-        isBookedByUser: _bookedClassIds.contains(4),
-        description: 'Energetyczny trening na rowerach stacjonarnych',
-      ),
-      GymClass(
-        id: 5,
-        name: 'Zumba',
-        startTime: today.add(const Duration(days: 1, hours: 19, minutes: 30)),
-        endTime: today.add(const Duration(days: 1, hours: 20, minutes: 30)),
-        trainer: Trainer(firstName: 'Maria', lastName: 'Lopez'),
-        maxParticipants: 25,
-        currentParticipants: _bookedClassIds.contains(5) ? 19 : 18,
-        isBookedByUser: _bookedClassIds.contains(5),
-        description: 'Taneczny fitness w rytmie latino',
-      ),
-      GymClass(
-        id: 6,
-        name: 'Body Pump',
-        startTime: today.add(const Duration(days: 2, hours: 18)),
-        endTime: today.add(const Duration(days: 2, hours: 19)),
-        trainer: Trainer(firstName: 'Michał', lastName: 'Nowak'),
-        maxParticipants: 15,
-        currentParticipants: _bookedClassIds.contains(6) ? 13 : 12,
-        isBookedByUser: _bookedClassIds.contains(6),
-        description: 'Trening siłowy z ciężarkami do muzyki',
-      ),
-      GymClass(
-        id: 7,
-        name: 'Stretching',
-        startTime: today.add(const Duration(days: 2, hours: 20)),
-        endTime: today.add(const Duration(days: 2, hours: 21)),
-        trainer: Trainer(firstName: 'Anna', lastName: 'Kowalska'),
-        maxParticipants: 12,
-        currentParticipants: _bookedClassIds.contains(7) ? 6 : 5,
-        isBookedByUser: _bookedClassIds.contains(7),
-        description: 'Rozciąganie i elastyczność całego ciała',
-      ),
-      GymClass(
-        id: 8,
-        name: 'Boxing',
-        startTime: today.add(const Duration(days: 3, hours: 18, minutes: 30)),
-        endTime: today.add(const Duration(days: 3, hours: 19, minutes: 30)),
-        trainer: Trainer(firstName: 'Jan', lastName: 'Lewandowski'),
-        maxParticipants: 10,
-        currentParticipants: 10,
-        isBookedByUser: false,
-        description: 'Trening bokserski dla wszystkich poziomów',
-      ),
-      GymClass(
-        id: 9,
-        name: 'Yoga Power',
-        startTime: today.add(const Duration(days: 3, hours: 17)),
-        endTime: today.add(const Duration(days: 3, hours: 18)),
-        trainer: Trainer(firstName: 'Anna', lastName: 'Kowalska'),
-        maxParticipants: 15,
-        currentParticipants: _bookedClassIds.contains(9) ? 10 : 9,
-        isBookedByUser: _bookedClassIds.contains(9),
-        description: 'Dynamiczna joga budująca siłę',
-      ),
-      GymClass(
-        id: 10,
-        name: 'TRX',
-        startTime: today.add(const Duration(days: 4, hours: 19)),
-        endTime: today.add(const Duration(days: 4, hours: 20)),
-        trainer: Trainer(firstName: 'Michał', lastName: 'Nowak'),
-        maxParticipants: 8,
-        currentParticipants: _bookedClassIds.contains(10) ? 7 : 6,
-        isBookedByUser: _bookedClassIds.contains(10),
-        description: 'Trening z pasami TRX - cały korpus',
-      ),
-    ];
+  @override
+  Future<void> deleteClass(int classId) async {
+    try {
+      await _dio.delete('/api/classes/$classId');
+    } on DioException catch (e) {
+      throw Exception(e.response?.data['message'] ?? 'Błąd usuwania zajęć.');
+    }
   }
 }

@@ -98,8 +98,6 @@ class ProfilePage extends ConsumerWidget {
                       width: double.infinity,
                       child: ElevatedButton.icon(
                         onPressed: () {
-                          ref.read(mainNavigationProvider.notifier).state = 0;
-
                           ref.read(authStateProvider.notifier).logout();
                         },
                         icon: const Icon(Icons.logout_rounded, size: 22),

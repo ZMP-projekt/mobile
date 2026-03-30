@@ -14,8 +14,8 @@ class AppValidators {
     if (value == null || value.isEmpty) {
       return 'Podaj hasło';
     }
-    if (value.length < 2) {
-      return 'Hasło musi mieć co najmniej 6 znaków';
+    if (value.length < 4) {
+      return 'Hasło musi mieć co najmniej 4 znaki';
     }
     return null;
   }
