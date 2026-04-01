@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/ui/widgets/no_connection_view.dart';
 import '../providers/classes_provider.dart';
 import '../data/models/gym_class.dart';
 import 'widgets/class_card.dart';
@@ -65,7 +66,9 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
             Expanded(
               child: classesAsync.when(
                 loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
-                error: (err, stack) => Center(child: Text('Błąd: $err', style: const TextStyle(color: AppColors.error))),
+                error: (err, stack) => NoConnectionView(
+                  onRetry: () => ref.invalidate(classesForDateProvider(selectedDate)),
+                ),
                 data: (dayClasses) {
                   final displayedClasses = dayClasses.where((c) {
                     return _showOnlyMyClasses ? c.userEnrolled : true;

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/ui/widgets/app_skeleton.dart';
 import '../../../membership/ui/widgets/membership_purchase_modal.dart';
 import '../../../membership/providers/membership_provider.dart';
 
@@ -10,10 +11,7 @@ class MembershipCard extends ConsumerWidget {
 
   void _showPurchaseModal(BuildContext context) {
     showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => const MembershipPurchaseModal(),
+      context: context, isScrollControlled: true, backgroundColor: Colors.transparent, builder: (context) => const MembershipPurchaseModal(),
     );
   }
 
@@ -26,39 +24,22 @@ class MembershipCard extends ConsumerWidget {
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(25),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.primary.withValues(alpha: 0.15),
-              blurRadius: 15,
-              spreadRadius: 1,
-              offset: const Offset(0, 4),
-            ),
-          ],
+          boxShadow: [BoxShadow(color: AppColors.primary.withValues(alpha: 0.15), blurRadius: 15, spreadRadius: 1, offset: const Offset(0, 4))],
         ),
         child: Container(
           width: double.infinity,
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [AppColors.surface, AppColors.surface.withValues(alpha: 0.8)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
+            gradient: LinearGradient(colors: [AppColors.surface, AppColors.surface.withValues(alpha: 0.8)], begin: Alignment.topLeft, end: Alignment.bottomRight),
             borderRadius: BorderRadius.circular(25),
             border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
           ),
           child: membershipAsync.when(
-            loading: () => const Center(
-              child: Padding(
-                padding: EdgeInsets.all(16.0),
-                child: CircularProgressIndicator(color: AppColors.primary),
-              ),
-            ),
-            error: (error, stack) => _buildEmptyState(),
+            // 🟢 ZMIANA NA SKELETON
+            loading: () => _buildSkeleton(),
+            error: (error, stack) => _buildSkeleton(),
             data: (membership) {
-              if (!membership.active || membership.daysRemaining == 0) {
-                return _buildEmptyState();
-              }
+              if (!membership.active || membership.daysRemaining == 0) return _buildEmptyState();
 
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -75,12 +56,7 @@ class MembershipCard extends ConsumerWidget {
                   const SizedBox(height: 15),
                   ClipRRect(
                     borderRadius: BorderRadius.circular(10),
-                    child: LinearProgressIndicator(
-                      value: membership.progressValue,
-                      minHeight: 8,
-                      backgroundColor: Colors.white.withValues(alpha: 0.1),
-                      valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
-                    ),
+                    child: LinearProgressIndicator(value: membership.progressValue, minHeight: 8, backgroundColor: Colors.white.withValues(alpha: 0.1), valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary)),
                   ),
                 ],
               ).animate().fadeIn(duration: 400.ms);
@@ -88,6 +64,19 @@ class MembershipCard extends ConsumerWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildSkeleton() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const AppSkeleton(width: 100, height: 16),
+        const SizedBox(height: 16),
+        const AppSkeleton(width: 180, height: 26),
+        const SizedBox(height: 20),
+        const AppSkeleton(width: double.infinity, height: 8),
+      ],
     );
   }
 
@@ -105,15 +94,7 @@ class MembershipCard extends ConsumerWidget {
         const SizedBox(height: 8),
         const Text('Kup dostęp już dziś!', style: TextStyle(color: AppColors.textPrimary, fontSize: 22, fontWeight: FontWeight.bold)),
         const SizedBox(height: 15),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(10),
-          child: LinearProgressIndicator(
-            value: 0.0,
-            minHeight: 8,
-            backgroundColor: Colors.white.withValues(alpha: 0.1),
-            valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
-          ),
-        ),
+        ClipRRect(borderRadius: BorderRadius.circular(10), child: LinearProgressIndicator(value: 0.0, minHeight: 8, backgroundColor: Colors.white.withValues(alpha: 0.1), valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary))),
       ],
     ).animate().fadeIn();
   }

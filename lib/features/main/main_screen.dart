@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/ui/widgets/offline_access_modal.dart';
 import '../membership/ui/widgets/membership_guard.dart';
 import '../membership/ui/widgets/membership_purchase_modal.dart';
 import '../membership/providers/membership_provider.dart';
@@ -41,6 +42,24 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     super.dispose();
   }
 
+  // 🟢 DRY: Wyniesiona logika list ekranów, co odchudza metodę build
+  List<Widget> _getScreens(bool isTrainer) {
+    if (isTrainer) {
+      return const [
+        TrainerDashboardPage(),
+        CalendarPage(),
+        TrainerPersonalTrainingsPage(),
+        ProfilePage(),
+      ];
+    }
+    return const [
+      DashboardPage(),
+      MembershipGuard(child: CalendarPage()),
+      MembershipGuard(child: PersonalTrainingsPage()),
+      ProfilePage(),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     ref.listen<int>(mainNavigationProvider, (previous, next) {
@@ -56,6 +75,12 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     final currentIndex = ref.watch(mainNavigationProvider);
     final userAsync = ref.watch(currentUserProvider);
 
+    // Odzyskiwanie kontrolera po wyjściu ze stanu ładowania
+    if (!_pageController.hasClients && _pageController.initialPage != currentIndex) {
+      _pageController.dispose();
+      _pageController = PageController(initialPage: currentIndex);
+    }
+
     if (userAsync.isLoading && !userAsync.hasValue) {
       return const Scaffold(
         backgroundColor: AppColors.background,
@@ -64,21 +89,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     }
 
     final isTrainer = userAsync.valueOrNull?.isTrainer ?? false;
-
-    final List<Widget> screens = isTrainer
-        ? const [
-      TrainerDashboardPage(),
-      CalendarPage(),
-      TrainerPersonalTrainingsPage(),
-      ProfilePage(),
-    ]
-        : [
-      const DashboardPage(),
-      const MembershipGuard(child: CalendarPage()),
-      const MembershipGuard(child: PersonalTrainingsPage()),
-      const ProfilePage(),
-    ];
-
+    final screens = _getScreens(isTrainer);
     final safeIndex = currentIndex >= screens.length ? 0 : currentIndex;
 
     return Scaffold(
@@ -88,6 +99,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         physics: const NeverScrollableScrollPhysics(),
         children: screens,
       ),
+      // 🟢 Interfejs pozostawiony dokładnie tak, jak go zaprojektowałeś
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: _buildFAB(context, isTrainer),
       bottomNavigationBar: _buildBottomNav(safeIndex, isTrainer),
@@ -107,7 +119,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
           children: [
             _buildNavItem(Icons.home_filled, 0, currentIndex),
             _buildNavItem(isTrainer ? Icons.calendar_month_outlined : Icons.calendar_today, 1, currentIndex),
-            const SizedBox(width: 40),
+            const SizedBox(width: 40), // Miejsce na wycięcie FAB
             _buildNavItem(isTrainer ? Icons.people_alt_outlined : Icons.fitness_center_rounded, 2, currentIndex),
             _buildNavItem(Icons.person_outline, 3, currentIndex),
           ],
@@ -173,13 +185,20 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       return;
     }
 
-    final membership = ref.read(currentMembershipProvider).valueOrNull;
+    final membershipAsync = ref.read(currentMembershipProvider);
+    final membership = membershipAsync.valueOrNull;
     final hasActiveMembership = membership != null && membership.active && membership.daysRemaining > 0;
 
     if (hasActiveMembership) {
       _showQRModal(context);
+    } else if (membershipAsync.hasError || membershipAsync.isLoading) {
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (context) => const OfflineAccessModal(),
+      );
     } else {
-
       showModalBottomSheet(
         context: context,
         isScrollControlled: true,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:mobile_gym_app/core/ui/widgets/no_connection_view.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../user/providers/user_provider.dart';
 import '../../providers/membership_provider.dart';
@@ -25,52 +26,15 @@ class MembershipGuard extends ConsumerWidget {
         backgroundColor: AppColors.background,
         body: Center(child: CircularProgressIndicator(color: AppColors.primary)),
       ),
-      error: (err, stack) => _buildErrorScreen(context, ref),
+      error: (err, stack) => NoConnectionView(
+        onRetry: () => ref.invalidate(currentUserProvider),
+      ),
       data: (membership) {
         if (membership.active && membership.daysRemaining > 0) {
           return child;
         }
         return _buildLockedScreen(context);
       },
-    );
-  }
-
-  Widget _buildErrorScreen(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.wifi_off_rounded, size: 64, color: AppColors.textSecondary),
-              const SizedBox(height: 24),
-              const Text(
-                'Problem z połączeniem',
-                style: TextStyle(color: AppColors.textPrimary, fontSize: 22, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 12),
-              const Text(
-                'Nie udało się zweryfikować statusu karnetu. Sprawdź połączenie z internetem.',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 16),
-              ),
-              const SizedBox(height: 32),
-              OutlinedButton.icon(
-                onPressed: () => ref.invalidate(currentMembershipProvider),
-                icon: const Icon(Icons.refresh, color: AppColors.primary),
-                label: const Text('Spróbuj ponownie', style: TextStyle(color: AppColors.primary)),
-                style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: AppColors.primary),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                ),
-              )
-            ],
-          ),
-        ),
-      ),
     );
   }
 

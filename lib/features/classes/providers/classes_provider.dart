@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/dio_client.dart';
 import '../data/models/gym_class.dart';
 import '../data/repositories/class_repository.dart';
+import '../../user/data/models/user.dart';
 
 final classesRepositoryProvider = Provider<IClassesRepository>((ref) {
   return ApiClassesRepository(ref.watch(dioProvider));
@@ -22,6 +23,16 @@ final todayClassesProvider = FutureProvider<List<GymClass>>((ref) async {
   final today = DateTime(now.year, now.month, now.day);
   final classes = await ref.watch(classesForDateProvider(today).future);
   return classes.where((c) => c.isFuture).toList();
+});
+
+final trainerClassesProvider = FutureProvider.family<List<GymClass>, DateTime>((ref, date) async {
+  final repo = ref.watch(classesRepositoryProvider);
+  return await repo.getTrainerClasses(date);
+});
+
+final classParticipantsProvider = FutureProvider.family<List<User>, int>((ref, classId) async {
+  final repo = ref.watch(classesRepositoryProvider);
+  return await repo.getClassParticipants(classId);
 });
 
 class BookingNotifier extends StateNotifier<bool> {
