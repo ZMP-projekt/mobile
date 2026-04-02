@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/ui/widgets/app_skeleton.dart';
+import '../../../../core/ui/widgets/async_value_widget.dart';
 import '../../../membership/ui/widgets/membership_purchase_modal.dart';
 import '../../../membership/providers/membership_provider.dart';
 
@@ -34,10 +35,18 @@ class MembershipCard extends ConsumerWidget {
             borderRadius: BorderRadius.circular(25),
             border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
           ),
-          child: membershipAsync.when(
-            // 🟢 ZMIANA NA SKELETON
-            loading: () => _buildSkeleton(),
-            error: (error, stack) => _buildSkeleton(),
+          child: AsyncValueWidget(
+            value: membershipAsync,
+            loading: () => Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: const [
+                AppSkeleton(width: 100, height: 16),
+                SizedBox(height: 16),
+                AppSkeleton(width: 180, height: 26),
+                SizedBox(height: 20),
+                AppSkeleton(width: double.infinity, height: 8),
+              ],
+            ),
             data: (membership) {
               if (!membership.active || membership.daysRemaining == 0) return _buildEmptyState();
 
@@ -64,19 +73,6 @@ class MembershipCard extends ConsumerWidget {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildSkeleton() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const AppSkeleton(width: 100, height: 16),
-        const SizedBox(height: 16),
-        const AppSkeleton(width: 180, height: 26),
-        const SizedBox(height: 20),
-        const AppSkeleton(width: double.infinity, height: 8),
-      ],
     );
   }
 

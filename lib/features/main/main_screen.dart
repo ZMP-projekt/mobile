@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/ui/widgets/async_value_widget.dart';
+import '../../core/ui/widgets/no_connection_view.dart';
 import '../../core/ui/widgets/offline_access_modal.dart';
 import '../membership/ui/widgets/membership_guard.dart';
 import '../membership/ui/widgets/membership_purchase_modal.dart';
@@ -42,7 +44,6 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     super.dispose();
   }
 
-  // 🟢 DRY: Wyniesiona logika list ekranów, co odchudza metodę build
   List<Widget> _getScreens(bool isTrainer) {
     if (isTrainer) {
       return const [
@@ -75,34 +76,38 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     final currentIndex = ref.watch(mainNavigationProvider);
     final userAsync = ref.watch(currentUserProvider);
 
-    // Odzyskiwanie kontrolera po wyjściu ze stanu ładowania
     if (!_pageController.hasClients && _pageController.initialPage != currentIndex) {
       _pageController.dispose();
       _pageController = PageController(initialPage: currentIndex);
     }
 
-    if (userAsync.isLoading && !userAsync.hasValue) {
-      return const Scaffold(
-        backgroundColor: AppColors.background,
-        body: Center(child: CircularProgressIndicator(color: AppColors.primary)),
-      );
-    }
+    return AsyncValueWidget(
+      value: userAsync,
+      data: (user) {
+        if (user == null) {
+          return const Scaffold(backgroundColor: AppColors.background);
+        }
 
-    final isTrainer = userAsync.valueOrNull?.isTrainer ?? false;
-    final screens = _getScreens(isTrainer);
-    final safeIndex = currentIndex >= screens.length ? 0 : currentIndex;
+        final isTrainer = user.isTrainer;
+        final screens = _getScreens(isTrainer);
+        final safeIndex = currentIndex >= screens.length ? 0 : currentIndex;
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: PageView(
-        controller: _pageController,
-        physics: const NeverScrollableScrollPhysics(),
-        children: screens,
+        return Scaffold(
+          backgroundColor: AppColors.background,
+          body: PageView(
+            controller: _pageController,
+            physics: const NeverScrollableScrollPhysics(),
+            children: screens,
+          ),
+          floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+          floatingActionButton: _buildFAB(context, isTrainer),
+          bottomNavigationBar: _buildBottomNav(safeIndex, isTrainer),
+        );
+      },
+      error: (err, stack) => NoConnectionView(
+        onRetry: () => ref.invalidate(currentUserProvider),
+        message: 'Nie udało się zweryfikować uprawnień konta. Sprawdź sieć.',
       ),
-      // 🟢 Interfejs pozostawiony dokładnie tak, jak go zaprojektowałeś
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: _buildFAB(context, isTrainer),
-      bottomNavigationBar: _buildBottomNav(safeIndex, isTrainer),
     );
   }
 

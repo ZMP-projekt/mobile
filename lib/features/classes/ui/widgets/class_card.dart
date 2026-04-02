@@ -15,7 +15,7 @@ class ClassCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isProcessing = ref.watch(bookingNotifierProvider);
+    final isProcessing = ref.watch(bookingNotifierProvider).isLoading;
     final imageUrl = gymClass.displayImageUrl;
 
     return GestureDetector(

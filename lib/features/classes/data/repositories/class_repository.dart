@@ -19,6 +19,19 @@ class ApiClassesRepository implements IClassesRepository {
 
   ApiClassesRepository(this._dio);
 
+  String _extractErrorMessage(Response? response, String defaultMessage) {
+    if (response != null && response.data != null) {
+      final data = response.data;
+      if (data is Map<String, dynamic>) {
+        return data['message'] ?? data['error'] ?? defaultMessage;
+      }
+      else if (data is String && data.isNotEmpty) {
+        return data;
+      }
+    }
+    return defaultMessage;
+  }
+
   @override
   Future<List<GymClass>> getClassesByDate(DateTime date) async {
     try {
@@ -27,7 +40,7 @@ class ApiClassesRepository implements IClassesRepository {
       final List<dynamic> data = response.data;
       return data.map((json) => GymClass.fromJson(json)).toList();
     } on DioException catch (e) {
-      throw Exception(e.response?.data['message'] ?? 'Nie udało się pobrać grafiku zajęć.');
+      throw Exception(_extractErrorMessage(e.response, 'Nie udało się pobrać grafiku zajęć.'));
     }
   }
 
@@ -40,7 +53,7 @@ class ApiClassesRepository implements IClassesRepository {
       final List<dynamic> data = response.data;
       return data.map((json) => GymClass.fromJson(json)).toList();
     } on DioException catch (e) {
-      throw Exception(e.response?.data['message'] ?? 'Nie udało się pobrać Twojego grafiku.');
+      throw Exception(_extractErrorMessage(e.response, 'Nie udało się pobrać Twojego grafiku.'));
     }
   }
 
@@ -52,7 +65,7 @@ class ApiClassesRepository implements IClassesRepository {
       final List<dynamic> data = response.data;
       return data.map((json) => User.fromJson(json)).toList();
     } on DioException catch (e) {
-      throw Exception(e.response?.data['message'] ?? 'Nie udało się pobrać listy uczestników.');
+      throw Exception(_extractErrorMessage(e.response, 'Nie udało się pobrać listy uczestników.'));
     }
   }
 
@@ -61,7 +74,7 @@ class ApiClassesRepository implements IClassesRepository {
     try {
       await _dio.post('/api/classes/$classId/book');
     } on DioException catch (e) {
-      throw Exception(e.response?.data['message'] ?? 'Nie udało się zarezerwować zajęć.');
+      throw Exception(_extractErrorMessage(e.response, 'Nie udało się zarezerwować zajęć.'));
     }
   }
 
@@ -70,7 +83,7 @@ class ApiClassesRepository implements IClassesRepository {
     try {
       await _dio.delete('/api/classes/$classId/cancel');
     } on DioException catch (e) {
-      throw Exception(e.response?.data['message'] ?? 'Nie udało się anulować rezerwacji.');
+      throw Exception(_extractErrorMessage(e.response, 'Nie udało się anulować rezerwacji.'));
     }
   }
 
@@ -79,7 +92,7 @@ class ApiClassesRepository implements IClassesRepository {
     try {
       await _dio.post('/api/classes', data: classData);
     } on DioException catch (e) {
-      throw Exception(e.response?.data['message'] ?? 'Błąd tworzenia zajęć.');
+      throw Exception(_extractErrorMessage(e.response, 'Błąd tworzenia zajęć.'));
     }
   }
 
@@ -91,7 +104,7 @@ class ApiClassesRepository implements IClassesRepository {
         'endTime': newEnd.toIso8601String(),
       });
     } on DioException catch (e) {
-      throw Exception(e.response?.data['message'] ?? 'Błąd przekładania zajęć.');
+      throw Exception(_extractErrorMessage(e.response, 'Błąd przekładania zajęć.'));
     }
   }
 
@@ -100,7 +113,7 @@ class ApiClassesRepository implements IClassesRepository {
     try {
       await _dio.delete('/api/classes/$classId');
     } on DioException catch (e) {
-      throw Exception(e.response?.data['message'] ?? 'Błąd usuwania zajęć.');
+      throw Exception(_extractErrorMessage(e.response, 'Błąd usuwania zajęć.'));
     }
   }
 }

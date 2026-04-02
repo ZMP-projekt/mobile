@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/ui/widgets/app_skeleton.dart';
 import '../../../classes/providers/classes_provider.dart';
 import '../../../classes/utils/gym_class_extension.dart';
 
@@ -15,9 +16,11 @@ class TodayClassesCarousel extends ConsumerWidget {
     final todayClassesAsync = ref.watch(todayClassesProvider);
 
     return todayClassesAsync.when(
-      // 🟢 OBA STANY WSKAZUJĄ NA SKELETON
       loading: () => _buildSkeleton(),
-      error: (err, stack) => _buildSkeleton(),
+      error: (err, stack) => const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+        child: Text('Nie udało się pobrać dzisiejszych zajęć. Spróbuj odświeżyć stronę.', style: TextStyle(color: AppColors.error, fontSize: 14)),
+      ),
       data: (classes) {
         if (classes.isEmpty) {
           return const Padding(
@@ -90,25 +93,16 @@ class TodayClassesCarousel extends ConsumerWidget {
     );
   }
 
-  // 🟢 EFEKT SZKIELETU
   Widget _buildSkeleton() {
     return SizedBox(
       height: 180,
       child: ListView.separated(
         padding: const EdgeInsets.symmetric(horizontal: 20),
         scrollDirection: Axis.horizontal,
-        itemCount: 3, // pokazujemy 3 atrapy kart
+        itemCount: 3,
         separatorBuilder: (context, index) => const SizedBox(width: 15),
-        itemBuilder: (context, index) {
-          return Container(
-            width: 260,
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(24),
-            ),
-          );
-        },
+        itemBuilder: (context, index) => const AppSkeleton(width: 260, height: 180, borderRadius: 24),
       ),
-    ).animate(onPlay: (controller) => controller.repeat()).shimmer(duration: 1200.ms, color: Colors.white24);
+    );
   }
 }

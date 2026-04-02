@@ -21,21 +21,31 @@ class MembershipGuard extends ConsumerWidget {
 
     final membershipAsync = ref.watch(currentMembershipProvider);
 
-    return membershipAsync.when(
-      loading: () => const Scaffold(
+    if (membershipAsync.hasValue) {
+      final membership = membershipAsync.value!;
+      if (membership.active && membership.daysRemaining > 0) {
+        return child;
+      }
+      return _buildLockedScreen(context);
+    }
+
+    if (membershipAsync.isLoading) {
+      return const Scaffold(
         backgroundColor: AppColors.background,
         body: Center(child: CircularProgressIndicator(color: AppColors.primary)),
-      ),
-      error: (err, stack) => NoConnectionView(
-        onRetry: () => ref.invalidate(currentUserProvider),
-      ),
-      data: (membership) {
-        if (membership.active && membership.daysRemaining > 0) {
-          return child;
-        }
-        return _buildLockedScreen(context);
-      },
-    );
+      );
+    }
+
+    if (membershipAsync.hasError) {
+      return NoConnectionView(
+        onRetry: () {
+          ref.invalidate(currentUserProvider);
+          ref.invalidate(currentMembershipProvider);
+        },
+      );
+    }
+
+    return _buildLockedScreen(context);
   }
 
   Widget _buildLockedScreen(BuildContext context) {

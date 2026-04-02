@@ -17,12 +17,33 @@ final dioProvider = Provider<Dio>((ref) {
     receiveTimeout: const Duration(seconds: 10),
   ));
 
+  dio.interceptors.add(LogInterceptor(
+    requestHeader: true,
+    requestBody: true,
+    responseBody: true,
+    error: true,
+  ));
+
   dio.interceptors.add(InterceptorsWrapper(
-      onRequest: (options, handler) {
-        final token = ref.read(authTokenProvider);
+      onRequest: (options, handler) async {
+        var token = ref.read(authTokenProvider);
+
+        if (token == null) {
+          final storage = ref.read(secureStorageProvider);
+          token = await storage.read(key: 'auth_token');
+
+          if (token != null) {
+            ref.read(authTokenProvider.notifier).state = token;
+          }
+        }
+
         if (token != null) {
           options.headers['Authorization'] = 'Bearer $token';
+          AppLogger.d("Dodano token do nagłówka: ${options.path}");
+        } else {
+          AppLogger.w("Brak tokena dla żądania: ${options.path}");
         }
+
         return handler.next(options);
       },
       onError: (DioException e, handler) {
@@ -30,8 +51,9 @@ final dioProvider = Provider<Dio>((ref) {
             e.requestOptions.path.contains('/auth/register');
 
         if (e.response?.statusCode == 401 && !isAuthEndpoint) {
-          AppLogger.w("Token wygasł.");
+          AppLogger.w("Token wygasł lub jest nieprawidłowy.");
           ref.read(authTokenProvider.notifier).state = null;
+          ref.read(secureStorageProvider).delete(key: 'auth_token');
         }
 
         return handler.next(e);

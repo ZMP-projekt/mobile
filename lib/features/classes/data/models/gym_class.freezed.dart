@@ -254,8 +254,8 @@ class _$GymClassImpl extends _GymClass {
     required this.startTime,
     required this.endTime,
     required this.trainer,
-    required this.maxParticipants,
-    required this.currentParticipants,
+    this.maxParticipants = 0,
+    this.currentParticipants = 0,
     this.userEnrolled = false,
     this.description,
     this.imageUrl,
@@ -275,8 +275,10 @@ class _$GymClassImpl extends _GymClass {
   @override
   final Trainer trainer;
   @override
+  @JsonKey()
   final int maxParticipants;
   @override
+  @JsonKey()
   final int currentParticipants;
   @override
   @JsonKey()
@@ -346,8 +348,8 @@ abstract class _GymClass extends GymClass {
     required final DateTime startTime,
     required final DateTime endTime,
     required final Trainer trainer,
-    required final int maxParticipants,
-    required final int currentParticipants,
+    final int maxParticipants,
+    final int currentParticipants,
     final bool userEnrolled,
     final String? description,
     final String? imageUrl,
