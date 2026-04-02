@@ -109,14 +109,17 @@ class _QrEntryModalContentState extends ConsumerState<QrEntryModalContent> {
         data: (code) => QrImageView(
           data: code,
           size: 200,
-          foregroundColor: Colors.black,
+          eyeStyle: const QrEyeStyle(
+            eyeShape: QrEyeShape.square,
+            color: Colors.black,
+          ),
           version: QrVersions.auto,
         ),
         loading: () => const SizedBox(
           width: 200, height: 200,
           child: Center(child: CircularProgressIndicator(color: AppColors.primary)),
         ),
-        error: (_, __) => const SizedBox(
+        error: (_, _) => const SizedBox(
           width: 200, height: 200,
           child: Center(child: Icon(Icons.error_outline, color: AppColors.error, size: 50)),
         ),
