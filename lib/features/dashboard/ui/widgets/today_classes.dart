@@ -1,8 +1,10 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/ui/widgets/app_skeleton.dart';
 import '../../../classes/providers/classes_provider.dart';
 import '../../../classes/utils/gym_class_extension.dart';
 
@@ -14,22 +16,16 @@ class TodayClassesCarousel extends ConsumerWidget {
     final todayClassesAsync = ref.watch(todayClassesProvider);
 
     return todayClassesAsync.when(
-      loading: () => const SizedBox(
-          height: 180,
-          child: Center(child: CircularProgressIndicator(color: AppColors.primary))
-      ),
-      error: (err, stack) => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Text('Błąd ładowania: $err', style: const TextStyle(color: AppColors.error)),
+      loading: () => _buildSkeleton(),
+      error: (err, stack) => const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+        child: Text('Nie udało się pobrać dzisiejszych zajęć. Spróbuj odświeżyć stronę.', style: TextStyle(color: AppColors.error, fontSize: 14)),
       ),
       data: (classes) {
         if (classes.isEmpty) {
           return const Padding(
             padding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-            child: Text(
-                'Brak zajęć na resztę dnia. Czas na odpoczynek! 🧘',
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 16)
-            ),
+            child: Text('Brak zajęć na resztę dnia. Czas na odpoczynek! 🧘', style: TextStyle(color: AppColors.textSecondary, fontSize: 16)),
           );
         }
 
@@ -45,33 +41,19 @@ class TodayClassesCarousel extends ConsumerWidget {
               final imageUrl = gymClass.displayImageUrl;
 
               return GestureDetector(
-                onTap: () {
-                  context.push(
-                    '/class-details',
-                    extra: {'gymClass': gymClass, 'imageUrl': imageUrl},
-                  );
-                },
+                onTap: () => context.push('/class-details', extra: {'gymClass': gymClass, 'imageUrl': imageUrl}),
                 child: Container(
                   width: 260,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(24),
-                    image: DecorationImage(
-                      image: NetworkImage(imageUrl),
-                      fit: BoxFit.cover,
-                    ),
-                    boxShadow: [
-                      BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 15, offset: const Offset(0, 8)),
-                    ],
+                    image: DecorationImage(image: NetworkImage(imageUrl), fit: BoxFit.cover),
+                    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 15, offset: const Offset(0, 8))],
                   ),
                   child: Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(24),
-                      gradient: const LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [Colors.black12, Colors.black87],
-                      ),
+                      gradient: const LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Colors.black12, Colors.black87]),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -86,10 +68,7 @@ class TodayClassesCarousel extends ConsumerWidget {
                               child: Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                                 color: Colors.white.withValues(alpha: 0.2),
-                                child: Text(
-                                  gymClass.startTimeFormatted,
-                                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
-                                ),
+                                child: Text(gymClass.startTimeFormatted, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
                               ),
                             ),
                           ),
@@ -97,15 +76,9 @@ class TodayClassesCarousel extends ConsumerWidget {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              gymClass.name,
-                              style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: -0.5),
-                            ),
+                            Text(gymClass.name, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: -0.5)),
                             const SizedBox(height: 4),
-                            Text(
-                              gymClass.trainer.fullName,
-                              style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 13),
-                            ),
+                            Text(gymClass.trainer.fullName, style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 13)),
                           ],
                         ),
                       ],
@@ -115,8 +88,21 @@ class TodayClassesCarousel extends ConsumerWidget {
               );
             },
           ),
-        );
+        ).animate().fadeIn(duration: 400.ms);
       },
+    );
+  }
+
+  Widget _buildSkeleton() {
+    return SizedBox(
+      height: 180,
+      child: ListView.separated(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        scrollDirection: Axis.horizontal,
+        itemCount: 3,
+        separatorBuilder: (context, index) => const SizedBox(width: 15),
+        itemBuilder: (context, index) => const AppSkeleton(width: 260, height: 180, borderRadius: 24),
+      ),
     );
   }
 }

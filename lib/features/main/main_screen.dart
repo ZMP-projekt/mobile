@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/ui/widgets/async_value_widget.dart';
+import '../../core/ui/widgets/no_connection_view.dart';
+import '../../core/ui/widgets/offline_access_modal.dart';
 import '../membership/ui/widgets/membership_guard.dart';
 import '../membership/ui/widgets/membership_purchase_modal.dart';
 import '../membership/providers/membership_provider.dart';
@@ -41,6 +44,23 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     super.dispose();
   }
 
+  List<Widget> _getScreens(bool isTrainer) {
+    if (isTrainer) {
+      return const [
+        TrainerDashboardPage(),
+        CalendarPage(),
+        TrainerPersonalTrainingsPage(),
+        ProfilePage(),
+      ];
+    }
+    return const [
+      DashboardPage(),
+      MembershipGuard(child: CalendarPage()),
+      MembershipGuard(child: PersonalTrainingsPage()),
+      ProfilePage(),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     ref.listen<int>(mainNavigationProvider, (previous, next) {
@@ -56,41 +76,38 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     final currentIndex = ref.watch(mainNavigationProvider);
     final userAsync = ref.watch(currentUserProvider);
 
-    if (userAsync.isLoading && !userAsync.hasValue) {
-      return const Scaffold(
-        backgroundColor: AppColors.background,
-        body: Center(child: CircularProgressIndicator(color: AppColors.primary)),
-      );
+    if (!_pageController.hasClients && _pageController.initialPage != currentIndex) {
+      _pageController.dispose();
+      _pageController = PageController(initialPage: currentIndex);
     }
 
-    final isTrainer = userAsync.valueOrNull?.isTrainer ?? false;
+    return AsyncValueWidget(
+      value: userAsync,
+      data: (user) {
+        if (user == null) {
+          return const Scaffold(backgroundColor: AppColors.background);
+        }
 
-    final List<Widget> screens = isTrainer
-        ? const [
-      TrainerDashboardPage(),
-      CalendarPage(),
-      TrainerPersonalTrainingsPage(),
-      ProfilePage(),
-    ]
-        : [
-      const DashboardPage(),
-      const MembershipGuard(child: CalendarPage()),
-      const MembershipGuard(child: PersonalTrainingsPage()),
-      const ProfilePage(),
-    ];
+        final isTrainer = user.isTrainer;
+        final screens = _getScreens(isTrainer);
+        final safeIndex = currentIndex >= screens.length ? 0 : currentIndex;
 
-    final safeIndex = currentIndex >= screens.length ? 0 : currentIndex;
-
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: PageView(
-        controller: _pageController,
-        physics: const NeverScrollableScrollPhysics(),
-        children: screens,
+        return Scaffold(
+          backgroundColor: AppColors.background,
+          body: PageView(
+            controller: _pageController,
+            physics: const NeverScrollableScrollPhysics(),
+            children: screens,
+          ),
+          floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+          floatingActionButton: _buildFAB(context, isTrainer),
+          bottomNavigationBar: _buildBottomNav(safeIndex, isTrainer),
+        );
+      },
+      error: (err, stack) => NoConnectionView(
+        onRetry: () => ref.invalidate(currentUserProvider),
+        message: 'Nie udało się zweryfikować uprawnień konta. Sprawdź sieć.',
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: _buildFAB(context, isTrainer),
-      bottomNavigationBar: _buildBottomNav(safeIndex, isTrainer),
     );
   }
 
@@ -173,13 +190,20 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       return;
     }
 
-    final membership = ref.read(currentMembershipProvider).valueOrNull;
+    final membershipAsync = ref.read(currentMembershipProvider);
+    final membership = membershipAsync.valueOrNull;
     final hasActiveMembership = membership != null && membership.active && membership.daysRemaining > 0;
 
     if (hasActiveMembership) {
       _showQRModal(context);
+    } else if (membershipAsync.hasError || membershipAsync.isLoading) {
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (context) => const OfflineAccessModal(),
+      );
     } else {
-
       showModalBottomSheet(
         context: context,
         isScrollControlled: true,

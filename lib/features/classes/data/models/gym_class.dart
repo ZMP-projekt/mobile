@@ -14,8 +14,8 @@ class GymClass with _$GymClass {
     required DateTime startTime,
     required DateTime endTime,
     required Trainer trainer,
-    required int maxParticipants,
-    required int currentParticipants,
+    @Default(0) int maxParticipants,
+    @Default(0) int currentParticipants,
     @Default(false) bool userEnrolled,
     String? description,
     String? imageUrl,
@@ -23,7 +23,7 @@ class GymClass with _$GymClass {
 
   int get durationMinutes => endTime.difference(startTime).inMinutes;
   bool get isFull => currentParticipants >= maxParticipants;
-  int get spotsLeft => maxParticipants - currentParticipants;
+  int get spotsLeft => (maxParticipants - currentParticipants) > 0 ? (maxParticipants - currentParticipants) : 0;
   bool get isPast => DateTime.now().isAfter(endTime);
   bool get isOngoing => DateTime.now().isAfter(startTime) && DateTime.now().isBefore(endTime);
   bool get isFuture => DateTime.now().isBefore(startTime);
@@ -55,17 +55,17 @@ class GymClass with _$GymClass {
       _$GymClassFromJson(_preProcessJson(json));
 
   static Map<String, dynamic> _preProcessJson(Map<String, dynamic> json) {
-    if (json['trainer'] == null) {
-      final fullName = (json['trainerName'] as String?) ?? 'Nieznany Trener';
-      final nameParts = fullName.split(' ');
+    final map = Map<String, dynamic>.from(json);
 
-      final map = Map<String, dynamic>.from(json);
+    if (map['trainer'] == null) {
+      final fullName = (map['trainerName'] as String?) ?? 'Nieznany Trener';
+      final nameParts = fullName.trim().split(' ');
+
       map['trainer'] = {
-        'firstName': nameParts.first,
+        'firstName': nameParts.isNotEmpty ? nameParts.first : 'Nieznany',
         'lastName': nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '',
       };
-      return map;
     }
-    return json;
+    return map;
   }
 }
