@@ -20,7 +20,7 @@ import '../user/providers/user_provider.dart';
 
 import '../../core/theme/app_colors.dart';
 
-final mainNavigationProvider = StateProvider.autoDispose<int>((ref) => 0);
+final mainNavigationProvider = StateProvider<int>((ref) => 0);
 
 class MainScreen extends ConsumerStatefulWidget {
   const MainScreen({super.key});

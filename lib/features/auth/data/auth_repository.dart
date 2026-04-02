@@ -44,8 +44,8 @@ class AuthRepository {
         data: {
           'firstName': firstName,
           'lastName': lastName,
-          'email': email.trim(),
-          'password': password.trim(),
+          'email': email,
+          'password': password,
           'role': 'ROLE_USER',
         },
         options: Options(

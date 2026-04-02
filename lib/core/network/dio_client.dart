@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../config/env.dart';
@@ -17,12 +18,13 @@ final dioProvider = Provider<Dio>((ref) {
     receiveTimeout: const Duration(seconds: 10),
   ));
 
-  dio.interceptors.add(LogInterceptor(
-    requestHeader: true,
-    requestBody: true,
-    responseBody: true,
-    error: true,
-  ));
+  if (kDebugMode) {
+    dio.interceptors.add(LogInterceptor(
+      requestHeader: true,
+      requestBody: true,
+      responseBody: true,
+    ));
+  }
 
   dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
@@ -30,7 +32,7 @@ final dioProvider = Provider<Dio>((ref) {
 
         if (token == null) {
           final storage = ref.read(secureStorageProvider);
-          token = await storage.read(key: 'auth_token');
+          token = await storage.read(key: 'jwt_token');
 
           if (token != null) {
             ref.read(authTokenProvider.notifier).state = token;
@@ -53,7 +55,7 @@ final dioProvider = Provider<Dio>((ref) {
         if (e.response?.statusCode == 401 && !isAuthEndpoint) {
           AppLogger.w("Token wygasł lub jest nieprawidłowy.");
           ref.read(authTokenProvider.notifier).state = null;
-          ref.read(secureStorageProvider).delete(key: 'auth_token');
+          ref.read(secureStorageProvider).delete(key: 'jwt_token');
         }
 
         return handler.next(e);

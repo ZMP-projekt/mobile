@@ -12,12 +12,11 @@ final rootNavigatorKey = GlobalKey<NavigatorState>();
 
 final routerProvider = Provider<GoRouter>((ref) {
 
-  final isAuthenticated = ref.watch(authStateProvider.select((state) => state.isAuthenticated));
-
-  return GoRouter(
+  final router = GoRouter(
     navigatorKey: rootNavigatorKey,
     initialLocation: '/',
     redirect: (context, state) {
+      final isAuthenticated = ref.read(authStateProvider).isAuthenticated;
       final isLoggingIn = state.matchedLocation == '/login' || state.matchedLocation == '/register';
 
       if (!isAuthenticated) {
@@ -45,6 +44,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/class-details',
+        redirect: (context, state) {
+          if (state.extra == null) {
+            return '/';
+          }
+          return null;
+        },
         builder: (context, state) {
           final extra = state.extra as Map<String, dynamic>;
           return ClassDetailsPage(
@@ -55,4 +60,15 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
     ],
   );
+
+  ref.listen(
+    authStateProvider.select((state) => state.isAuthenticated),
+        (previous, next) {
+      if (previous != next) {
+        router.refresh();
+      }
+    },
+  );
+
+  return router;
 });

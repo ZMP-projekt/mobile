@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/dio_client.dart';
+import '../../classes/providers/classes_provider.dart';
+import '../../membership/providers/membership_provider.dart';
 import '../data/auth_repository.dart';
 import '../../../core/util/app_logger.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -103,6 +105,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<void> logout() async {
     await _storage.delete(key: 'jwt_token');
     ref.read(authTokenProvider.notifier).state = null;
+
+    ref.invalidate(currentUserProvider);
+    ref.invalidate(currentMembershipProvider);
+    ref.invalidate(classesForDateProvider);
+    ref.invalidate(todayClassesProvider);
+    ref.invalidate(trainerClassesProvider);
 
     state = state.copyWith(isAuthenticated: false);
     AppLogger.i("👋 Wylogowano");
