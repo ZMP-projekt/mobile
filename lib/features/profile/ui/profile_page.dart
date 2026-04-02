@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/ui/widgets/async_value_widget.dart';
 import '../../../core/ui/widgets/no_connection_view.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../user/providers/user_provider.dart';
@@ -16,13 +17,8 @@ class ProfilePage extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: userAsync.when(
-          loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
-
-          error: (err, stack) => NoConnectionView(
-            onRetry: () => ref.invalidate(currentUserProvider),
-          ),
-
+        child: AsyncValueWidget(
+          value: userAsync,
           data: (user) {
             if (user == null) {
               return const Center(child: Text('Brak danych', style: TextStyle(color: AppColors.textSecondary)));

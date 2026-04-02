@@ -94,14 +94,7 @@ class MembershipGuard extends ConsumerWidget {
                   boxShadow: AppColors.primaryGlow,
                 ),
                 child: ElevatedButton(
-                  onPressed: () {
-                    showModalBottomSheet(
-                      context: context,
-                      isScrollControlled: true,
-                      backgroundColor: Colors.transparent,
-                      builder: (context) => const MembershipPurchaseModal(),
-                    );
-                  },
+                  onPressed: () => MembershipPurchaseModal.show(context),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.transparent,
                     shadowColor: Colors.transparent,

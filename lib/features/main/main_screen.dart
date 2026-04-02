@@ -204,12 +204,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         builder: (context) => const OfflineAccessModal(),
       );
     } else {
-      showModalBottomSheet(
-        context: context,
-        isScrollControlled: true,
-        backgroundColor: Colors.transparent,
-        builder: (context) => const MembershipPurchaseModal(),
-      );
+      MembershipPurchaseModal.show(context);
     }
   }
 

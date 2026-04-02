@@ -7,6 +7,7 @@ import 'package:mobile_gym_app/features/trainer/ui/widgets/add_class_modal.dart'
 import '../../../core/theme/app_colors.dart';
 import '../../../core/ui/widgets/app_skeleton.dart';
 import '../../classes/utils/gym_class_extension.dart';
+import '../../membership/ui/widgets/membership_purchase_modal.dart';
 import '../../user/providers/user_provider.dart';
 import '../../classes/providers/classes_provider.dart';
 import '../../classes/data/models/gym_class.dart';
@@ -70,12 +71,7 @@ class TrainerDashboardPage extends ConsumerWidget {
                     title: 'Twoje zajęcia grupowe',
                     action: 'DODAJ',
                     onTap: () {
-                      showModalBottomSheet(
-                        context: context,
-                        isScrollControlled: true,
-                        backgroundColor: Colors.transparent,
-                        builder: (context) => const AddClassModal(),
-                      );
+                      MembershipPurchaseModal.show(context);
                     },
                   ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.1),
                 ),
