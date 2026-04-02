@@ -124,7 +124,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
           children: [
             _buildNavItem(Icons.home_filled, 0, currentIndex),
             _buildNavItem(isTrainer ? Icons.calendar_month_outlined : Icons.calendar_today, 1, currentIndex),
-            const SizedBox(width: 40), // Miejsce na wycięcie FAB
+            const SizedBox(width: 40),
             _buildNavItem(isTrainer ? Icons.people_alt_outlined : Icons.fitness_center_rounded, 2, currentIndex),
             _buildNavItem(Icons.person_outline, 3, currentIndex),
           ],

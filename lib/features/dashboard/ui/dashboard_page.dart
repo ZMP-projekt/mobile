@@ -16,7 +16,6 @@ class DashboardPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // 🟢 SPRAWDZENIE: Czy którykolwiek z kluczowych zasobów rzucił błędem sieciowym?
     final hasError = ref.watch(currentUserProvider).hasError ||
         ref.watch(todayClassesProvider).hasError ||
         ref.watch(currentMembershipProvider).hasError;
@@ -55,7 +54,6 @@ class DashboardPage extends ConsumerWidget {
                 children: [
                   const SizedBox(height: 10),
 
-                  // 🟢 BANER BŁĘDU: Wyświetlany tylko, gdy API nie odpowiada
                   if (hasError)
                     Container(
                       margin: const EdgeInsets.symmetric(horizontal: 20).copyWith(bottom: 20),

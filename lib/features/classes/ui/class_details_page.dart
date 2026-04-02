@@ -25,7 +25,6 @@ class ClassDetailsPage extends ConsumerWidget {
     final isTrainer = userAsync.valueOrNull?.isTrainer ?? false;
     final size = MediaQuery.of(context).size;
 
-    // Bezpieczne zamknięcie widoku po udanej akcji (np. udana rezerwacja lub odwołanie)
     ref.listen(bookingNotifierProvider, (previous, next) {
       if (previous != null && previous.isLoading && !next.isLoading && !next.hasError) {
         if (context.canPop()) {
@@ -71,7 +70,6 @@ class ClassDetailsPage extends ConsumerWidget {
             ),
           ),
 
-          // DOLNY PANEL WYNIESIONY DO OSOBNEGO WIDGETU (Separation of Concerns)
           ClassActionPanel(gymClass: gymClass, isTrainer: isTrainer),
         ],
       ),
