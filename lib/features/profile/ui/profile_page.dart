@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/ui/widgets/async_value_widget.dart';
-import '../../../core/ui/widgets/no_connection_view.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../user/providers/user_provider.dart';
 

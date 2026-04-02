@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/dio_client.dart';
 import '../../classes/providers/classes_provider.dart';
+import '../../main/main_screen.dart';
 import '../../membership/providers/membership_provider.dart';
 import '../data/auth_repository.dart';
 import '../../../core/util/app_logger.dart';
@@ -103,16 +104,24 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   Future<void> logout() async {
-    await _storage.delete(key: 'jwt_token');
-    ref.read(authTokenProvider.notifier).state = null;
-
-    ref.invalidate(currentUserProvider);
-    ref.invalidate(currentMembershipProvider);
-    ref.invalidate(classesForDateProvider);
-    ref.invalidate(todayClassesProvider);
-    ref.invalidate(trainerClassesProvider);
+    if (!state.isAuthenticated) return;
 
     state = state.copyWith(isAuthenticated: false);
+
+    await _storage.delete(key: 'jwt_token');
+
+    Future.microtask(() {
+      ref.read(authTokenProvider.notifier).state = null;
+
+      ref.invalidate(mainNavigationProvider);
+
+      ref.invalidate(currentUserProvider);
+      ref.invalidate(currentMembershipProvider);
+      ref.invalidate(classesForDateProvider);
+      ref.invalidate(todayClassesProvider);
+      ref.invalidate(trainerClassesProvider);
+    });
+
     AppLogger.i("👋 Wylogowano");
   }
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mobile_gym_app/features/main/ui/widgets/main_action_button.dart';
 
 import '../../core/ui/widgets/async_value_widget.dart';
 import '../../core/ui/widgets/no_connection_view.dart';
@@ -19,6 +19,7 @@ import '../trainer/ui/personal_trainings.dart';
 import '../user/providers/user_provider.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../user/ui/widgets/qr_entry_modal_content.dart';
 
 final mainNavigationProvider = StateProvider<int>((ref) => 0);
 
@@ -146,41 +147,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   }
 
   Widget _buildFAB(BuildContext context, bool isTrainer) {
-    return Container(
-      height: 72,
-      width: 72,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.4),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-        border: Border.all(color: AppColors.surface, width: 4),
-      ),
-      child: FloatingActionButton(
-        onPressed: () => _handleQRAction(context, isTrainer),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        shape: const CircleBorder(),
-        child: Ink(
-          decoration: const BoxDecoration(
-            shape: BoxShape.circle,
-            gradient: LinearGradient(
-              colors: [AppColors.primary, AppColors.secondary],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-          child: const Center(
-            child: Icon(Icons.qr_code_scanner, color: Colors.white, size: 32),
-          ),
-        ),
-      )
-          .animate(onPlay: (controller) => controller.repeat(reverse: true))
-          .shimmer(duration: 3.seconds, color: Colors.white.withValues(alpha: 0.3)),
+    return MainActionButton(
+      onPressed: () => _handleQRAction(context, isTrainer),
     );
   }
 
@@ -215,27 +183,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
       ),
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(30),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'Twój kod wejścia',
-              style: TextStyle(color: AppColors.textPrimary, fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 20),
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
-              child: const Icon(Icons.qr_code_2, size: 200, color: Colors.black),
-            ),
-            const SizedBox(height: 20),
-            Text('Zeskanuj kod przy bramce', style: TextStyle(color: AppColors.textSecondary.withValues(alpha: 0.8))),
-            const SizedBox(height: 20),
-          ],
-        ),
-      ),
+      builder: (context) => const QrEntryModalContent(),
     );
   }
 }
+
