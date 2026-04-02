@@ -10,6 +10,15 @@ final selectedPlanTypeProvider = StateProvider<String>((ref) => 'OPEN');
 class MembershipPurchaseModal extends ConsumerWidget {
   const MembershipPurchaseModal({super.key});
 
+  static Future<void> show(BuildContext context) {
+    return showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => const MembershipPurchaseModal(),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final selectedType = ref.watch(selectedPlanTypeProvider);

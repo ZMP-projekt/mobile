@@ -9,7 +9,7 @@ final membershipRepositoryProvider = Provider<MembershipRepository>((ref) {
   return MembershipRepository(dio);
 });
 
-final currentMembershipProvider = FutureProvider<Membership>((ref) async {
+final currentMembershipProvider = FutureProvider.autoDispose<Membership>((ref) async {
   final repo = ref.watch(membershipRepositoryProvider);
   return await repo.getMyMembership();
 });

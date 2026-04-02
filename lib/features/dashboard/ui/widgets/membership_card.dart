@@ -11,9 +11,7 @@ class MembershipCard extends ConsumerWidget {
   const MembershipCard({super.key});
 
   void _showPurchaseModal(BuildContext context) {
-    showModalBottomSheet(
-      context: context, isScrollControlled: true, backgroundColor: Colors.transparent, builder: (context) => const MembershipPurchaseModal(),
-    );
+    MembershipPurchaseModal.show(context);
   }
 
   @override
