@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
+import '../ui/widgets/participants_list.dart';
 import '../../../core/theme/app_colors.dart';
 import '../data/models/gym_class.dart';
 import '../providers/classes_provider.dart';
@@ -33,45 +34,43 @@ class ClassDetailsPage extends ConsumerWidget {
       }
     });
 
-    final participants = [
-      {'name': 'Anna Nowak', 'avatar': 'https://api.dicebear.com/9.x/thumbs/png?seed=Anna&backgroundColor=0a0a14'},
-      {'name': 'Michał K.', 'avatar': 'https://api.dicebear.com/9.x/thumbs/png?seed=Michal&backgroundColor=0a0a14'},
-      {'name': 'Kasia W.', 'avatar': 'https://api.dicebear.com/9.x/thumbs/png?seed=Kasia&backgroundColor=0a0a14'},
-      {'name': 'Janek P.', 'avatar': 'https://api.dicebear.com/9.x/thumbs/png?seed=Janek&backgroundColor=0a0a14'},
-    ];
-
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom + 140),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildHeaderImage(context, size),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildTitleSection(),
-                      const SizedBox(height: 15),
-                      _buildBadgesRow(),
-                      const SizedBox(height: 35),
-                      if (isTrainer)
-                        _buildParticipantsList(participants)
-                      else
-                        _buildInstructorAndDescription(),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
+      extendBody: true,
 
-          ClassActionPanel(gymClass: gymClass, isTrainer: isTrainer),
-        ],
+      bottomNavigationBar: ClassActionPanel(
+          gymClass: gymClass,
+          isTrainer: isTrainer
+      ),
+
+      body: SingleChildScrollView(
+
+        padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom + 100),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildHeaderImage(context, size),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildTitleSection(),
+                  const SizedBox(height: 15),
+                  _buildBadgesRow(),
+                  const SizedBox(height: 35),
+                  if (isTrainer)
+                    ParticipantsList(
+                      classId: gymClass.id,
+                      maxParticipants: gymClass.maxParticipants,
+                    )
+                  else
+                    _buildInstructorAndDescription(),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -190,41 +189,6 @@ class ClassDetailsPage extends ConsumerWidget {
             gymClass.description ?? 'Dołącz do nas i poczuj energię grupowego treningu. Idealne dla każdego poziomu zaawansowania.',
             style: TextStyle(color: AppColors.textSecondary.withValues(alpha: 0.8), fontSize: 16, height: 1.6)
         ).animate().fadeIn(delay: 450.ms),
-      ],
-    );
-  }
-
-  Widget _buildParticipantsList(List<Map<String, String>> participants) {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text('Zapisani uczestnicy', style: TextStyle(color: AppColors.textPrimary, fontSize: 22, fontWeight: FontWeight.bold, letterSpacing: -0.5)),
-            Text('${participants.length}/${gymClass.maxParticipants}', style: const TextStyle(color: AppColors.primary, fontSize: 16, fontWeight: FontWeight.bold)),
-          ],
-        ).animate().fadeIn(delay: 300.ms),
-        const SizedBox(height: 16),
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
-          ),
-          child: Column(
-            children: participants.map((p) => Padding(
-              padding: const EdgeInsets.only(bottom: 12.0),
-              child: Row(
-                children: [
-                  CircleAvatar(radius: 20, backgroundImage: NetworkImage(p['avatar']!), backgroundColor: AppColors.background),
-                  const SizedBox(width: 16),
-                  Text(p['name']!, style: const TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w600)),
-                ],
-              ),
-            )).toList(),
-          ),
-        ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.1, end: 0),
       ],
     );
   }

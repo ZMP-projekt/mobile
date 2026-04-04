@@ -25,7 +25,7 @@ class DashboardHeader extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.all(2),
                   decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: AppColors.primary.withValues(alpha: 0.5), width: 2)),
-                  child: CircleAvatar(radius: 22, backgroundColor: AppColors.surface, backgroundImage: NetworkImage(user.avatarUrl)),
+                  child: CircleAvatar(radius: 22, backgroundColor: AppColors.surface, backgroundImage: NetworkImage(user.displayAvatarUrl)),
                 ),
                 const SizedBox(width: 12),
                 Column(

@@ -38,7 +38,7 @@ class ProfilePage extends ConsumerWidget {
                     child: CircleAvatar(
                       radius: 50,
                       backgroundColor: AppColors.surface,
-                      backgroundImage: NetworkImage(user.avatarUrl),
+                      backgroundImage: NetworkImage(user.displayAvatarUrl),
                     ),
                   ).animate().scale(duration: 300.ms, curve: Curves.easeOutBack),
 

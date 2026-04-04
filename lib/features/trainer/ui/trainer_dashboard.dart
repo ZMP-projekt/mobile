@@ -1,224 +1,161 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import '../../../core/theme/app_colors.dart';
-import '../../../core/ui/widgets/app_skeleton.dart';
-import '../../classes/utils/gym_class_extension.dart';
-import '../../membership/ui/widgets/membership_purchase_modal.dart';
-import '../../user/providers/user_provider.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/ui/widgets/app_skeleton.dart';
+import '../../../../core/ui/widgets/empty_state_view.dart';
 import '../../classes/providers/classes_provider.dart';
-import '../../classes/data/models/gym_class.dart';
+import '../../classes/ui/widgets/compact_class_card.dart';
 import '../../dashboard/ui/widgets/dashboard_header.dart';
 import 'widgets/trainer_summary.dart';
+import 'widgets/add_class_modal.dart';
 
 class TrainerDashboardPage extends ConsumerWidget {
   const TrainerDashboardPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final userAsync = ref.watch(currentUserProvider);
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-
     final trainerClassesAsync = ref.watch(trainerClassesProvider(today));
-
-    final hasError = userAsync.hasError || trainerClassesAsync.hasError;
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: SafeArea(
-        bottom: false,
-        child: RefreshIndicator(
-          onRefresh: () async {
-            ref.invalidate(currentUserProvider);
-            ref.invalidate(trainerClassesProvider(today));
-            await ref.read(currentUserProvider.future);
-            await ref.read(trainerClassesProvider(today).future);
-          },
-          color: AppColors.primary,
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 10),
-
-                if (hasError) _buildErrorBanner(),
-
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                  child: const DashboardHeader()
-                      .animate()
-                      .fadeIn(duration: 300.ms)
-                      .slideY(begin: -0.2),
-                ),
-
-                const SizedBox(height: 25),
-
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20.0),
-                  child: TrainerSummaryCard(),
-                ),
-
-                const SizedBox(height: 30),
-
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                  child: _buildSectionHeader(
-                    title: 'Twoje zajęcia grupowe',
-                    action: 'DODAJ',
-                    onTap: () {
-                      MembershipPurchaseModal.show(context);
-                    },
-                  ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.1),
-                ),
-
-                _buildTrainerCarousel(trainerClassesAsync),
-
-                const SizedBox(height: 30),
-
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                  child: _buildSectionHeader(
-                    title: 'Treningi personalne',
-                    action: '',
-                    onTap: () {},
-                  ).animate().fadeIn(delay: 500.ms).slideY(begin: 0.1),
-                ),
-
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                  child: Column(
-                    children: [
-                      _buildPersonalTrainingCard('Michał Kowalski', 'Redukcja', '12:30', isActive: true),
-                      const SizedBox(height: 12),
-                      _buildPersonalTrainingCard('Anna Nowak', 'Budowa siły', '15:00'),
-                    ],
-                  ),
-                ).animate().fadeIn(delay: 600.ms),
-
-                const SizedBox(height: 120),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTrainerCarousel(AsyncValue<List<GymClass>> classesAsync) {
-    return classesAsync.when(
-      loading: () => const Padding(
-        padding: EdgeInsets.symmetric(horizontal: 20),
-        child: AppSkeleton(width: 260, height: 180, borderRadius: 24),
-      ),
-      error: (err, stack) => const Padding(
-        padding: EdgeInsets.symmetric(horizontal: 20),
-        child: Text('Błąd pobierania zajęć', style: TextStyle(color: AppColors.error)),
-      ),
-      data: (classes) {
-        if (classes.isEmpty) {
-          return const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            child: Text('Nie masz dziś zaplanowanych zajęć 🧘', style: TextStyle(color: AppColors.textSecondary, fontSize: 16)),
-          );
-        }
-
-        return SizedBox(
-          height: 180,
-          child: ListView.separated(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            scrollDirection: Axis.horizontal,
-            itemCount: classes.length,
-            separatorBuilder: (context, index) => const SizedBox(width: 15),
-            itemBuilder: (context, index) {
-              final gymClass = classes[index];
-              return _buildTrainerClassCard(context, gymClass);
-            },
-          ),
-        ).animate().fadeIn().slideX(begin: 0.1);
-      },
-    );
-  }
-
-  Widget _buildTrainerClassCard(BuildContext context, GymClass gymClass) {
-    return GestureDetector(
-        onTap: () {
-          context.push('/class-details', extra: {
-            'gymClass': gymClass,
-            'imageUrl': gymClass.displayImageUrl,
-          });
-        },
-        child: Container(
-          width: 260,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        image: DecorationImage(
-          image: NetworkImage(gymClass.displayImageUrl),
-          fit: BoxFit.cover,
-        ),
-      ),
-      child: Container(
-        padding: const EdgeInsets.all(16),
+      extendBody: true,
+      body: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(24),
-          gradient: const LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Colors.black12, Colors.black87],
+          gradient: RadialGradient(
+            center: Alignment.topRight,
+            radius: 1.8,
+            colors: [
+              AppColors.primary.withValues(alpha: 0.12),
+              AppColors.secondary.withValues(alpha: 0.08),
+              AppColors.background,
+            ],
+            stops: const [0.0, 0.5, 1.0],
           ),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Align(
-              alignment: Alignment.topRight,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                    color: Colors.white.withValues(alpha: 0.2),
-                    child: Text(gymClass.startTimeFormatted, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+        child: SafeArea(
+          bottom: false,
+          child: RefreshIndicator(
+            onRefresh: () async {
+              ref.invalidate(trainerClassesProvider(today));
+              await ref.read(trainerClassesProvider(today).future);
+            },
+            color: AppColors.primary,
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 10),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 20.0),
+                    child: DashboardHeader(),
                   ),
-                ),
+                  const SizedBox(height: 25),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 20.0),
+                    child: TrainerSummaryCard(),
+                  ),
+                  const SizedBox(height: 30),
+
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                    child: _buildSectionHeader(
+                      title: 'Twoje zajęcia grupowe',
+                      action: 'DODAJ',
+                      onTap: () => showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        builder: (context) => const AddClassModal(),
+                      ),
+                    ),
+                  ),
+
+                  trainerClassesAsync.when(
+                    loading: () => const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      child: AppSkeleton(width: 260, height: 180, borderRadius: 24),
+                    ),
+                    error: (err, stack) => const Padding(
+                      padding: EdgeInsets.all(20),
+                      child: Text('Błąd pobierania zajęć', style: TextStyle(color: AppColors.error)),
+                    ),
+                    data: (classes) {
+                      final groupClasses = classes.where((c) => c.maxParticipants > 1 && c.isFuture).toList();
+
+                      if (groupClasses.isEmpty) {
+                        return const EmptyStateView(
+                          icon: Icons.event_available_rounded,
+                          title: 'Wszystko gotowe',
+                          subtitle: 'Nie masz już dziś zaplanowanych zajęć grupowych.',
+                        );
+                      }
+
+                      return SizedBox(
+                        height: 180,
+                        child: ListView.separated(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          scrollDirection: Axis.horizontal,
+                          itemCount: groupClasses.length,
+                          separatorBuilder: (context, index) => const SizedBox(width: 15),
+                          itemBuilder: (context, index) => CompactClassCard(
+                              gymClass: groupClasses[index],
+                              isTrainer: true
+                          ),
+                        ),
+                      ).animate().fadeIn().slideX(begin: 0.1);
+                    },
+                  ),
+
+                  const SizedBox(height: 30),
+
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                    child: _buildSectionHeader(title: 'Treningi personalne', action: '', onTap: () {}),
+                  ),
+
+                  trainerClassesAsync.when(
+                    loading: () => const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      child: AppSkeleton(width: double.infinity, height: 80, borderRadius: 20),
+                    ),
+                    error: (_, _) => const SizedBox.shrink(),
+                    data: (classes) {
+                      final personalTrainings = classes.where((c) => c.maxParticipants == 1 && c.isFuture).toList();
+
+                      if (personalTrainings.isEmpty) {
+                        return const EmptyStateView(
+                          icon: Icons.person_search_rounded,
+                          title: 'Brak podopiecznych',
+                          subtitle: 'Nie masz zaplanowanych treningów personalnych na dziś.',
+                        );
+                      }
+
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                        child: Column(
+                          children: personalTrainings.map((pt) => Padding(
+                            padding: const EdgeInsets.only(bottom: 12.0),
+                            child: _buildPersonalTrainingCard(
+                              pt.name,
+                              pt.description ?? 'Trening personalny',
+                              pt.startTimeFormatted,
+                              isActive: pt.isOngoing,
+                            ),
+                          )).toList(),
+                        ),
+                      ).animate().fadeIn(delay: 400.ms);
+                    },
+                  ),
+                  const SizedBox(height: 120),
+                ],
               ),
             ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(gymClass.name, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 4),
-                Text('Uczestnicy: ${gymClass.currentParticipants}/${gymClass.maxParticipants}',
-                    style: const TextStyle(color: Colors.white70, fontSize: 13)),
-              ],
-            ),
-          ],
+          ),
         ),
-      ),
-        ),
-    );
-  }
-
-  Widget _buildErrorBanner() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20).copyWith(bottom: 20),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.error.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: const Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.wifi_off_rounded, color: AppColors.error, size: 18),
-          SizedBox(width: 8),
-          Text('Problemy z połączeniem', style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold)),
-        ],
       ),
     );
   }
@@ -230,10 +167,11 @@ class TrainerDashboardPage extends ConsumerWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(title, style: const TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.bold)),
-          TextButton(
-            onPressed: onTap,
-            child: Text(action, style: const TextStyle(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.bold)),
-          ),
+          if (action.isNotEmpty)
+            TextButton(
+              onPressed: onTap,
+              child: Text(action, style: const TextStyle(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.bold)),
+            ),
         ],
       ),
     );
@@ -246,7 +184,7 @@ class TrainerDashboardPage extends ConsumerWidget {
       decoration: BoxDecoration(
         color: isActive ? AppColors.surface : AppColors.surface.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: isActive ? AppColors.primary.withValues(alpha: 0.3) : Colors.white.withValues(alpha: 0.05), width: 1),
+        border: Border.all(color: isActive ? AppColors.primary.withValues(alpha: 0.3) : Colors.white10),
       ),
       child: Row(
         children: [
@@ -261,7 +199,7 @@ class TrainerDashboardPage extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(clientName, style: const TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.bold)),
-                Text('Cel: $goal', style: const TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+                Text(goal, style: const TextStyle(color: AppColors.textSecondary, fontSize: 13)),
               ],
             ),
           ),

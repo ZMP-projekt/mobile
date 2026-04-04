@@ -18,16 +18,20 @@ class ClassActionPanel extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isProcessing = ref.watch(bookingNotifierProvider).isLoading;
 
-    return Positioned(
-      bottom: 0, left: 0, right: 0,
+    return SafeArea(
       child: ClipRRect(
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
           child: Container(
-            padding: EdgeInsets.fromLTRB(24, 20, 24, MediaQuery.of(context).padding.bottom + 20),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
             decoration: BoxDecoration(
-              color: AppColors.background.withValues(alpha: 0.75),
-              border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.05), width: 1)),
+              color: AppColors.background.withValues(alpha: 0.85),
+              border: Border(
+                top: BorderSide(
+                    color: Colors.white.withValues(alpha: 0.08),
+                    width: 1.5
+                ),
+              ),
             ),
             child: isTrainer
                 ? _buildTrainerActionButtons(context, ref, isProcessing)
@@ -82,22 +86,51 @@ class ClassActionPanel extends ConsumerWidget {
   }
 
   Widget _buildTrainerActionButtons(BuildContext context, WidgetRef ref, bool isProcessing) {
+    final bool isStarted = !gymClass.isFuture;
+
     return Row(
       children: [
         Expanded(
           child: OutlinedButton(
-            onPressed: isProcessing ? null : () => _showRescheduleModal(context),
-            style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16), side: BorderSide(color: Colors.white.withValues(alpha: 0.3)), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20))),
-            child: const Text('Przełóż', style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.bold)),
+            onPressed: (isProcessing || isStarted) ? null : () => _showRescheduleModal(context),
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              side: BorderSide(color: isStarted ? Colors.white10 : Colors.white.withValues(alpha: 0.3)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            ),
+            child: Text(
+              'Przełóż',
+              style: TextStyle(
+                  color: isStarted ? AppColors.textSecondary : AppColors.textPrimary,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold
+              ),
+            ),
           ),
         ),
         const SizedBox(width: 16),
         Expanded(
           flex: 2,
           child: ElevatedButton(
-            onPressed: isProcessing ? null : () => _showCancelClassDialog(context, ref),
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.error, padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20))),
-            child: isProcessing ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) : const Text('Odwołaj zajęcia', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+            onPressed: (isProcessing || isStarted) ? null : () => _showCancelClassDialog(context, ref),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: isStarted ? AppColors.surface : AppColors.error,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              elevation: isStarted ? 0 : 2,
+            ),
+            child: isProcessing
+                ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                : Text(
+              isStarted
+                  ? (gymClass.isPast ? 'Zakończone' : 'Zajęcia w toku')
+                  : 'Odwołaj zajęcia',
+              style: TextStyle(
+                  color: isStarted ? AppColors.textSecondary : Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold
+              ),
+            ),
           ),
         ),
       ],

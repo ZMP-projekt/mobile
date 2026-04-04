@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/ui/success_overlay.dart';
+import '../../../user/providers/user_provider.dart';
 import '../../data/models/gym_class.dart';
 import '../../providers/classes_provider.dart';
 import '../../utils/gym_class_extension.dart';
@@ -16,6 +17,11 @@ class ClassCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isProcessing = ref.watch(bookingNotifierProvider).isLoading;
+
+    final user = ref.watch(currentUserProvider).value;
+    final roleString = user?.role.toString().toLowerCase() ?? '';
+    final isTrainer = roleString.contains('trainer');
+
     final imageUrl = gymClass.displayImageUrl;
 
     return GestureDetector(
@@ -94,7 +100,7 @@ class ClassCard extends ConsumerWidget {
                             ],
                           ),
                         ),
-                        _buildQuickActionButton(context, ref, isProcessing),
+                        _buildQuickActionButton(context, ref, isProcessing, isTrainer),
                       ],
                     ),
                   ),
@@ -132,8 +138,8 @@ class ClassCard extends ConsumerWidget {
     return const SizedBox.shrink();
   }
 
-  Widget _buildQuickActionButton(BuildContext context, WidgetRef ref, bool isProcessing) {
-    if (gymClass.userEnrolled || gymClass.isFull || gymClass.isPast) {
+  Widget _buildQuickActionButton(BuildContext context, WidgetRef ref, bool isProcessing, bool isTrainer) {
+    if (isTrainer || gymClass.userEnrolled || gymClass.isFull || gymClass.isPast) {
       return Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.1), shape: BoxShape.circle),

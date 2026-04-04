@@ -4,6 +4,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/ui/widgets/no_connection_view.dart';
+import '../../user/providers/user_provider.dart';
 import '../providers/classes_provider.dart';
 import '../data/models/gym_class.dart';
 import 'widgets/class_card.dart';
@@ -28,6 +29,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
   Widget build(BuildContext context) {
     final selectedDate = ref.watch(selectedDateProvider);
     final classesAsync = ref.watch(classesForDateProvider(selectedDate));
+    final userAsync = ref.watch(currentUserProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -51,26 +53,43 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                   ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.1, end: 0),
 
                   const SizedBox(height: 20),
-
                   _buildHorizontalCalendar(ref, selectedDate),
-
                   const SizedBox(height: 20),
 
-                  CalendarViewToggle(
-                    isMyClassesSelected: _showOnlyMyClasses,
-                    onToggle: (value) => setState(() => _showOnlyMyClasses = value),
-                  ).animate().fadeIn(delay: 100.ms),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: userAsync.when(
+                      data: (user) => user?.role.toString().toLowerCase().contains('trainer') == true
+                          ? const SizedBox(height: 10)
+                          : CalendarViewToggle(
+                        isMyClassesSelected: _showOnlyMyClasses,
+                        onToggle: (value) => setState(() => _showOnlyMyClasses = value),
+                      ).animate().fadeIn(),
+                      loading: () => const SizedBox(height: 48),
+                      error: (_, _) => const SizedBox.shrink(),
+                    ),
+                  ),
                 ],
               ),
             ),
             Expanded(
               child: classesAsync.when(
                 loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
-                error: (err, stack) => NoConnectionView(
-                  onRetry: () => ref.invalidate(classesForDateProvider(selectedDate)),
-                ),
+                error: (err, stack) => NoConnectionView(onRetry: () => ref.invalidate(classesForDateProvider(selectedDate))),
                 data: (dayClasses) {
+                  final user = userAsync.value;
+                  final roleString = user?.role.toString().toLowerCase() ?? '';
+                  final isTrainer = roleString.contains('trainer');
+
                   final displayedClasses = dayClasses.where((c) {
+                    if (c.maxParticipants <= 1) return false;
+
+                    if (isTrainer) {
+                      final trainerName = c.trainer.fullName.toLowerCase().trim();
+                      final currentUserName = user?.fullName.toLowerCase().trim();
+                      return trainerName == currentUserName;
+                    }
+
                     return _showOnlyMyClasses ? c.userEnrolled : true;
                   }).toList();
 
@@ -102,6 +121,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     );
   }
 
+  // ... Pozostałe metody (_buildHorizontalCalendar, _buildClassesList, _buildEmptyState, _getDateLabel) pozostają bez zmian
   Widget _buildHorizontalCalendar(WidgetRef ref, DateTime selectedDate) {
     final today = DateTime.now();
     final normalizedToday = DateTime(today.year, today.month, today.day);
