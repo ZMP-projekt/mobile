@@ -91,7 +91,6 @@ class _QrEntryModalContentState extends ConsumerState<QrEntryModalContent> {
             error: (_, _) => const SizedBox.shrink(),
           ),
 
-
           const SizedBox(height: 20),
         ],
       ),

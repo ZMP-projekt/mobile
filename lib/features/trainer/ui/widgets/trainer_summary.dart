@@ -118,7 +118,7 @@ class TrainerSummaryCard extends ConsumerWidget {
             Icon(Icons.event_available_rounded, color: AppColors.textSecondary.withValues(alpha: 0.5)),
           ],
         ),
-        const Text('Wolne! 🎉', style: TextStyle(color: AppColors.textPrimary, fontSize: 32, fontWeight: FontWeight.w800)),
+        const Text('Brak zaplanowanych zajęć na dziś', style: TextStyle(color: AppColors.textPrimary, fontSize: 28, fontWeight: FontWeight.w800)),
         ClipRRect(
           borderRadius: BorderRadius.circular(10),
           child: LinearProgressIndicator(value: 0, minHeight: 8, backgroundColor: Colors.white.withValues(alpha: 0.1)),

@@ -23,7 +23,7 @@ User _$UserFromJson(Map<String, dynamic> json) {
 mixin _$User {
   int get id => throw _privateConstructorUsedError;
   String get email => throw _privateConstructorUsedError;
-  String get role => throw _privateConstructorUsedError;
+  String? get role => throw _privateConstructorUsedError;
   String get firstName => throw _privateConstructorUsedError;
   String get lastName => throw _privateConstructorUsedError;
 
@@ -44,7 +44,7 @@ abstract class $UserCopyWith<$Res> {
   $Res call({
     int id,
     String email,
-    String role,
+    String? role,
     String firstName,
     String lastName,
   });
@@ -67,7 +67,7 @@ class _$UserCopyWithImpl<$Res, $Val extends User>
   $Res call({
     Object? id = null,
     Object? email = null,
-    Object? role = null,
+    Object? role = freezed,
     Object? firstName = null,
     Object? lastName = null,
   }) {
@@ -81,10 +81,10 @@ class _$UserCopyWithImpl<$Res, $Val extends User>
                 ? _value.email
                 : email // ignore: cast_nullable_to_non_nullable
                       as String,
-            role: null == role
+            role: freezed == role
                 ? _value.role
                 : role // ignore: cast_nullable_to_non_nullable
-                      as String,
+                      as String?,
             firstName: null == firstName
                 ? _value.firstName
                 : firstName // ignore: cast_nullable_to_non_nullable
@@ -110,7 +110,7 @@ abstract class _$$UserImplCopyWith<$Res> implements $UserCopyWith<$Res> {
   $Res call({
     int id,
     String email,
-    String role,
+    String? role,
     String firstName,
     String lastName,
   });
@@ -130,7 +130,7 @@ class __$$UserImplCopyWithImpl<$Res>
   $Res call({
     Object? id = null,
     Object? email = null,
-    Object? role = null,
+    Object? role = freezed,
     Object? firstName = null,
     Object? lastName = null,
   }) {
@@ -144,10 +144,10 @@ class __$$UserImplCopyWithImpl<$Res>
             ? _value.email
             : email // ignore: cast_nullable_to_non_nullable
                   as String,
-        role: null == role
+        role: freezed == role
             ? _value.role
             : role // ignore: cast_nullable_to_non_nullable
-                  as String,
+                  as String?,
         firstName: null == firstName
             ? _value.firstName
             : firstName // ignore: cast_nullable_to_non_nullable
@@ -167,7 +167,7 @@ class _$UserImpl extends _User {
   const _$UserImpl({
     required this.id,
     required this.email,
-    required this.role,
+    this.role,
     required this.firstName,
     required this.lastName,
   }) : super._();
@@ -180,7 +180,7 @@ class _$UserImpl extends _User {
   @override
   final String email;
   @override
-  final String role;
+  final String? role;
   @override
   final String firstName;
   @override
@@ -228,7 +228,7 @@ abstract class _User extends User {
   const factory _User({
     required final int id,
     required final String email,
-    required final String role,
+    final String? role,
     required final String firstName,
     required final String lastName,
   }) = _$UserImpl;
@@ -241,7 +241,7 @@ abstract class _User extends User {
   @override
   String get email;
   @override
-  String get role;
+  String? get role;
   @override
   String get firstName;
   @override

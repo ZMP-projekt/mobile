@@ -32,8 +32,7 @@ final trainerClassesProvider = FutureProvider.autoDispose.family<List<GymClass>,
 });
 
 final classParticipantsProvider = FutureProvider.autoDispose.family<List<User>, int>((ref, classId) async {
-  final repo = ref.watch(classesRepositoryProvider);
-  return await repo.getClassParticipants(classId);
+  return ref.watch(classesRepositoryProvider).getClassParticipants(classId);
 });
 
 class BookingNotifier extends AutoDisposeAsyncNotifier<void> {
@@ -44,8 +43,14 @@ class BookingNotifier extends AutoDisposeAsyncNotifier<void> {
     state = const AsyncLoading();
     try {
       await ref.read(classesRepositoryProvider).bookClass(classId);
+
+      await Future.delayed(const Duration(milliseconds: 300));
+
       ref.invalidate(classesForDateProvider);
       ref.invalidate(todayClassesProvider);
+      ref.invalidate(classParticipantsProvider(classId));
+
+
       state = const AsyncData(null);
     } catch (error, stack) {
       state = AsyncError(error, stack);
@@ -57,8 +62,13 @@ class BookingNotifier extends AutoDisposeAsyncNotifier<void> {
     state = const AsyncLoading();
     try {
       await ref.read(classesRepositoryProvider).cancelBooking(classId);
+
+      await Future.delayed(const Duration(milliseconds: 300));
+
       ref.invalidate(classesForDateProvider);
       ref.invalidate(todayClassesProvider);
+      ref.invalidate(classParticipantsProvider(classId));
+
       state = const AsyncData(null);
     } catch (error, stack) {
       state = AsyncError(error, stack);
