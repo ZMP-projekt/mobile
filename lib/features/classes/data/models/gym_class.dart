@@ -1,5 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import '../../../trainer/models/trainer.dart';
+import '../../../trainer/data/models/trainer.dart';
 
 part 'gym_class.freezed.dart';
 part 'gym_class.g.dart';
@@ -17,6 +17,7 @@ class GymClass with _$GymClass {
     @Default(0) int maxParticipants,
     @Default(0) int currentParticipants,
     @Default(false) bool userEnrolled,
+    @Default(false) bool personalTraining,
     String? description,
     String? imageUrl,
   }) = _GymClass;

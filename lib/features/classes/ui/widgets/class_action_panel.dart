@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/ui/success_overlay.dart';
 import '../../data/models/gym_class.dart';
@@ -182,22 +183,164 @@ class ClassActionPanel extends ConsumerWidget {
 
   void _showRescheduleModal(BuildContext context) {
     showModalBottomSheet(
-      context: context, backgroundColor: AppColors.surface, shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-      builder: (ctx) => Container(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Przełóż zajęcia', style: TextStyle(color: AppColors.textPrimary, fontSize: 24, fontWeight: FontWeight.bold, letterSpacing: -0.5)),
-            const SizedBox(height: 16),
-            const Text('Wybierz nową datę i godzinę.', style: TextStyle(color: AppColors.textSecondary, fontSize: 16, height: 1.5)),
-            const SizedBox(height: 32),
-            ElevatedButton(
-              onPressed: () => ctx.pop(),
-              style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, 56), backgroundColor: AppColors.primary, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20))),
-              child: const Text('Zatwierdź zmianę', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (ctx) => _RescheduleModal(gymClass: gymClass),
+    );
+  }
+}
+
+class _RescheduleModal extends ConsumerStatefulWidget {
+  final GymClass gymClass;
+  const _RescheduleModal({required this.gymClass});
+
+  @override
+  ConsumerState<_RescheduleModal> createState() => _RescheduleModalState();
+}
+
+class _RescheduleModalState extends ConsumerState<_RescheduleModal> {
+  late DateTime _selectedDate;
+  late TimeOfDay _selectedTime;
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedDate = widget.gymClass.startTime;
+    _selectedTime = TimeOfDay.fromDateTime(widget.gymClass.startTime);
+  }
+
+  Future<void> _submit() async {
+    final newTime = DateTime(
+      _selectedDate.year, _selectedDate.month, _selectedDate.day,
+      _selectedTime.hour, _selectedTime.minute,
+    );
+
+    if (newTime.isBefore(DateTime.now())) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Nowy termin nie może być w przeszłości!'), backgroundColor: AppColors.error),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      await ref.read(bookingNotifierProvider.notifier).rescheduleClass(widget.gymClass.id, newTime);
+
+      if (!mounted) return;
+      context.pop(); // Zamknij modal
+      await SuccessOverlay.show(context, 'Zajęcia\nprzełożone!');
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString().replaceAll('Exception: ', '')),
+          backgroundColor: AppColors.error,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _pickDate() async {
+    final date = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 60)),
+    );
+    if (date != null) setState(() => _selectedDate = date);
+  }
+
+  Future<void> _pickTime() async {
+    final time = await showTimePicker(
+      context: context,
+      initialTime: _selectedTime,
+    );
+    if (time != null) setState(() => _selectedTime = time);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.only(
+        top: 24, left: 24, right: 24,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 32,
+      ),
+      decoration: const BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('Przełóż zajęcia', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+          const SizedBox(height: 24),
+
+          _buildPickerTile(
+            label: 'Nowa data',
+            value: DateFormat('dd.MM.yyyy').format(_selectedDate),
+            icon: Icons.calendar_today_rounded,
+            onTap: _pickDate,
+          ),
+          const SizedBox(height: 12),
+
+          _buildPickerTile(
+            label: 'Nowa godzina',
+            value: _selectedTime.format(context),
+            icon: Icons.access_time_rounded,
+            onTap: _pickTime,
+          ),
+
+          const SizedBox(height: 32),
+
+          SizedBox(
+            width: double.infinity,
+            height: 56,
+            child: ElevatedButton(
+              onPressed: _isLoading ? null : _submit,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              ),
+              child: _isLoading
+                  ? const CircularProgressIndicator(color: Colors.white)
+                  : const Text('Zatwierdź zmianę', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
             ),
-            const SizedBox(height: 20),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPickerTile({required String label, required String value, required IconData icon, required VoidCallback onTap}) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: AppColors.primary),
+            const SizedBox(width: 16),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label, style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+                Text(value, style: const TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.bold)),
+              ],
+            ),
+            const Spacer(),
+            const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppColors.textSecondary),
           ],
         ),
       ),

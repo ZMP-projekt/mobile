@@ -16,6 +16,7 @@ _$GymClassImpl _$$GymClassImplFromJson(Map<String, dynamic> json) =>
       maxParticipants: (json['maxParticipants'] as num?)?.toInt() ?? 0,
       currentParticipants: (json['currentParticipants'] as num?)?.toInt() ?? 0,
       userEnrolled: json['userEnrolled'] as bool? ?? false,
+      personalTraining: json['personalTraining'] as bool? ?? false,
       description: json['description'] as String?,
       imageUrl: json['imageUrl'] as String?,
     );
@@ -30,6 +31,7 @@ Map<String, dynamic> _$$GymClassImplToJson(_$GymClassImpl instance) =>
       'maxParticipants': instance.maxParticipants,
       'currentParticipants': instance.currentParticipants,
       'userEnrolled': instance.userEnrolled,
+      'personalTraining': instance.personalTraining,
       'description': instance.description,
       'imageUrl': instance.imageUrl,
     };

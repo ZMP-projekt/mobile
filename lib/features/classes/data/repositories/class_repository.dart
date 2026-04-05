@@ -11,7 +11,7 @@ abstract class IClassesRepository {
   Future<void> bookClass(int classId);
   Future<void> cancelBooking(int classId);
   Future<void> createClass(Map<String, dynamic> classData);
-  Future<void> rescheduleClass(int classId, DateTime newStart, DateTime newEnd);
+  Future<void> rescheduleClass(int classId, DateTime newTime);
   Future<void> deleteClass(int classId);
 }
 
@@ -83,12 +83,14 @@ class ApiClassesRepository implements IClassesRepository {
   }
 
   @override
-  Future<void> rescheduleClass(int classId, DateTime newStart, DateTime newEnd) async {
+  Future<void> rescheduleClass(int classId, DateTime newTime) async {
     try {
-      await _dio.patch('/api/classes/$classId/reschedule', data: {
-        'startTime': newStart.toIso8601String(),
-        'endTime': newEnd.toIso8601String(),
-      });
+      await _dio.patch(
+        '/api/classes/$classId/reschedule',
+        queryParameters: {
+          'newTime': newTime.toIso8601String(),
+        },
+      );
     } on DioException catch (e) {
       throw Exception(DioErrorParser.extract(e.response, e.type, defaultMessage: 'Błąd przekładania zajęć.'));
     }

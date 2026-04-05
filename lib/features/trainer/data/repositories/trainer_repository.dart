@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
-import '../../../../core/network/dio_error_parser.dart';
-import '../../models/trainer.dart';
+import '../../../../../core/network/dio_error_parser.dart';
+import '../models/trainer.dart';
 
 class TrainerRepository {
   final Dio _dio;

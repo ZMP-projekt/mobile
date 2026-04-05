@@ -29,6 +29,7 @@ mixin _$GymClass {
   int get maxParticipants => throw _privateConstructorUsedError;
   int get currentParticipants => throw _privateConstructorUsedError;
   bool get userEnrolled => throw _privateConstructorUsedError;
+  bool get personalTraining => throw _privateConstructorUsedError;
   String? get description => throw _privateConstructorUsedError;
   String? get imageUrl => throw _privateConstructorUsedError;
 
@@ -56,6 +57,7 @@ abstract class $GymClassCopyWith<$Res> {
     int maxParticipants,
     int currentParticipants,
     bool userEnrolled,
+    bool personalTraining,
     String? description,
     String? imageUrl,
   });
@@ -86,6 +88,7 @@ class _$GymClassCopyWithImpl<$Res, $Val extends GymClass>
     Object? maxParticipants = null,
     Object? currentParticipants = null,
     Object? userEnrolled = null,
+    Object? personalTraining = null,
     Object? description = freezed,
     Object? imageUrl = freezed,
   }) {
@@ -122,6 +125,10 @@ class _$GymClassCopyWithImpl<$Res, $Val extends GymClass>
             userEnrolled: null == userEnrolled
                 ? _value.userEnrolled
                 : userEnrolled // ignore: cast_nullable_to_non_nullable
+                      as bool,
+            personalTraining: null == personalTraining
+                ? _value.personalTraining
+                : personalTraining // ignore: cast_nullable_to_non_nullable
                       as bool,
             description: freezed == description
                 ? _value.description
@@ -165,6 +172,7 @@ abstract class _$$GymClassImplCopyWith<$Res>
     int maxParticipants,
     int currentParticipants,
     bool userEnrolled,
+    bool personalTraining,
     String? description,
     String? imageUrl,
   });
@@ -195,6 +203,7 @@ class __$$GymClassImplCopyWithImpl<$Res>
     Object? maxParticipants = null,
     Object? currentParticipants = null,
     Object? userEnrolled = null,
+    Object? personalTraining = null,
     Object? description = freezed,
     Object? imageUrl = freezed,
   }) {
@@ -232,6 +241,10 @@ class __$$GymClassImplCopyWithImpl<$Res>
             ? _value.userEnrolled
             : userEnrolled // ignore: cast_nullable_to_non_nullable
                   as bool,
+        personalTraining: null == personalTraining
+            ? _value.personalTraining
+            : personalTraining // ignore: cast_nullable_to_non_nullable
+                  as bool,
         description: freezed == description
             ? _value.description
             : description // ignore: cast_nullable_to_non_nullable
@@ -257,6 +270,7 @@ class _$GymClassImpl extends _GymClass {
     this.maxParticipants = 0,
     this.currentParticipants = 0,
     this.userEnrolled = false,
+    this.personalTraining = false,
     this.description,
     this.imageUrl,
   }) : super._();
@@ -284,6 +298,9 @@ class _$GymClassImpl extends _GymClass {
   @JsonKey()
   final bool userEnrolled;
   @override
+  @JsonKey()
+  final bool personalTraining;
+  @override
   final String? description;
   @override
   final String? imageUrl;
@@ -305,6 +322,8 @@ class _$GymClassImpl extends _GymClass {
                 other.currentParticipants == currentParticipants) &&
             (identical(other.userEnrolled, userEnrolled) ||
                 other.userEnrolled == userEnrolled) &&
+            (identical(other.personalTraining, personalTraining) ||
+                other.personalTraining == personalTraining) &&
             (identical(other.description, description) ||
                 other.description == description) &&
             (identical(other.imageUrl, imageUrl) ||
@@ -323,6 +342,7 @@ class _$GymClassImpl extends _GymClass {
     maxParticipants,
     currentParticipants,
     userEnrolled,
+    personalTraining,
     description,
     imageUrl,
   );
@@ -351,6 +371,7 @@ abstract class _GymClass extends GymClass {
     final int maxParticipants,
     final int currentParticipants,
     final bool userEnrolled,
+    final bool personalTraining,
     final String? description,
     final String? imageUrl,
   }) = _$GymClassImpl;
@@ -375,6 +396,8 @@ abstract class _GymClass extends GymClass {
   int get currentParticipants;
   @override
   bool get userEnrolled;
+  @override
+  bool get personalTraining;
   @override
   String? get description;
   @override

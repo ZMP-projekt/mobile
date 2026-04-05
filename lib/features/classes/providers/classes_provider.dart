@@ -43,13 +43,11 @@ class BookingNotifier extends AutoDisposeAsyncNotifier<void> {
     state = const AsyncLoading();
     try {
       await ref.read(classesRepositoryProvider).bookClass(classId);
-
       await Future.delayed(const Duration(milliseconds: 300));
 
       ref.invalidate(classesForDateProvider);
       ref.invalidate(todayClassesProvider);
       ref.invalidate(classParticipantsProvider(classId));
-
 
       state = const AsyncData(null);
     } catch (error, stack) {
@@ -62,7 +60,6 @@ class BookingNotifier extends AutoDisposeAsyncNotifier<void> {
     state = const AsyncLoading();
     try {
       await ref.read(classesRepositoryProvider).cancelBooking(classId);
-
       await Future.delayed(const Duration(milliseconds: 300));
 
       ref.invalidate(classesForDateProvider);
@@ -76,13 +73,68 @@ class BookingNotifier extends AutoDisposeAsyncNotifier<void> {
     }
   }
 
+  Future<void> createClass(Map<String, dynamic> classData) async {
+    state = const AsyncLoading();
+    try {
+      await ref.read(classesRepositoryProvider).createClass(classData);
+      await Future.delayed(const Duration(milliseconds: 300));
+
+      final startTimeStr = classData['startTime'] as String;
+      final classDate = DateTime.parse(startTimeStr);
+      final targetDate = DateTime(
+          classDate.year, classDate.month, classDate.day);
+
+      ref.invalidate(classesForDateProvider(targetDate));
+      ref.invalidate(trainerClassesProvider(targetDate));
+      ref.invalidate(todayClassesProvider);
+
+      final selectedDate = ref.read(selectedDateProvider);
+      if (selectedDate != targetDate) {
+        ref.invalidate(classesForDateProvider(selectedDate));
+        ref.invalidate(trainerClassesProvider(selectedDate));
+      }
+
+      state = const AsyncData(null);
+    } catch (error, stack) {
+      state = AsyncError(error, stack);
+      rethrow;
+    }
+  }
+
+  Future<void> rescheduleClass(int classId, DateTime newTime) async {
+    state = const AsyncLoading();
+    try {
+      await ref.read(classesRepositoryProvider).rescheduleClass(
+          classId, newTime);
+      await Future.delayed(const Duration(milliseconds: 300));
+
+      final targetDate = DateTime(newTime.year, newTime.month, newTime.day);
+      final selectedDate = ref.read(selectedDateProvider);
+
+      ref.invalidate(classesForDateProvider(targetDate));
+      ref.invalidate(trainerClassesProvider(targetDate));
+      ref.invalidate(classesForDateProvider(selectedDate));
+      ref.invalidate(trainerClassesProvider(selectedDate));
+      ref.invalidate(todayClassesProvider);
+
+      state = const AsyncData(null);
+    } catch (error, stack) {
+      state = AsyncError(error, stack);
+      rethrow;
+    }
+  }
+
   Future<void> deleteClass(int classId) async {
     state = const AsyncLoading();
     try {
       await ref.read(classesRepositoryProvider).deleteClass(classId);
-      ref.invalidate(classesForDateProvider);
-      ref.invalidate(trainerClassesProvider);
+      await Future.delayed(const Duration(milliseconds: 300));
+
+      final selectedDate = ref.read(selectedDateProvider);
+      ref.invalidate(classesForDateProvider(selectedDate));
+      ref.invalidate(trainerClassesProvider(selectedDate));
       ref.invalidate(todayClassesProvider);
+
       state = const AsyncData(null);
     } catch (error, stack) {
       state = AsyncError(error, stack);
