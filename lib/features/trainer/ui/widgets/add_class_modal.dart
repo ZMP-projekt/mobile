@@ -9,7 +9,12 @@ import '../../../../core/ui/success_overlay.dart';
 import '../../../classes/providers/classes_provider.dart';
 
 class AddClassModal extends ConsumerStatefulWidget {
-  const AddClassModal({super.key});
+  final bool initialIsPersonalTraining;
+
+  const AddClassModal({
+    super.key,
+    this.initialIsPersonalTraining = false,
+  });
 
   @override
   ConsumerState<AddClassModal> createState() => _AddClassModalState();
@@ -27,11 +32,13 @@ class _AddClassModalState extends ConsumerState<AddClassModal> {
   late TimeOfDay _endTime;
 
   bool _isLoading = false;
-  bool _isPersonalTraining = false;
+
+  late bool _isPersonalTraining;
 
   @override
   void initState() {
     super.initState();
+    _isPersonalTraining = widget.initialIsPersonalTraining;
 
     DateTime defaultStart = DateTime.now().add(const Duration(hours: 1));
 
@@ -57,7 +64,10 @@ class _AddClassModalState extends ConsumerState<AddClassModal> {
 
   Future<void> _selectDate(BuildContext context) async {
     final picked = await showDatePicker(
-      context: context, initialDate: _selectedDate, firstDate: DateTime.now(), lastDate: DateTime.now().add(const Duration(days: 90)),
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 90)),
       builder: (context, child) => Theme(data: Theme.of(context).copyWith(colorScheme: const ColorScheme.dark(primary: AppColors.primary, surface: AppColors.surface)), child: child!),
     );
     if (picked != null) setState(() => _selectedDate = picked);
@@ -65,7 +75,8 @@ class _AddClassModalState extends ConsumerState<AddClassModal> {
 
   Future<void> _selectTime(BuildContext context, bool isStart) async {
     final picked = await showTimePicker(
-      context: context, initialTime: isStart ? _startTime : _endTime,
+      context: context,
+      initialTime: isStart ? _startTime : _endTime,
       builder: (context, child) => Theme(data: Theme.of(context).copyWith(colorScheme: const ColorScheme.dark(primary: AppColors.primary, surface: AppColors.surface)), child: child!),
     );
 
@@ -162,7 +173,22 @@ class _AddClassModalState extends ConsumerState<AddClassModal> {
                     children: [
                       Expanded(flex: 2, child: _buildPickerField('Data', DateFormat('dd.MM.yyyy').format(_selectedDate), Icons.calendar_month, () => _selectDate(context))),
                       const SizedBox(width: 16),
-                      Expanded(flex: 1, child: IgnorePointer(ignoring: _isPersonalTraining, child: Opacity(opacity: _isPersonalTraining ? 0.5 : 1.0, child: CustomTextField(controller: _maxParticipantsController, label: 'Miejsca', icon: Icons.people, keyboardType: TextInputType.number, validator: (v) => (int.tryParse(v ?? '') ?? 0) <= 0 ? 'Błąd' : null)))),
+                      Expanded(
+                          flex: 1,
+                          child: IgnorePointer(
+                              ignoring: _isPersonalTraining,
+                              child: Opacity(
+                                  opacity: _isPersonalTraining ? 0.5 : 1.0,
+                                  child: CustomTextField(
+                                      controller: _maxParticipantsController,
+                                      label: 'Miejsca',
+                                      icon: Icons.people,
+                                      keyboardType: TextInputType.number,
+                                      validator: (v) => (int.tryParse(v ?? '') ?? 0) <= 0 ? 'Błąd' : null
+                                  )
+                              )
+                          )
+                      ),
                     ],
                   ),
                   const SizedBox(height: 16),

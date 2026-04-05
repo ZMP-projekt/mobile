@@ -30,7 +30,7 @@ class CompactClassCard extends StatelessWidget {
           image: DecorationImage(image: NetworkImage(imageUrl), fit: BoxFit.cover),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.3),
+              color: Colors.black.withValues(alpha: 0.6),
               blurRadius: 15,
               offset: const Offset(0, 8),
             )

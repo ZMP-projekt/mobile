@@ -16,7 +16,7 @@ class TrainerSummaryCard extends ConsumerWidget {
 
     return Container(
       width: double.infinity,
-      height: 180,
+      height: 150,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(25),
         boxShadow: [
@@ -56,10 +56,10 @@ class TrainerSummaryCard extends ConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'TWÓJ PLAN NA DZIŚ',
+                      'DZISIAJ',
                       style: TextStyle(
                           color: isBusy ? AppColors.success : AppColors.textSecondary,
-                          fontSize: 12,
+                          fontSize: 16,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 1),
                     ),
@@ -68,7 +68,7 @@ class TrainerSummaryCard extends ConsumerWidget {
                 ),
                 Text(
                   '$classCount ${classCount == 1 ? 'Trening' : 'Treningi'}',
-                  style: const TextStyle(color: AppColors.textPrimary, fontSize: 32, fontWeight: FontWeight.w800),
+                  style: const TextStyle(color: AppColors.textPrimary, fontSize: 24, fontWeight: FontWeight.w800),
                 ),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(10),
@@ -109,19 +109,42 @@ class TrainerSummaryCard extends ConsumerWidget {
   Widget _buildEmptyState() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text('TWÓJ PLAN NA DZIŚ', style: TextStyle(color: AppColors.textSecondary, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1)),
+            const Text(
+                'DZISIAJ',
+                style: TextStyle(color: AppColors.textSecondary, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1)
+            ),
             Icon(Icons.event_available_rounded, color: AppColors.textSecondary.withValues(alpha: 0.5)),
           ],
         ),
-        const Text('Brak zaplanowanych zajęć na dziś', style: TextStyle(color: AppColors.textPrimary, fontSize: 28, fontWeight: FontWeight.w800)),
+
+        Expanded(
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: const Text(
+                'Brak zaplanowanych zajęć',
+                style: TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+          ),
+        ),
+
         ClipRRect(
           borderRadius: BorderRadius.circular(10),
-          child: LinearProgressIndicator(value: 0, minHeight: 8, backgroundColor: Colors.white.withValues(alpha: 0.1)),
+          child: LinearProgressIndicator(
+              value: 0,
+              minHeight: 8,
+              backgroundColor: Colors.white.withValues(alpha: 0.1)
+          ),
         ),
       ],
     ).animate().fadeIn(duration: 400.ms);

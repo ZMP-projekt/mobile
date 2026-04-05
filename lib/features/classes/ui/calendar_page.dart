@@ -10,11 +10,6 @@ import '../data/models/gym_class.dart';
 import 'widgets/class_card.dart';
 import 'widgets/calendar_view_toggle.dart';
 
-final selectedDateProvider = StateProvider<DateTime>((ref) {
-  final now = DateTime.now();
-  return DateTime(now.year, now.month, now.day);
-});
-
 class CalendarPage extends ConsumerStatefulWidget {
   const CalendarPage({super.key});
 
@@ -59,7 +54,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: userAsync.when(
-                      data: (user) => user?.role.toString().toLowerCase().contains('trainer') == true
+                      data: (user) => (user?.isTrainer ?? false)
                           ? const SizedBox(height: 10)
                           : CalendarViewToggle(
                         isMyClassesSelected: _showOnlyMyClasses,
@@ -78,11 +73,10 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                 error: (err, stack) => NoConnectionView(onRetry: () => ref.invalidate(classesForDateProvider(selectedDate))),
                 data: (dayClasses) {
                   final user = userAsync.value;
-                  final roleString = user?.role.toString().toLowerCase() ?? '';
-                  final isTrainer = roleString.contains('trainer');
+                  final isTrainer = user?.isTrainer ?? false;
 
                   final displayedClasses = dayClasses.where((c) {
-                    if (c.maxParticipants <= 1) return false;
+                    if (c.personalTraining) return false;
 
                     if (isTrainer) {
                       final trainerName = c.trainer.fullName.toLowerCase().trim();
@@ -121,7 +115,6 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     );
   }
 
-  // ... Pozostałe metody (_buildHorizontalCalendar, _buildClassesList, _buildEmptyState, _getDateLabel) pozostają bez zmian
   Widget _buildHorizontalCalendar(WidgetRef ref, DateTime selectedDate) {
     final today = DateTime.now();
     final normalizedToday = DateTime(today.year, today.month, today.day);

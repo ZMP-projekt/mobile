@@ -20,9 +20,10 @@ class EmptyStateView extends StatelessWidget {
       padding: const EdgeInsets.all(24),
       margin: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
-        color: AppColors.surface.withValues(alpha: 0.5),
+        color: AppColors.surface.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+        boxShadow: AppColors.subtleGlow,
       ),
       child: Row(
         children: [
