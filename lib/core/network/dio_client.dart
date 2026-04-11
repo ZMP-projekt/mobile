@@ -5,8 +5,6 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../config/env.dart';
 import '../util/app_logger.dart';
 
-import '../../features/auth/providers/auth_provider.dart';
-
 final secureStorageProvider = Provider<FlutterSecureStorage>((ref) {
   return const FlutterSecureStorage();
 });

@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import '../ui/widgets/participants_list.dart';
 import '../../../core/theme/app_colors.dart';
 import '../data/models/gym_class.dart';
-import '../providers/classes_provider.dart';
 import '../../user/providers/user_provider.dart';
 import 'widgets/class_action_panel.dart';
 
