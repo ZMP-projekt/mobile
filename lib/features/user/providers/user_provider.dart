@@ -23,7 +23,10 @@ final currentUserProvider = FutureProvider<User?>((ref) async {
   } on DioException catch (e) {
     if (e.response?.statusCode == 401 || e.response?.statusCode == 403) {
       AppLogger.e("Token wygasł lub jest nieważny. Automatyczne wylogowanie.");
-      ref.read(authStateProvider.notifier).logout();
+
+      Future.microtask(() {
+        ref.read(authStateProvider.notifier).logout();
+      });
     }
     rethrow;
   }

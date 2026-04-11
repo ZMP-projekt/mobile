@@ -66,18 +66,14 @@ class TrainerSummaryCard extends ConsumerWidget {
                     const Icon(Icons.check_circle_outline_rounded, color: AppColors.success),
                   ],
                 ),
-                Text(
-                  '$classCount ${classCount == 1 ? 'Trening' : 'Treningi'}',
-                  style: const TextStyle(color: AppColors.textPrimary, fontSize: 24, fontWeight: FontWeight.w800),
+                const Text(
+                  'Harmonogram gotowy',
+                  style: TextStyle(color: AppColors.textPrimary, fontSize: 24, fontWeight: FontWeight.w800),
                 ),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: LinearProgressIndicator(
-                    value: (classCount / 5).clamp(0.0, 1.0),
-                    minHeight: 8,
-                    backgroundColor: Colors.white.withValues(alpha: 0.1),
-                    valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
-                  ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Wszystkie zajęcia są zaplanowane.',
+                  style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
                 ),
               ],
             ).animate().fadeIn(duration: 400.ms);

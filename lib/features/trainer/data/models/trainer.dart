@@ -16,9 +16,14 @@ class Trainer with _$Trainer {
   String get fullName => '$firstName $lastName';
 
   String get displayAvatarUrl {
-    if (photoUrl != null) return photoUrl!;
-    final seed = '${firstName.trim().toLowerCase()}${lastName.trim().toLowerCase()}';
-    return 'https://api.dicebear.com/9.x/thumbs/png?seed=$seed&shapeColor=00d2d3,ff2a7a,b721ff&backgroundColor=0a0a14';
+    if (photoUrl != null && photoUrl!.isNotEmpty) return photoUrl!;
+
+    final seed = (firstName + lastName).codeUnits.fold(0, (a, b) => a + b);
+    return 'https://api.dicebear.com/9.x/thumbs/png'
+        '?seed=$seed'
+        '&shapeColor=00d2d3,ff2a7a,b721ff'
+        '&backgroundColor=0a0a14';
   }
+
   factory Trainer.fromJson(Map<String, dynamic> json) => _$TrainerFromJson(json);
 }

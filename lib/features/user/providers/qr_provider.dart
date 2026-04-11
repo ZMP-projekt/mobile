@@ -7,20 +7,12 @@ final qrEntryCodeProvider = StreamProvider.autoDispose<String>((ref) async* {
   final user = ref.watch(currentUserProvider).valueOrNull;
   if (user == null) return;
 
-  const interval = 15000;
-  int lastWindow = -1;
-  String currentPayload = '';
-
   while (true) {
-    int currentWindow = DateTime.now().millisecondsSinceEpoch ~/ interval;
+    yield QrGenerator.generateEntryPayload(user.id);
 
-    if (currentWindow != lastWindow) {
-      currentPayload = QrGenerator.generateEntryPayload(user.id);
-      lastWindow = currentWindow;
-    }
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final timeToNext = 15000 - (now % 15000);
 
-    yield currentPayload;
-
-    await Future.delayed(const Duration(milliseconds: 100));
+    await Future.delayed(Duration(milliseconds: timeToNext));
   }
 });

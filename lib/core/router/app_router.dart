@@ -7,23 +7,27 @@ import '../../features/auth/ui/registration_page.dart';
 import '../../features/main/main_screen.dart';
 import '../../features/classes/ui/class_details_page.dart';
 import '../../features/classes/data/models/gym_class.dart';
+import '../network/dio_client.dart';
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 
 final routerProvider = Provider<GoRouter>((ref) {
 
+  final authState = ref.watch(authStateProvider);
+  final token = ref.watch(authTokenProvider);
+
   final router = GoRouter(
-    navigatorKey: rootNavigatorKey,
     initialLocation: '/',
     redirect: (context, state) {
-      final isAuthenticated = ref.read(authStateProvider).isAuthenticated;
+      final isAuth = authState.isAuthenticated && token != null;
+
       final isLoggingIn = state.matchedLocation == '/login' || state.matchedLocation == '/register';
 
-      if (!isAuthenticated) {
-        return isLoggingIn ? null : '/login';
+      if (!isAuth && !isLoggingIn) {
+        return '/login';
       }
 
-      if (isLoggingIn) {
+      if (isAuth && isLoggingIn) {
         return '/';
       }
 

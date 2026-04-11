@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/ui/success_overlay.dart';
+import '../../../core/ui/widgets/full_screen_empty_state.dart';
+import '../../../core/ui/widgets/horizontal_calendar.dart';
 import '../../../core/ui/widgets/no_connection_view.dart';
 import '../../classes/providers/classes_provider.dart';
 import '../../classes/data/models/gym_class.dart';
@@ -32,25 +33,47 @@ class PersonalTrainingsPage extends ConsumerWidget {
                 children: [
                   const Text(
                     'Treningi Personalne',
-                    style: TextStyle(color: AppColors.textPrimary, fontSize: 34, fontWeight: FontWeight.w800, letterSpacing: -1.0),
-                  ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.1, end: 0),
+                    style: TextStyle(color: AppColors.textPrimary,
+                        fontSize: 34,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -1.0),
+                  ).animate().fadeIn(duration: 400.ms).slideY(
+                      begin: 0.1, end: 0),
 
                   const SizedBox(height: 20),
 
-                  _buildHorizontalCalendar(ref, selectedDate),
+                  HorizontalCalendar(
+                    selectedDate: selectedDate,
+                    onDateSelected: (date) {
+                      ref
+                          .read(selectedDateProvider.notifier)
+                          .state = date;
+                    },
+                  ),
                 ],
               ),
             ),
 
             Expanded(
               child: classesAsync.when(
-                loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
-                error: (err, stack) => NoConnectionView(onRetry: () => ref.invalidate(classesForDateProvider(selectedDate))),
+                loading: () =>
+                const Center(
+                    child: CircularProgressIndicator(color: AppColors.primary)),
+                error: (err, stack) =>
+                    NoConnectionView(onRetry: () =>
+                        ref.invalidate(classesForDateProvider(selectedDate))),
                 data: (dayClasses) {
-                  final ptClasses = dayClasses.where((c) => c.personalTraining).toList();
+                  final ptClasses = dayClasses
+                      .where((c) => c.personalTraining)
+                      .toList();
 
                   if (ptClasses.isEmpty) {
-                    return _buildEmptyState();
+                    return const FullScreenEmptyState(
+                      icon: Icons.person_search_rounded,
+                      title: 'Brak dostępnych\ntreningów w tym dniu',
+                      subtitle: 'Wybierz inną datę z kalendarza powyżej',
+                      iconColor: AppColors.primary,
+                    );
                   }
 
                   return ListView.builder(
@@ -73,99 +96,6 @@ class PersonalTrainingsPage extends ConsumerWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildHorizontalCalendar(WidgetRef ref, DateTime selectedDate) {
-    final today = DateTime.now();
-    final normalizedToday = DateTime(today.year, today.month, today.day);
-    final days = List.generate(14, (index) => normalizedToday.add(Duration(days: index)));
-
-    return SizedBox(
-      height: 85,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        clipBehavior: Clip.none,
-        itemCount: days.length,
-        itemBuilder: (context, index) {
-          final date = days[index];
-          final isSelected = date.isAtSameMomentAs(selectedDate);
-          final dayName = DateFormat('E', 'pl_PL').format(date).toLowerCase();
-
-          return GestureDetector(
-            onTap: () => ref.read(selectedDateProvider.notifier).state = date,
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 250),
-              width: 65,
-              margin: const EdgeInsets.only(right: 12),
-              decoration: BoxDecoration(
-                color: isSelected ? AppColors.primary : AppColors.surface,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: isSelected ? [
-                  BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.3),
-                    blurRadius: 12,
-                    offset: const Offset(0, 6),
-                  )
-                ] : [],
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    dayName,
-                    style: TextStyle(
-                      color: isSelected ? Colors.white : AppColors.textSecondary,
-                      fontSize: 14,
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    '${date.day}',
-                    style: TextStyle(
-                      color: isSelected ? Colors.white : AppColors.textPrimary,
-                      fontSize: 22,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ).animate().fadeIn(delay: (index * 30).ms).slideX(begin: 0.1);
-        },
-      ),
-    );
-  }
-
-  Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(35),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.surface,
-              border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
-              boxShadow: AppColors.subtleGlow,
-            ),
-            child: const Icon(Icons.person_search_rounded, size: 70, color: AppColors.primary),
-          ).animate().scale(duration: 400.ms, curve: Curves.easeOutBack),
-          const SizedBox(height: 25),
-          const Text(
-            'Brak dostępnych\ntreningów w tym dniu',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: AppColors.textPrimary, fontSize: 20, fontWeight: FontWeight.bold, height: 1.2),
-          ).animate().fadeIn(delay: 200.ms),
-          const SizedBox(height: 12),
-          const Text(
-            'Wybierz inną datę z kalendarza powyżej',
-            style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
-          ).animate().fadeIn(delay: 300.ms),
-        ],
       ),
     );
   }

@@ -56,12 +56,15 @@ class _QrEntryModalContentState extends ConsumerState<QrEntryModalContent> {
           const SizedBox(height: 24),
 
           qrCodeAsync.when(
-            data: (_) {
-              final double targetProgress = 1 - (DateTime.now().millisecondsSinceEpoch % 15000) / 15000;
+            data: (code) {
+              final int currentMillis = DateTime.now().millisecondsSinceEpoch;
+              final int remainingMillis = 15000 - (currentMillis % 15000);
+              final double startProgress = remainingMillis / 15000;
 
               return TweenAnimationBuilder<double>(
-                tween: Tween<double>(begin: targetProgress, end: targetProgress),
-                duration: const Duration(milliseconds: 50),
+                key: ValueKey(code),
+                tween: Tween<double>(begin: startProgress, end: 0.0),
+                duration: Duration(milliseconds: remainingMillis),
                 builder: (context, value, child) {
                   return Column(
                     children: [

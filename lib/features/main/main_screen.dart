@@ -93,6 +93,15 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         final screens = _getScreens(isTrainer);
         final safeIndex = currentIndex >= screens.length ? 0 : currentIndex;
 
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (_pageController.hasClients) {
+            final currentPage = _pageController.page?.round() ?? 0;
+            if (currentPage >= screens.length || currentPage != safeIndex) {
+              _pageController.jumpToPage(safeIndex);
+            }
+          }
+        });
+
         return Scaffold(
           backgroundColor: AppColors.background,
           body: PageView(

@@ -169,9 +169,13 @@ class ClassActionPanel extends ConsumerWidget {
         actions: [
           TextButton(onPressed: () => ctx.pop(), child: const Text('Wróć', style: TextStyle(color: AppColors.textSecondary))),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               ctx.pop();
-              ref.read(bookingNotifierProvider.notifier).deleteClass(gymClass.id);
+              await ref.read(bookingNotifierProvider.notifier).deleteClass(gymClass.id);
+
+              if (context.mounted && context.canPop()) {
+                context.pop();
+              }
             },
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.error, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
             child: const Text('Tak, odwołaj', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),

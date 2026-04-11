@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import '../ui/widgets/participants_list.dart';
 import '../../../core/theme/app_colors.dart';
 import '../data/models/gym_class.dart';
-import '../providers/classes_provider.dart';
 import '../../user/providers/user_provider.dart';
 import 'widgets/class_action_panel.dart';
 
@@ -25,14 +24,6 @@ class ClassDetailsPage extends ConsumerWidget {
     final userAsync = ref.watch(currentUserProvider);
     final isTrainer = userAsync.valueOrNull?.isTrainer ?? false;
     final size = MediaQuery.of(context).size;
-
-    ref.listen(bookingNotifierProvider, (previous, next) {
-      if (previous != null && previous.isLoading && !next.isLoading && !next.hasError) {
-        if (context.canPop()) {
-          context.pop();
-        }
-      }
-    });
 
     return Scaffold(
       backgroundColor: AppColors.background,

@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/intl.dart';
+import 'package:mobile_gym_app/core/ui/widgets/full_screen_empty_state.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/ui/widgets/horizontal_calendar.dart';
 import '../../../core/ui/widgets/no_connection_view.dart';
 import '../../user/providers/user_provider.dart';
 import '../providers/classes_provider.dart';
@@ -23,8 +25,14 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
   @override
   Widget build(BuildContext context) {
     final selectedDate = ref.watch(selectedDateProvider);
-    final classesAsync = ref.watch(classesForDateProvider(selectedDate));
     final userAsync = ref.watch(currentUserProvider);
+    final isTrainer = userAsync.valueOrNull?.isTrainer ?? false;
+
+    // Trener widzi tylko swoje zajęcia (backend filtruje po tokenie).
+    // Zwykły użytkownik widzi wszystkie zajęcia grupowe na dany dzień.
+    final classesAsync = isTrainer
+        ? ref.watch(trainerClassesProvider(selectedDate))
+        : ref.watch(classesForDateProvider(selectedDate));
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -38,72 +46,92 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Grafik',
-                      style: TextStyle(
-                          color: AppColors.textPrimary,
-                          fontSize: 34,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: -1.0
-                      )
+                  const Text(
+                    'Grafik',
+                    style: TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 34,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -1.0,
+                    ),
                   ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.1, end: 0),
 
                   const SizedBox(height: 20),
-                  _buildHorizontalCalendar(ref, selectedDate),
+                  HorizontalCalendar(
+                    selectedDate: selectedDate,
+                    onDateSelected: (date) {
+                      ref.read(selectedDateProvider.notifier).state = date;
+                    },
+                  ),
                   const SizedBox(height: 20),
 
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: userAsync.when(
-                      data: (user) => (user?.isTrainer ?? false)
-                          ? const SizedBox(height: 10)
-                          : CalendarViewToggle(
-                        isMyClassesSelected: _showOnlyMyClasses,
-                        onToggle: (value) => setState(() => _showOnlyMyClasses = value),
-                      ).animate().fadeIn(),
-                      loading: () => const SizedBox(height: 48),
-                      error: (_, _) => const SizedBox.shrink(),
+                  // Toggle "Moje zajęcia" widoczny tylko dla zwykłych użytkowników.
+                  if (!isTrainer)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: userAsync.when(
+                        data: (_) => CalendarViewToggle(
+                          isMyClassesSelected: _showOnlyMyClasses,
+                          onToggle: (value) =>
+                              setState(() => _showOnlyMyClasses = value),
+                        ).animate().fadeIn(),
+                        loading: () => const SizedBox(height: 48),
+                        error: (_, _) => const SizedBox.shrink(),
+                      ),
                     ),
-                  ),
                 ],
               ),
             ),
+
             Expanded(
               child: classesAsync.when(
-                loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
-                error: (err, stack) => NoConnectionView(onRetry: () => ref.invalidate(classesForDateProvider(selectedDate))),
+                loading: () => const Center(
+                  child: CircularProgressIndicator(color: AppColors.primary),
+                ),
+                error: (err, stack) => NoConnectionView(
+                  onRetry: () => isTrainer
+                      ? ref.invalidate(trainerClassesProvider(selectedDate))
+                      : ref.invalidate(classesForDateProvider(selectedDate)),
+                ),
                 data: (dayClasses) {
-                  final user = userAsync.value;
-                  final isTrainer = user?.isTrainer ?? false;
-
                   final displayedClasses = dayClasses.where((c) {
+                    // Treningi personalne mają osobną zakładkę — tu nie pokazujemy.
                     if (c.personalTraining) return false;
-
-                    if (isTrainer) {
-                      final trainerName = c.trainer.fullName.toLowerCase().trim();
-                      final currentUserName = user?.fullName.toLowerCase().trim();
-                      return trainerName == currentUserName;
-                    }
-
+                    // Trener: backend zwrócił już tylko jego zajęcia, nie filtrujemy dalej.
+                    // Użytkownik: opcjonalnie tylko zapisane.
                     return _showOnlyMyClasses ? c.userEnrolled : true;
                   }).toList();
 
-                  Widget content = displayedClasses.isEmpty
-                      ? _buildEmptyState(key: ValueKey('empty_${selectedDate}_$_showOnlyMyClasses'))
-                      : _buildClassesList(displayedClasses, selectedDate, key: ValueKey('list_${selectedDate}_$_showOnlyMyClasses'));
+                  final content = displayedClasses.isEmpty
+                      ? FullScreenEmptyState(
+                    key: ValueKey(
+                        'empty_${selectedDate}_$_showOnlyMyClasses'),
+                    icon: Icons.event_busy_rounded,
+                    title: 'Brak zajęć w tym dniu',
+                    subtitle: 'Wybierz inną datę z kalendarza powyżej',
+                    iconColor: AppColors.primary,
+                  )
+                      : _buildClassesList(
+                    displayedClasses,
+                    selectedDate,
+                    key: ValueKey(
+                        'list_${selectedDate}_$_showOnlyMyClasses'),
+                  );
 
                   return AnimatedSwitcher(
                     duration: const Duration(milliseconds: 400),
                     switchInCurve: Curves.easeOutQuart,
                     switchOutCurve: Curves.easeInQuart,
-                    transitionBuilder: (child, animation) {
-                      return FadeTransition(
-                        opacity: animation,
-                        child: SlideTransition(
-                          position: Tween<Offset>(begin: const Offset(0.05, 0.0), end: Offset.zero).animate(animation),
-                          child: child,
-                        ),
-                      );
-                    },
+                    transitionBuilder: (child, animation) => FadeTransition(
+                      opacity: animation,
+                      child: SlideTransition(
+                        position: Tween<Offset>(
+                          begin: const Offset(0.05, 0.0),
+                          end: Offset.zero,
+                        ).animate(animation),
+                        child: child,
+                      ),
+                    ),
                     child: content,
                   );
                 },
@@ -115,76 +143,17 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     );
   }
 
-  Widget _buildHorizontalCalendar(WidgetRef ref, DateTime selectedDate) {
-    final today = DateTime.now();
-    final normalizedToday = DateTime(today.year, today.month, today.day);
-    final days = List.generate(14, (index) => normalizedToday.add(Duration(days: index)));
-
-    return SizedBox(
-      height: 85,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        clipBehavior: Clip.none,
-        itemCount: days.length,
-        itemBuilder: (context, index) {
-          final date = days[index];
-          final isSelected = date.isAtSameMomentAs(selectedDate);
-          final dayName = DateFormat('E', 'pl_PL').format(date).toLowerCase();
-
-          return GestureDetector(
-            onTap: () => ref.read(selectedDateProvider.notifier).state = date,
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 250),
-              width: 65,
-              margin: const EdgeInsets.only(right: 12),
-              decoration: BoxDecoration(
-                color: isSelected ? AppColors.primary : AppColors.surface,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: isSelected ? [
-                  BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.3),
-                    blurRadius: 12,
-                    offset: const Offset(0, 6),
-                  )
-                ] : [],
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    dayName,
-                    style: TextStyle(
-                      color: isSelected ? Colors.white : AppColors.textSecondary,
-                      fontSize: 14,
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    '${date.day}',
-                    style: TextStyle(
-                      color: isSelected ? Colors.white : AppColors.textPrimary,
-                      fontSize: 22,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ).animate().fadeIn(delay: (index * 30).ms).slideX(begin: 0.1);
-        },
-      ),
-    );
-  }
-
-  Widget _buildClassesList(List<GymClass> classes, DateTime selectedDate, {required Key key}) {
+  Widget _buildClassesList(
+      List<GymClass> classes,
+      DateTime selectedDate, {
+        required Key key,
+      }) {
     return ListView.builder(
       key: key,
       padding: const EdgeInsets.fromLTRB(20, 10, 20, 130),
       itemCount: classes.length,
       itemBuilder: (context, index) {
         final gymClass = classes[index];
-
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -193,16 +162,27 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                 padding: const EdgeInsets.only(bottom: 16, top: 5),
                 child: Row(
                   children: [
-                    Container(width: 4, height: 16, decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(2))),
+                    Container(
+                      width: 4,
+                      height: 16,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
                     const SizedBox(width: 8),
                     Text(
-                        _getDateLabel(selectedDate).toUpperCase(),
-                        style: const TextStyle(color: AppColors.textPrimary, fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1.2)
+                      _getDateLabel(selectedDate).toUpperCase(),
+                      style: const TextStyle(
+                        color: AppColors.textPrimary,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.2,
+                      ),
                     ),
                   ],
                 ),
               ).animate().fadeIn(),
-
             Padding(
               padding: const EdgeInsets.only(bottom: 16),
               child: ClassCard(gymClass: gymClass)
@@ -213,31 +193,6 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
           ],
         );
       },
-    );
-  }
-
-  Widget _buildEmptyState({required Key key}) {
-    return Center(
-      key: key,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(35),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.surface,
-              border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
-            ),
-            child: const Icon(Icons.event_busy_rounded, size: 70, color: AppColors.textSecondary),
-          ).animate().scale(duration: 400.ms, curve: Curves.easeOutBack),
-          const SizedBox(height: 25),
-          const Text(
-            'Brak zajęć w tym dniu',
-            style: TextStyle(color: AppColors.textPrimary, fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-        ],
-      ),
     );
   }
 
