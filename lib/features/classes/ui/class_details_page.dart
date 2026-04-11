@@ -26,14 +26,6 @@ class ClassDetailsPage extends ConsumerWidget {
     final isTrainer = userAsync.valueOrNull?.isTrainer ?? false;
     final size = MediaQuery.of(context).size;
 
-    ref.listen(bookingNotifierProvider, (previous, next) {
-      if (previous != null && previous.isLoading && !next.isLoading && !next.hasError) {
-        if (context.canPop()) {
-          context.pop();
-        }
-      }
-    });
-
     return Scaffold(
       backgroundColor: AppColors.background,
       extendBody: true,

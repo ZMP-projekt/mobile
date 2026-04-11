@@ -12,7 +12,7 @@ class MembershipRepository {
       final response = await _dio.get('/api/memberships/me');
       return Membership.fromJson(response.data);
     } on DioException catch (e) {
-      if (e.response?.statusCode == 404 || e.response?.statusCode == 403) {
+      if (e.response?.statusCode == 404) {
         return Membership(
           active: false,
           endDate: DateTime.now().subtract(const Duration(days: 1)),

@@ -20,8 +20,11 @@ class User with _$User {
   String get fullName => '$firstName $lastName';
 
   String get displayAvatarUrl {
-    final seed = '${firstName.trim().toLowerCase()}${lastName.trim().toLowerCase()}';
-    return 'https://api.dicebear.com/9.x/thumbs/png?seed=$seed&shapeColor=00d2d3,ff2a7a,b721ff&backgroundColor=0a0a14';
+    return 'https://api.dicebear.com/9.x/thumbs/png'
+        '?seed=$id'
+        '&shapeColor=00d2d3,ff2a7a,b721ff'
+        '&backgroundColor=0a0a14';
   }
+
   bool get isTrainer => role == 'ROLE_TRAINER' || role == 'ROLE_ADMIN';
 }

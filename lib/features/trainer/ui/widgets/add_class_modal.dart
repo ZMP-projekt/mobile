@@ -119,7 +119,7 @@ class _AddClassModalState extends ConsumerState<AddClassModal> {
         'personalTraining': _isPersonalTraining,
       };
 
-      await ref.read(classesRepositoryProvider).createClass(requestData);
+      await ref.read(bookingNotifierProvider.notifier).createClass(requestData);
 
       ref.invalidate(classesForDateProvider);
       ref.invalidate(trainerClassesProvider);

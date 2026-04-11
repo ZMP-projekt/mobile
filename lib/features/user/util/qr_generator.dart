@@ -14,7 +14,7 @@ class QrGenerator {
 
   static String _generateNonce(int length) {
     const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-    final rnd = Random();
+    final rnd = Random.secure();
     return String.fromCharCodes(Iterable.generate(
       length, (_) => chars.codeUnitAt(rnd.nextInt(chars.length)),
     ));
