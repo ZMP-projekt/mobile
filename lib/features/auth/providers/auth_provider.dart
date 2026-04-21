@@ -3,6 +3,7 @@ import '../../../core/network/dio_client.dart';
 import '../../classes/providers/classes_provider.dart';
 import '../../main/main_screen.dart';
 import '../../membership/providers/membership_provider.dart';
+import '../../notifications/providers/notification_provider.dart';
 import '../data/auth_repository.dart';
 import '../../../core/util/app_logger.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -112,14 +113,13 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
     Future.microtask(() {
       ref.read(authTokenProvider.notifier).state = null;
-
-      ref.invalidate(mainNavigationProvider);
-
       ref.invalidate(currentUserProvider);
       ref.invalidate(currentMembershipProvider);
       ref.invalidate(classesForDateProvider);
       ref.invalidate(todayClassesProvider);
       ref.invalidate(trainerClassesProvider);
+      ref.invalidate(notificationsProvider);
+      ref.read(mainNavigationProvider.notifier).state = 0;
     });
 
     AppLogger.i("👋 Wylogowano");

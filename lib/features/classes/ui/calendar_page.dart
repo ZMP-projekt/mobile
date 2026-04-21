@@ -28,8 +28,6 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     final userAsync = ref.watch(currentUserProvider);
     final isTrainer = userAsync.valueOrNull?.isTrainer ?? false;
 
-    // Trener widzi tylko swoje zajęcia (backend filtruje po tokenie).
-    // Zwykły użytkownik widzi wszystkie zajęcia grupowe na dany dzień.
     final classesAsync = isTrainer
         ? ref.watch(trainerClassesProvider(selectedDate))
         : ref.watch(classesForDateProvider(selectedDate));
@@ -65,7 +63,6 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                   ),
                   const SizedBox(height: 20),
 
-                  // Toggle "Moje zajęcia" widoczny tylko dla zwykłych użytkowników.
                   if (!isTrainer)
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -95,10 +92,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                 ),
                 data: (dayClasses) {
                   final displayedClasses = dayClasses.where((c) {
-                    // Treningi personalne mają osobną zakładkę — tu nie pokazujemy.
                     if (c.personalTraining) return false;
-                    // Trener: backend zwrócił już tylko jego zajęcia, nie filtrujemy dalej.
-                    // Użytkownik: opcjonalnie tylko zapisane.
                     return _showOnlyMyClasses ? c.userEnrolled : true;
                   }).toList();
 

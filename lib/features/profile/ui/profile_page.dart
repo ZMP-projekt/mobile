@@ -29,6 +29,7 @@ class ProfilePage extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   const SizedBox(height: 20),
+
                   Container(
                     padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
@@ -58,9 +59,16 @@ class ProfilePage extends ConsumerWidget {
 
                   const SizedBox(height: 32),
 
-                  _buildFlatSection(
-                    title: 'Rola Konta',
-                    content: Row(
+                  _buildSectionHeader('INFORMACJE'),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+                    ),
+                    child: Row(
                       children: [
                         Icon(
                           user.role == 'ROLE_TRAINER' ? Icons.fitness_center_rounded : Icons.person,
@@ -68,59 +76,107 @@ class ProfilePage extends ConsumerWidget {
                         ),
                         const SizedBox(width: 12),
                         Text(
-                          user.role == 'ROLE_TRAINER' ? 'Trener' : 'Użytkownik',
+                          user.role == 'ROLE_TRAINER' ? 'Konto Trenera' : 'Konto Użytkownika',
                           style: const TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w600),
                         ),
                       ],
                     ),
                   ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.05),
 
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 24),
 
-                  _buildFlatSection(
-                    title: 'Ustawienia',
-                    content: Column(
+                  _buildSectionHeader('USTAWIENIA'),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+                    ),
+                    child: Column(
                       children: [
-                        _buildSettingsRow(Icons.lock_outline_rounded, 'Zmień hasło'),
-                        const Divider(color: Colors.white12, height: 24),
-                        _buildSettingsRow(Icons.notifications_none_rounded, 'Powiadomienia'),
-                        const Divider(color: Colors.white12, height: 24),
-                        _buildSettingsRow(Icons.help_outline_rounded, 'Pomoc i wsparcie'),
+                        _buildActionTile(
+                          icon: Icons.language_rounded,
+                          title: 'Język aplikacji',
+                          trailing: const Text('Polski', style: TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.w500)),
+                          onTap: () {
+                            // Tu w przyszłości podepniemy przełączanie języka (i18n)
+                          },
+                        ),
+                        Divider(color: Colors.white.withValues(alpha: 0.05), height: 1),
+                        _buildActionTile(
+                          icon: Icons.notifications_active_outlined,
+                          title: 'Powiadomienia Push',
+                          trailing: Switch(
+                            value: true,
+                            onChanged: (val) {},
+                            activeThumbColor: AppColors.primary,
+                          ),
+                          onTap: () {},
+                        ),
                       ],
                     ),
                   ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.05),
 
+                  const SizedBox(height: 24),
+
+                  _buildSectionHeader('O APLIKACJI'),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+                    ),
+                    child: Column(
+                      children: [
+                        _buildActionTile(
+                          icon: Icons.help_outline_rounded,
+                          title: 'Pomoc i kontakt',
+                          onTap: () {},
+                        ),
+                        Divider(color: Colors.white.withValues(alpha: 0.05), height: 1),
+                        _buildActionTile(
+                          icon: Icons.description_outlined,
+                          title: 'Regulamin klubu',
+                          onTap: () {},
+                        ),
+                      ],
+                    ),
+                  ).animate().fadeIn(delay: 500.ms).slideY(begin: 0.05),
+
                   const SizedBox(height: 40),
 
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                    child: SizedBox(
-                      height: 56,
-                      width: double.infinity,
-                      child: ElevatedButton.icon(
-                        onPressed: () {
-                          ref.read(authStateProvider.notifier).logout();
-                        },
-                        icon: const Icon(Icons.logout_rounded, size: 22),
-                        label: const Text(
-                          'Wyloguj się',
-                          style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, letterSpacing: -0.5),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.error.withValues(alpha: 0.1),
-                          foregroundColor: AppColors.error,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            side: BorderSide(color: AppColors.error.withValues(alpha: 0.3), width: 1),
-                          ),
+                  SizedBox(
+                    height: 56,
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        ref.read(authStateProvider.notifier).logout();
+                      },
+                      icon: const Icon(Icons.logout_rounded, size: 22),
+                      label: const Text(
+                        'Wyloguj się',
+                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, letterSpacing: -0.5),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.error.withValues(alpha: 0.1),
+                        foregroundColor: AppColors.error,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          side: BorderSide(color: AppColors.error.withValues(alpha: 0.3), width: 1),
                         ),
                       ),
                     ),
-                  ),
+                  ).animate().fadeIn(delay: 600.ms),
 
-                  const SizedBox(height: 120),
+                  const SizedBox(height: 32),
 
+                  const Text(
+                    'Wersja 1.0.0',
+                    style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                  ).animate().fadeIn(delay: 700.ms),
+
+                  const SizedBox(height: 80),
                 ],
               ),
             );
@@ -130,40 +186,48 @@ class ProfilePage extends ConsumerWidget {
     );
   }
 
-  Widget _buildFlatSection({required String title, required Widget content}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 8, bottom: 12),
-          child: Text(
-            title.toUpperCase(),
-            style: const TextStyle(color: AppColors.textSecondary, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1),
-          ),
+  Widget _buildSectionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 8, bottom: 12),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Text(
+          title.toUpperCase(),
+          style: const TextStyle(color: AppColors.textSecondary, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1),
         ),
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
-          ),
-          child: content,
-        ),
-      ],
+      ),
     );
   }
 
-  Widget _buildSettingsRow(IconData icon, String title) {
-    return Row(
-      children: [
-        Icon(icon, color: AppColors.textSecondary, size: 22),
-        const SizedBox(width: 16),
-        Text(title, style: const TextStyle(color: AppColors.textPrimary, fontSize: 16)),
-        const Spacer(),
-        const Icon(Icons.chevron_right_rounded, color: Colors.white24),
-      ],
+  Widget _buildActionTile({
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+    Widget? trailing,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          child: Row(
+            children: [
+              Icon(icon, color: AppColors.textSecondary, size: 22),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  title,
+                  style: const TextStyle(color: AppColors.textPrimary, fontSize: 15, fontWeight: FontWeight.w500),
+                ),
+              ),
+              if (trailing != null) trailing
+              else const Icon(Icons.arrow_forward_ios_rounded, color: AppColors.textSecondary, size: 16),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

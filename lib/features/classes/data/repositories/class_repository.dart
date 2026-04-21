@@ -7,6 +7,7 @@ abstract class IClassesRepository {
   Future<List<GymClass>> getClassesByDate(DateTime date);
   Future<List<GymClass>> getTrainerClasses(DateTime date);
   Future<List<User>> getClassParticipants(int classId);
+  Future<List<GymClass>> getClassesByLocation(int locationId);
 
   Future<void> bookClass(int classId);
   Future<void> cancelBooking(int classId);
@@ -21,10 +22,17 @@ class ApiClassesRepository implements IClassesRepository {
   ApiClassesRepository(this._dio);
 
   @override
+  Future<List<GymClass>> getClassesByLocation(int locationId) async {
+    final response = await _dio.get('/api/classes/location/$locationId');
+    final List<dynamic> data = response.data;
+    return data.map((json) => GymClass.fromJson(json)).toList();
+  }
+
+  @override
   Future<List<GymClass>> getClassesByDate(DateTime date) async {
     try {
       final dateString = "${date.toIso8601String().substring(0, 10)}T00:00:00";
-      final response = await _dio.get('/api/classes', queryParameters: {'date': dateString});
+      final response = await _dio.get('/api/classes/by-date', queryParameters: {'date': dateString});
       final List<dynamic> data = response.data;
       return data.map((json) => GymClass.fromJson(json)).toList();
     } on DioException catch (e) {

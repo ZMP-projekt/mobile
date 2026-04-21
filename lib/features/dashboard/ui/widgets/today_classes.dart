@@ -42,12 +42,9 @@ class TodayClassesCarousel extends ConsumerWidget {
           );
         }
 
-        // Filtrowanie na dwie kategorie
-        // Jeśli w modelu masz isPersonalTraining zamiast personalTraining, zmień to tutaj!
         final groupClasses = classes.where((c) => !c.personalTraining).toList();
         final ptClasses = classes.where((c) => c.personalTraining).toList();
 
-        // Brak jakichkolwiek zajęć w dniu dzisiejszym
         if (classes.isEmpty) {
           return const EmptyStateView(
             icon: Icons.wb_sunny_rounded,
@@ -59,7 +56,6 @@ class TodayClassesCarousel extends ConsumerWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // --- SEKCJA ZAJĘĆ GRUPOWYCH (Karuzela) ---
             if (groupClasses.isNotEmpty)
               SizedBox(
                 height: 180,
@@ -83,7 +79,6 @@ class TodayClassesCarousel extends ConsumerWidget {
                 ),
               ).animate().fadeIn(),
 
-            // --- SEKCJA TRENINGÓW PERSONALNYCH (Pionowa lista) ---
             if (ptClasses.isNotEmpty) ...[
               const SizedBox(height: 30),
               const Padding(
@@ -124,9 +119,6 @@ class TodayClassesCarousel extends ConsumerWidget {
   }
 }
 
-// ---------------------------------------------------------
-// Dedykowana karta dla Treningu Personalnego na Dashboardzie
-// ---------------------------------------------------------
 class _DashboardUserPtCard extends ConsumerWidget {
   final GymClass gymClass;
 
@@ -153,7 +145,6 @@ class _DashboardUserPtCard extends ConsumerWidget {
         ),
         child: Row(
           children: [
-            // Avatar trenera
             CircleAvatar(
               radius: 26,
               backgroundColor: AppColors.background,
@@ -200,7 +191,6 @@ class _DashboardUserPtCard extends ConsumerWidget {
     );
   }
 
-  // Przycisk zapisu na trening wbudowany w kartę
   Widget _buildActionArea(BuildContext context, WidgetRef ref, bool isProcessing) {
     if (gymClass.userEnrolled) {
       return Container(

@@ -14,19 +14,16 @@ final userRepositoryProvider = Provider<UserRepository>((ref) {
 
 final currentUserProvider = FutureProvider<User?>((ref) async {
   final authState = ref.watch(authStateProvider);
-
   if (!authState.isAuthenticated) return null;
 
   try {
     final repo = ref.watch(userRepositoryProvider);
     return await repo.getMe();
   } on DioException catch (e) {
-    if (e.response?.statusCode == 401 || e.response?.statusCode == 403) {
-      AppLogger.e("Token wygasł lub jest nieważny. Automatyczne wylogowanie.");
 
-      Future.microtask(() {
-        ref.read(authStateProvider.notifier).logout();
-      });
+    if (e.response?.statusCode == 401 || e.response?.statusCode == 403) {
+      AppLogger.e("Token wygasł — automatyczne wylogowanie.");
+      Future.microtask(() => ref.read(authStateProvider.notifier).logout());
     }
     rethrow;
   }

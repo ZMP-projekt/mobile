@@ -20,8 +20,10 @@ class User with _$User {
   String get fullName => '$firstName $lastName';
 
   String get displayAvatarUrl {
+
+    final seed = (firstName + lastName).codeUnits.fold(0, (a, b) => a + b);
     return 'https://api.dicebear.com/9.x/thumbs/png'
-        '?seed=$id'
+        '?seed=$seed'
         '&shapeColor=00d2d3,ff2a7a,b721ff'
         '&backgroundColor=0a0a14';
   }

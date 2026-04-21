@@ -7,6 +7,7 @@ import '../ui/widgets/participants_list.dart';
 import '../../../core/theme/app_colors.dart';
 import '../data/models/gym_class.dart';
 import '../../user/providers/user_provider.dart';
+import '../providers/classes_provider.dart';
 import 'widgets/class_action_panel.dart';
 
 class ClassDetailsPage extends ConsumerWidget {
@@ -25,38 +26,49 @@ class ClassDetailsPage extends ConsumerWidget {
     final isTrainer = userAsync.valueOrNull?.isTrainer ?? false;
     final size = MediaQuery.of(context).size;
 
+    final targetDate = DateTime(gymClass.startTime.year, gymClass.startTime.month, gymClass.startTime.day);
+
+    final classesList = ref.watch(classesForDateProvider(targetDate)).valueOrNull ?? [];
+
+    final currentClass = classesList.firstWhere(
+          (c) => c.id == gymClass.id,
+      orElse: () => gymClass,
+    );
+
     return Scaffold(
       backgroundColor: AppColors.background,
       extendBody: true,
 
       bottomNavigationBar: ClassActionPanel(
-          gymClass: gymClass,
+          gymClass: currentClass,
           isTrainer: isTrainer
       ),
 
       body: SingleChildScrollView(
-
         padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom + 100),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildHeaderImage(context, size),
+            _buildHeaderImage(context, size, currentClass),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildTitleSection(),
+                  _buildTitleSection(currentClass),
                   const SizedBox(height: 15),
-                  _buildBadgesRow(),
+
+                  // SEKCJA ODZNAK (z lokalizacją)
+                  _buildBadgesRow(currentClass),
+
                   const SizedBox(height: 35),
                   if (isTrainer)
                     ParticipantsList(
-                      classId: gymClass.id,
-                      maxParticipants: gymClass.maxParticipants,
+                      classId: currentClass.id,
+                      maxParticipants: currentClass.maxParticipants,
                     )
                   else
-                    _buildInstructorAndDescription(),
+                    _buildInstructorAndDescription(currentClass),
                 ],
               ),
             ),
@@ -66,11 +78,11 @@ class ClassDetailsPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildHeaderImage(BuildContext context, Size size) {
+  Widget _buildHeaderImage(BuildContext context, Size size, GymClass currentClass) {
     return Stack(
       children: [
         Hero(
-          tag: 'class_image_${gymClass.id}',
+          tag: 'class_image_${currentClass.id}',
           child: Container(
             height: size.height * 0.45,
             width: double.infinity,
@@ -120,28 +132,34 @@ class ClassDetailsPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildTitleSection() {
+  Widget _buildTitleSection(GymClass currentClass) {
     return Text(
-      gymClass.name,
+      currentClass.name,
       style: const TextStyle(color: AppColors.textPrimary, fontSize: 34, fontWeight: FontWeight.w800, letterSpacing: -1.0, height: 1.1),
     ).animate().fadeIn(delay: 100.ms).slideY(begin: 0.1, end: 0);
   }
 
-  Widget _buildBadgesRow() {
-    return Row(
+  Widget _buildBadgesRow(GymClass currentClass) {
+    final locName = currentClass.locationName ?? 'Lokalizacja nieznana';
+
+    // Zmienione na Wrap, aby badge ładnie układały się w nowych rzędach jeśli brakuje miejsca
+    return Wrap(
+      spacing: 12,
+      runSpacing: 12,
       children: [
-        _buildBadge(Icons.access_time_rounded, '${gymClass.startTimeFormatted} (${gymClass.durationMinutes} min)'),
-        const SizedBox(width: 12),
+        _buildBadge(Icons.access_time_rounded, '${currentClass.startTimeFormatted} (${currentClass.durationMinutes} min)'),
         _buildBadge(
             Icons.people_alt_rounded,
-            '${gymClass.spotsLeft} wolnych',
-            color: gymClass.isFull ? AppColors.error : AppColors.primary
+            '${currentClass.spotsLeft} wolnych',
+            color: currentClass.isFull ? AppColors.error : AppColors.primary
         ),
+        // Nowy badge z lokalizacją
+        _buildBadge(Icons.location_on_rounded, locName),
       ],
     ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.1, end: 0);
   }
 
-  Widget _buildInstructorAndDescription() {
+  Widget _buildInstructorAndDescription(GymClass currentClass) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -157,7 +175,7 @@ class ClassDetailsPage extends ConsumerWidget {
               CircleAvatar(
                 radius: 30,
                 backgroundColor: AppColors.background,
-                backgroundImage: NetworkImage(gymClass.trainer.photoUrl ?? gymClass.trainer.displayAvatarUrl),
+                backgroundImage: NetworkImage(currentClass.trainer.photoUrl ?? currentClass.trainer.displayAvatarUrl),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -166,18 +184,18 @@ class ClassDetailsPage extends ConsumerWidget {
                   children: [
                     const Text('Instruktor', style: TextStyle(color: AppColors.textSecondary, fontSize: 14, fontWeight: FontWeight.w500)),
                     const SizedBox(height: 4),
-                    Text(gymClass.trainer.fullName, style: const TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.bold)),
+                    Text(currentClass.trainer.fullName, style: const TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.bold)),
                   ],
                 ),
               ),
             ],
           ),
-        ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.1, end: 0),
+        ).animate().fadeIn(delay: 350.ms).slideY(begin: 0.1, end: 0),
         const SizedBox(height: 35),
         const Text('O treningu', style: TextStyle(color: AppColors.textPrimary, fontSize: 22, fontWeight: FontWeight.bold, letterSpacing: -0.5)).animate().fadeIn(delay: 400.ms),
         const SizedBox(height: 12),
         Text(
-            gymClass.description ?? 'Dołącz do nas i poczuj energię grupowego treningu. Idealne dla każdego poziomu zaawansowania.',
+            currentClass.description ?? 'Dołącz do nas i poczuj energię grupowego treningu. Idealne dla każdego poziomu zaawansowania.',
             style: TextStyle(color: AppColors.textSecondary.withValues(alpha: 0.8), fontSize: 16, height: 1.6)
         ).animate().fadeIn(delay: 450.ms),
       ],

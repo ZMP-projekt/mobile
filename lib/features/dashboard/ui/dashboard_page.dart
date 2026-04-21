@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import '../../notifications/providers/notification_provider.dart';
 import '../../user/providers/user_provider.dart';
 import '../../main/main_screen.dart';
 import '../../classes/providers/classes_provider.dart';
@@ -16,6 +17,7 @@ class DashboardPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(notificationsProvider);
     final hasError = ref.watch(currentUserProvider).hasError ||
         ref.watch(todayClassesProvider).hasError ||
         ref.watch(currentMembershipProvider).hasError;
