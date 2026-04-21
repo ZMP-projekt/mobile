@@ -2,14 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile_gym_app/features/main/ui/widgets/main_action_button.dart';
 
+import '../../core/network/dio_client.dart';
 import '../../core/ui/widgets/async_value_widget.dart';
 import '../../core/ui/widgets/no_connection_view.dart';
 import '../../core/ui/widgets/offline_access_modal.dart';
+import '../auth/providers/auth_provider.dart';
 import '../membership/ui/widgets/membership_guard.dart';
 import '../membership/ui/widgets/membership_purchase_modal.dart';
 import '../membership/providers/membership_provider.dart';
 
 import '../dashboard/ui/dashboard_page.dart';
+import '../notifications/data/models/notification.dart';
+import '../notifications/providers/notification_provider.dart';
+import '../notifications/ui/widgets/notification_toast.dart';
 import '../trainings/ui/personal_trainings_page.dart';
 import '../classes/ui/calendar_page.dart';
 import '../profile/ui/profile_page.dart';
@@ -64,6 +69,17 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(notificationsProvider);
+
+    ref.listen<AppNotification?>(toastNotificationProvider, (prev, next) {
+      if (next != null && context.mounted) {
+        NotificationToast.show(context, next);
+        Future.microtask(() =>
+        ref.read(toastNotificationProvider.notifier).state = null,
+        );
+      }
+    });
+
     ref.listen<int>(mainNavigationProvider, (previous, next) {
       if (_pageController.hasClients && _pageController.page?.round() != next) {
         _pageController.animateToPage(
@@ -115,7 +131,15 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         );
       },
       error: (err, stack) => NoConnectionView(
-        onRetry: () => ref.invalidate(currentUserProvider),
+        onRetry: () {
+
+          final token = ref.read(authTokenProvider);
+          if (token != null) {
+            ref.read(authStateProvider.notifier).logout();
+          } else {
+            ref.invalidate(currentUserProvider);
+          }
+        },
         message: 'Nie udało się zweryfikować uprawnień konta. Sprawdź sieć.',
       ),
     );

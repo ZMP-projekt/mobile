@@ -14,6 +14,10 @@ class GymClass with _$GymClass {
     required DateTime startTime,
     required DateTime endTime,
     required Trainer trainer,
+    String? locationName,
+    String? address,
+    String? city,
+    int? locationId,
     @Default(0) int maxParticipants,
     @Default(0) int currentParticipants,
     @Default(false) bool userEnrolled,
@@ -53,20 +57,21 @@ class GymClass with _$GymClass {
   }
 
   factory GymClass.fromJson(Map<String, dynamic> json) =>
-      _$GymClassFromJson(_preProcessJson(json));
+  _$GymClassFromJson(_preProcessJson(json));
 
   static Map<String, dynamic> _preProcessJson(Map<String, dynamic> json) {
-    final map = Map<String, dynamic>.from(json);
+  final map = Map<String, dynamic>.from(json);
 
-    if (map['trainer'] == null) {
-      final fullName = (map['trainerName'] as String?) ?? 'Nieznany Trener';
-      final nameParts = fullName.trim().split(' ');
+  map['locationId'] = json['locationId'];
 
-      map['trainer'] = {
-        'firstName': nameParts.isNotEmpty ? nameParts.first : 'Nieznany',
-        'lastName': nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '',
-      };
-    }
+  if (map['trainer'] == null) {
+  final fullName = (map['trainerName'] as String?) ?? 'Nieznany Trener';
+  final nameParts = fullName.trim().split(' ');
+  map['trainer'] = {
+  'firstName': nameParts.isNotEmpty ? nameParts.first : 'Nieznany',
+  'lastName': nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '',
+    };
+  }
     return map;
   }
 }

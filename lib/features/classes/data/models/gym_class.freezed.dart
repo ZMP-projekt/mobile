@@ -26,6 +26,10 @@ mixin _$GymClass {
   DateTime get startTime => throw _privateConstructorUsedError;
   DateTime get endTime => throw _privateConstructorUsedError;
   Trainer get trainer => throw _privateConstructorUsedError;
+  String? get locationName => throw _privateConstructorUsedError;
+  String? get address => throw _privateConstructorUsedError;
+  String? get city => throw _privateConstructorUsedError;
+  int? get locationId => throw _privateConstructorUsedError;
   int get maxParticipants => throw _privateConstructorUsedError;
   int get currentParticipants => throw _privateConstructorUsedError;
   bool get userEnrolled => throw _privateConstructorUsedError;
@@ -54,6 +58,10 @@ abstract class $GymClassCopyWith<$Res> {
     DateTime startTime,
     DateTime endTime,
     Trainer trainer,
+    String? locationName,
+    String? address,
+    String? city,
+    int? locationId,
     int maxParticipants,
     int currentParticipants,
     bool userEnrolled,
@@ -85,6 +93,10 @@ class _$GymClassCopyWithImpl<$Res, $Val extends GymClass>
     Object? startTime = null,
     Object? endTime = null,
     Object? trainer = null,
+    Object? locationName = freezed,
+    Object? address = freezed,
+    Object? city = freezed,
+    Object? locationId = freezed,
     Object? maxParticipants = null,
     Object? currentParticipants = null,
     Object? userEnrolled = null,
@@ -114,6 +126,22 @@ class _$GymClassCopyWithImpl<$Res, $Val extends GymClass>
                 ? _value.trainer
                 : trainer // ignore: cast_nullable_to_non_nullable
                       as Trainer,
+            locationName: freezed == locationName
+                ? _value.locationName
+                : locationName // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            address: freezed == address
+                ? _value.address
+                : address // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            city: freezed == city
+                ? _value.city
+                : city // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            locationId: freezed == locationId
+                ? _value.locationId
+                : locationId // ignore: cast_nullable_to_non_nullable
+                      as int?,
             maxParticipants: null == maxParticipants
                 ? _value.maxParticipants
                 : maxParticipants // ignore: cast_nullable_to_non_nullable
@@ -169,6 +197,10 @@ abstract class _$$GymClassImplCopyWith<$Res>
     DateTime startTime,
     DateTime endTime,
     Trainer trainer,
+    String? locationName,
+    String? address,
+    String? city,
+    int? locationId,
     int maxParticipants,
     int currentParticipants,
     bool userEnrolled,
@@ -200,6 +232,10 @@ class __$$GymClassImplCopyWithImpl<$Res>
     Object? startTime = null,
     Object? endTime = null,
     Object? trainer = null,
+    Object? locationName = freezed,
+    Object? address = freezed,
+    Object? city = freezed,
+    Object? locationId = freezed,
     Object? maxParticipants = null,
     Object? currentParticipants = null,
     Object? userEnrolled = null,
@@ -229,6 +265,22 @@ class __$$GymClassImplCopyWithImpl<$Res>
             ? _value.trainer
             : trainer // ignore: cast_nullable_to_non_nullable
                   as Trainer,
+        locationName: freezed == locationName
+            ? _value.locationName
+            : locationName // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        address: freezed == address
+            ? _value.address
+            : address // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        city: freezed == city
+            ? _value.city
+            : city // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        locationId: freezed == locationId
+            ? _value.locationId
+            : locationId // ignore: cast_nullable_to_non_nullable
+                  as int?,
         maxParticipants: null == maxParticipants
             ? _value.maxParticipants
             : maxParticipants // ignore: cast_nullable_to_non_nullable
@@ -267,6 +319,10 @@ class _$GymClassImpl extends _GymClass {
     required this.startTime,
     required this.endTime,
     required this.trainer,
+    this.locationName,
+    this.address,
+    this.city,
+    this.locationId,
     this.maxParticipants = 0,
     this.currentParticipants = 0,
     this.userEnrolled = false,
@@ -288,6 +344,14 @@ class _$GymClassImpl extends _GymClass {
   final DateTime endTime;
   @override
   final Trainer trainer;
+  @override
+  final String? locationName;
+  @override
+  final String? address;
+  @override
+  final String? city;
+  @override
+  final int? locationId;
   @override
   @JsonKey()
   final int maxParticipants;
@@ -316,6 +380,12 @@ class _$GymClassImpl extends _GymClass {
                 other.startTime == startTime) &&
             (identical(other.endTime, endTime) || other.endTime == endTime) &&
             (identical(other.trainer, trainer) || other.trainer == trainer) &&
+            (identical(other.locationName, locationName) ||
+                other.locationName == locationName) &&
+            (identical(other.address, address) || other.address == address) &&
+            (identical(other.city, city) || other.city == city) &&
+            (identical(other.locationId, locationId) ||
+                other.locationId == locationId) &&
             (identical(other.maxParticipants, maxParticipants) ||
                 other.maxParticipants == maxParticipants) &&
             (identical(other.currentParticipants, currentParticipants) ||
@@ -339,6 +409,10 @@ class _$GymClassImpl extends _GymClass {
     startTime,
     endTime,
     trainer,
+    locationName,
+    address,
+    city,
+    locationId,
     maxParticipants,
     currentParticipants,
     userEnrolled,
@@ -368,6 +442,10 @@ abstract class _GymClass extends GymClass {
     required final DateTime startTime,
     required final DateTime endTime,
     required final Trainer trainer,
+    final String? locationName,
+    final String? address,
+    final String? city,
+    final int? locationId,
     final int maxParticipants,
     final int currentParticipants,
     final bool userEnrolled,
@@ -390,6 +468,14 @@ abstract class _GymClass extends GymClass {
   DateTime get endTime;
   @override
   Trainer get trainer;
+  @override
+  String? get locationName;
+  @override
+  String? get address;
+  @override
+  String? get city;
+  @override
+  int? get locationId;
   @override
   int get maxParticipants;
   @override

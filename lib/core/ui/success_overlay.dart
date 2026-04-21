@@ -1,7 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import '../../theme/app_colors.dart';
+import '../theme/app_colors.dart';
+import 'package:go_router/go_router.dart';
 
 class SuccessOverlay extends StatelessWidget {
   final String message;
@@ -12,22 +13,11 @@ class SuccessOverlay extends StatelessWidget {
       context: context,
       barrierColor: Colors.black54,
       barrierDismissible: false,
-      builder: (dialogContext) {
-
-        // Czekamy 2 sekundy, a następnie zamykamy overlay
+      builder: (context) {
         Future.delayed(const Duration(milliseconds: 2000), () {
-          if (dialogContext.mounted) {
-            // ZMIANA: Używamy natywnego Navigatora zamiast GoRoutera
-            Navigator.of(dialogContext).pop();
-          }
+          if (context.mounted) context.pop();
         });
-
-        // ZMIANA: PopScope zapobiega zamknięciu okienka fizycznym
-        // przyciskiem "Wstecz" na Androidzie przed upływem 2 sekund.
-        return PopScope(
-          canPop: false,
-          child: SuccessOverlay(message: message),
-        );
+        return SuccessOverlay(message: message);
       },
     );
   }
