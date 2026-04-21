@@ -49,15 +49,12 @@ final dioProvider = Provider<Dio>((ref) {
         return handler.next(options);
       },
       onError: (DioException e, handler) {
-        final isAuthEndpoint = e.requestOptions.path.contains('/auth/login') ||
-            e.requestOptions.path.contains('/auth/register');
+        final isAuthEndpoint = e.requestOptions.path.contains('/auth/');
 
-        if ((e.response?.statusCode == 401 || e.response?.statusCode == 403) && !isAuthEndpoint) {
-          AppLogger.w("Token wygasł lub jest nieprawidłowy. Wymuszanie wylogowania.");
-
+        if (e.response?.statusCode == 401 && !isAuthEndpoint) {
+          AppLogger.w("Token wygasł lub jest nieprawidłowy.");
           ref.read(authTokenProvider.notifier).state = null;
           ref.read(secureStorageProvider).delete(key: 'jwt_token');
-
         }
 
         return handler.next(e);
