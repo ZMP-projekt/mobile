@@ -7,18 +7,20 @@ import '../../features/auth/ui/registration_page.dart';
 import '../../features/main/main_screen.dart';
 import '../../features/classes/ui/class_details_page.dart';
 import '../../features/classes/data/models/gym_class.dart';
+import '../../features/notifications/ui/notifications_page.dart';
 import '../network/dio_client.dart';
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 
 final routerProvider = Provider<GoRouter>((ref) {
 
-  final authState = ref.watch(authStateProvider);
-  final token = ref.watch(authTokenProvider);
-
   final router = GoRouter(
     initialLocation: '/',
     redirect: (context, state) {
+
+      final authState = ref.read(authStateProvider);
+      final token = ref.read(authTokenProvider);
+
       final isAuth = authState.isAuthenticated && token != null;
 
       final isLoggingIn = state.matchedLocation == '/login' || state.matchedLocation == '/register';
@@ -61,6 +63,10 @@ final routerProvider = Provider<GoRouter>((ref) {
             imageUrl: extra['imageUrl'] as String,
           );
         },
+      ),
+      GoRoute(
+        path: '/notifications',
+        builder: (context, state) => const NotificationsPage(),
       ),
     ],
   );
