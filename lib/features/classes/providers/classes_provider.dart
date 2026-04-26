@@ -15,35 +15,36 @@ final selectedDateProvider = StateProvider<DateTime>((ref) {
   return DateTime(now.year, now.month, now.day);
 });
 
+
 final classesForDateProvider = FutureProvider.autoDispose.family<List<GymClass>, DateTime>((ref, date) async {
   final repo = ref.watch(classesRepositoryProvider);
   final selectedLocationId = ref.watch(selectedLocationIdProvider);
 
-  List<GymClass> classes;
-
   if (selectedLocationId != null) {
-    classes = await repo.getClassesByLocation(selectedLocationId);
+    final locationClasses = await repo.getClassesByLocation(selectedLocationId);
 
-    classes = classes.where((c) =>
-    c.startTime.year == date.year &&
-        c.startTime.month == date.month &&
-        c.startTime.day == date.day
-    ).toList();
-  } else {
-    classes = await repo.getClassesByDate(date);
+    return locationClasses.where((c) {
+      return c.startTime.year == date.year &&
+          c.startTime.month == date.month &&
+          c.startTime.day == date.day;
+    }).toList();
   }
 
-  return classes;
+  return await repo.getClassesByDate(date);
 });
 
-final trainerClassesProvider = FutureProvider.autoDispose.family<List<GymClass>, DateTime>((ref, date) async {
+final trainerLocationFilterProvider = StateProvider<int?>((ref) => null);
+
+final trainerClassesProvider = FutureProvider.autoDispose
+    .family<List<GymClass>, DateTime>((ref, date) async {
   final repo = ref.watch(classesRepositoryProvider);
-  final allTrainerClasses = await repo.getTrainerClasses(date);
+  final allClasses = await repo.getTrainerClasses(date);
 
-  final selectedLocationId = ref.watch(selectedLocationIdProvider);
-  if (selectedLocationId == null) return allTrainerClasses;
+  final filterLocationId = ref.watch(trainerLocationFilterProvider);
 
-  return allTrainerClasses.where((c) => c.locationId == selectedLocationId).toList();
+  if (filterLocationId == null) return allClasses;
+
+  return allClasses.where((c) => c.locationId == filterLocationId).toList();
 });
 
 final todayClassesProvider = FutureProvider.autoDispose<List<GymClass>>((ref) async {

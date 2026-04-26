@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:geolocator/geolocator.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../locations/providers/location_provider.dart';
 
@@ -9,7 +10,8 @@ class GymLocationCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final locationsAsync = ref.watch(locationsProvider);
-    final selectedLocationId = ref.watch(selectedLocationIdProvider);
+    final positionAsync = ref.watch(userPositionProvider);
+
 
     return locationsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -17,16 +19,46 @@ class GymLocationCard extends ConsumerWidget {
       data: (locations) {
         if (locations.isEmpty) return const SizedBox();
 
-        final activeLocation = locations.firstWhere(
+        final userPosition = ref.watch(userPositionProvider).valueOrNull;
+        final selectedLocationId = ref.watch(selectedLocationIdProvider);
+
+        final sortedLocations = [...locations];
+
+        sortedLocations.sort((a, b) {
+          final isASelected = a.id == selectedLocationId;
+          final isBSelected = b.id == selectedLocationId;
+
+          if (isASelected && !isBSelected) return -1;
+          if (!isASelected && isBSelected) return 1;
+
+          if (userPosition != null && a.latitude != null && b.latitude != null) {
+            final distA = Geolocator.distanceBetween(
+                userPosition.latitude, userPosition.longitude, a.latitude!, a.longitude!);
+            final distB = Geolocator.distanceBetween(
+                userPosition.latitude, userPosition.longitude, b.latitude!, b.longitude!);
+            return distA.compareTo(distB);
+          }
+
+          return 0;
+        });
+
+        final activeLocation = sortedLocations.firstWhere(
               (loc) => loc.id == selectedLocationId,
           orElse: () {
-            Future.microtask(() => ref.read(selectedLocationIdProvider.notifier).setLocation(locations.first.id));
-            return locations.first;
+            final firstId = sortedLocations.first.id;
+            Future.microtask(() =>
+                ref.read(selectedLocationIdProvider.notifier).setLocation(firstId)
+            );
+            return sortedLocations.first;
           },
         );
 
         return GestureDetector(
-          onTap: () => _showLocationPicker(context, ref, locations, selectedLocationId),
+          onTap: () => _showLocationPicker(
+            context, ref, sortedLocations, selectedLocationId,
+            positionAsync.valueOrNull, 
+          ),
+
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
@@ -85,22 +117,6 @@ class GymLocationCard extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: AppColors.background,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
-                    ),
-                    child: const Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.directions_run_rounded, color: AppColors.primary, size: 16),
-                        SizedBox(height: 4),
-                        Text('850m', style: TextStyle(color: AppColors.primary, fontSize: 11, fontWeight: FontWeight.bold)),
-                      ],
-                    ),
-                  ),
                 ],
               ),
             ),
@@ -110,7 +126,7 @@ class GymLocationCard extends ConsumerWidget {
     );
   }
 
-  void _showLocationPicker(BuildContext context, WidgetRef ref, List<GymLocation> locations, int? selectedId) {
+  void _showLocationPicker(BuildContext context, WidgetRef ref, List<GymLocation> locations, int? selectedId, Position? userPosition) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -143,7 +159,14 @@ class GymLocationCard extends ConsumerWidget {
                           contentPadding: EdgeInsets.zero,
                           leading: Icon(Icons.location_city, color: isSelected ? AppColors.primary : AppColors.textSecondary),
                           title: Text(loc.name, style: TextStyle(color: isSelected ? AppColors.primary : AppColors.textPrimary, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
-                          subtitle: Text('${loc.address}, ${loc.city}', style: const TextStyle(color: AppColors.textSecondary)),
+                          subtitle: Text(
+                            [
+                              '${loc.address}, ${loc.city}',
+                              formatDistance(userPosition, loc),
+                            ].whereType<String>().join(' · '),
+                            style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                          ),
+
                           trailing: isSelected ? const Icon(Icons.check_circle, color: AppColors.primary) : null,
                           onTap: () {
                             ref.read(selectedLocationIdProvider.notifier).setLocation(loc.id);

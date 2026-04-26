@@ -35,6 +35,8 @@ class _AddClassModalState extends ConsumerState<AddClassModal> {
   bool _isLoading = false;
   late bool _isPersonalTraining;
 
+  int? _localSelectedLocationId;
+
   @override
   void initState() {
     super.initState();
@@ -60,6 +62,13 @@ class _AddClassModalState extends ConsumerState<AddClassModal> {
     _selectedDate = defaultStart;
     _startTime = TimeOfDay.fromDateTime(defaultStart);
     _endTime = TimeOfDay.fromDateTime(defaultEnd);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final globalId = ref.read(selectedLocationIdProvider);
+      setState(() {
+        _localSelectedLocationId = globalId;
+      });
+    });
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -106,10 +115,7 @@ class _AddClassModalState extends ConsumerState<AddClassModal> {
   Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final selectedLocId = ref.read(selectedLocationIdProvider);
-    final locations = ref.read(locationsProvider).valueOrNull ?? [];
-
-    final finalLocationId = selectedLocId ?? (locations.isNotEmpty ? locations.first.id : null);
+    final finalLocationId = _localSelectedLocationId;
 
     if (finalLocationId == null) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -247,7 +253,7 @@ class _AddClassModalState extends ConsumerState<AddClassModal> {
 
                   locationsAsync.when(
                     data: (locations) {
-                      final selectedLocationId = ref.watch(selectedLocationIdProvider) ??
+                      final selectedLocationId = _localSelectedLocationId ??
                           (locations.isNotEmpty ? locations.first.id : null);
 
                       return Container(
@@ -263,16 +269,16 @@ class _AddClassModalState extends ConsumerState<AddClassModal> {
                             isExpanded: true,
                             dropdownColor: AppColors.surface,
                             icon: const Icon(Icons.location_on, color: AppColors.primary),
-                            items: locations.map((loc) {
-                              return DropdownMenuItem<int>(
-                                value: loc.id,
-                                child: Text('${loc.name} (${loc.city})',
-                                    style: const TextStyle(color: AppColors.textPrimary)),
-                              );
-                            }).toList(),
+                            items: locations.map((loc) => DropdownMenuItem<int>(
+                              value: loc.id,
+                              child: Text(
+                                '${loc.name} (${loc.city})',
+                                style: const TextStyle(color: AppColors.textPrimary),
+                              ),
+                            )).toList(),
                             onChanged: (val) {
                               if (val != null) {
-                                ref.read(selectedLocationIdProvider.notifier).setLocation(val);
+                                setState(() => _localSelectedLocationId = val);
                               }
                             },
                           ),

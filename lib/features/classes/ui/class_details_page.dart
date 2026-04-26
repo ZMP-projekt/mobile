@@ -58,7 +58,6 @@ class ClassDetailsPage extends ConsumerWidget {
                   _buildTitleSection(currentClass),
                   const SizedBox(height: 15),
 
-                  // SEKCJA ODZNAK (z lokalizacją)
                   _buildBadgesRow(currentClass),
 
                   const SizedBox(height: 35),
@@ -142,7 +141,6 @@ class ClassDetailsPage extends ConsumerWidget {
   Widget _buildBadgesRow(GymClass currentClass) {
     final locName = currentClass.locationName ?? 'Lokalizacja nieznana';
 
-    // Zmienione na Wrap, aby badge ładnie układały się w nowych rzędach jeśli brakuje miejsca
     return Wrap(
       spacing: 12,
       runSpacing: 12,
@@ -153,7 +151,6 @@ class ClassDetailsPage extends ConsumerWidget {
             '${currentClass.spotsLeft} wolnych',
             color: currentClass.isFull ? AppColors.error : AppColors.primary
         ),
-        // Nowy badge z lokalizacją
         _buildBadge(Icons.location_on_rounded, locName),
       ],
     ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.1, end: 0);
