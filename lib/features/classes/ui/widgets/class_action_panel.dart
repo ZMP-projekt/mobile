@@ -234,7 +234,7 @@ class _RescheduleModalState extends ConsumerState<_RescheduleModal> {
       await ref.read(bookingNotifierProvider.notifier).rescheduleClass(widget.gymClass.id, newTime);
 
       if (!mounted) return;
-      context.pop(); // Zamknij modal
+      context.pop();
       await SuccessOverlay.show(context, 'Zajęcia\nprzełożone!');
     } catch (e) {
       if (!mounted) return;

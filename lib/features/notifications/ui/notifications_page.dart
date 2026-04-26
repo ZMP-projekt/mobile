@@ -123,7 +123,6 @@ class NotificationsPage extends ConsumerWidget {
     );
   }
 
-  // --- OTO WIDŻET, KTÓREGO BRAKOWAŁO (Z GESTAMI) ---
   Widget _buildActionableCard(AppNotification notification, int index, WidgetRef ref) {
     return Dismissible(
       key: ValueKey(notification.id),

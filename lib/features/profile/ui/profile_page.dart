@@ -99,7 +99,6 @@ class ProfilePage extends ConsumerWidget {
                           title: 'Język aplikacji',
                           trailing: const Text('Polski', style: TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.w500)),
                           onTap: () {
-                            // Tu w przyszłości podepniemy przełączanie języka (i18n)
                           },
                         ),
                         Divider(color: Colors.white.withValues(alpha: 0.05), height: 1),

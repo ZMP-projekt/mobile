@@ -253,7 +253,6 @@ class _AddClassModalState extends ConsumerState<AddClassModal> {
 
                   locationsAsync.when(
                     data: (locations) {
-                      // ← było: ref.watch(selectedLocationIdProvider)
                       final selectedLocationId = _localSelectedLocationId ??
                           (locations.isNotEmpty ? locations.first.id : null);
 
