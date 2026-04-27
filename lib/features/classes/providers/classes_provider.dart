@@ -15,10 +15,11 @@ final selectedDateProvider = StateProvider<DateTime>((ref) {
   return DateTime(now.year, now.month, now.day);
 });
 
-
-final classesForDateProvider = FutureProvider.autoDispose.family<List<GymClass>, DateTime>((ref, date) async {
+final classesForDateProvider =
+    FutureProvider.autoDispose.family<List<GymClass>, DateTime>((ref, date) async {
   final repo = ref.watch(classesRepositoryProvider);
-  final selectedLocationId = ref.watch(selectedLocationIdProvider);
+  final selectedLocationId =
+      await ref.watch(effectiveSelectedLocationIdProvider.future);
 
   if (selectedLocationId != null) {
     final locationClasses = await repo.getClassesByLocation(selectedLocationId);
@@ -47,7 +48,8 @@ final trainerClassesProvider = FutureProvider.autoDispose
   return allClasses.where((c) => c.locationId == filterLocationId).toList();
 });
 
-final todayClassesProvider = FutureProvider.autoDispose<List<GymClass>>((ref) async {
+final todayClassesProvider =
+    FutureProvider.autoDispose<List<GymClass>>((ref) async {
   final now = DateTime.now();
   final today = DateTime(now.year, now.month, now.day);
 
@@ -56,7 +58,8 @@ final todayClassesProvider = FutureProvider.autoDispose<List<GymClass>>((ref) as
   return classes.where((c) => c.isFuture).toList();
 });
 
-final classParticipantsProvider = FutureProvider.autoDispose.family<List<User>, int>((ref, classId) async {
+final classParticipantsProvider =
+    FutureProvider.autoDispose.family<List<User>, int>((ref, classId) async {
   return ref.watch(classesRepositoryProvider).getClassParticipants(classId);
 });
 
@@ -108,7 +111,8 @@ class BookingNotifier extends AutoDisposeAsyncNotifier<void> {
       await Future.delayed(const Duration(milliseconds: 300));
       state = const AsyncData(null);
     } catch (error, stack) {
-      if (error.toString().contains('500') || error.toString().contains('Internal Server Error')) {
+      if (error.toString().contains('500') ||
+          error.toString().contains('Internal Server Error')) {
         state = const AsyncData(null);
       } else {
         state = AsyncError(error, stack);
@@ -122,7 +126,9 @@ class BookingNotifier extends AutoDisposeAsyncNotifier<void> {
   Future<void> rescheduleClass(int classId, DateTime newTime) async {
     state = const AsyncLoading();
     try {
-      await ref.read(classesRepositoryProvider).rescheduleClass(classId, newTime);
+      await ref
+          .read(classesRepositoryProvider)
+          .rescheduleClass(classId, newTime);
       await Future.delayed(const Duration(milliseconds: 300));
       state = const AsyncData(null);
     } catch (error, stack) {
@@ -148,6 +154,7 @@ class BookingNotifier extends AutoDisposeAsyncNotifier<void> {
   }
 }
 
-final bookingNotifierProvider = AsyncNotifierProvider.autoDispose<BookingNotifier, void>(
+final bookingNotifierProvider =
+    AsyncNotifierProvider.autoDispose<BookingNotifier, void>(
   BookingNotifier.new,
 );
