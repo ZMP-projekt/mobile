@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../notifications/providers/notification_provider.dart';
 import '../../../user/providers/user_provider.dart';
 
@@ -13,6 +14,7 @@ class DashboardHeader extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final userAsync = ref.watch(currentUserProvider);
     final unreadCount = ref.watch(unreadCountProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     return userAsync.when(
       loading: () => _buildSkeleton(),
@@ -44,16 +46,16 @@ class DashboardHeader extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Cześć, ${user.firstName}!',
+                      l10n.dashboardGreeting(user.firstName),
                       style: const TextStyle(
                         color: AppColors.textPrimary,
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const Text(
-                      'Gotowy na trening? 🔥',
-                      style: TextStyle(
+                    Text(
+                      l10n.dashboardReadyQuestion,
+                      style: const TextStyle(
                           color: AppColors.textSecondary, fontSize: 14),
                     ),
                   ],

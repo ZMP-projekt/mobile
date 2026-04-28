@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../providers/membership_provider.dart';
 
 final selectedPlanTypeProvider = StateProvider<String>((ref) => 'OPEN');
@@ -23,11 +24,12 @@ class MembershipPurchaseModal extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final selectedType = ref.watch(selectedPlanTypeProvider);
     final purchaseState = ref.watch(purchaseMembershipProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     final plans = [
-      {'type': 'OPEN', 'title': 'Karnet OPEN', 'price': '170 zł', 'desc': 'Całodobowy dostęp do klubu', 'highlight': true},
-      {'type': 'NIGHT', 'title': 'Karnet NIGHT', 'price': '80 zł', 'desc': 'Dostęp w godzinach 22:00 - 06:00'},
-      {'type': 'STUDENT', 'title': 'Karnet STUDENT', 'price': ' 100 zł', 'desc': 'Dla osób z ważną legitymacją'},
+      {'type': 'OPEN', 'title': l10n.membershipPlanOpenTitle, 'price': '170 zł', 'desc': l10n.membershipPlanOpenDescription, 'highlight': true},
+      {'type': 'NIGHT', 'title': l10n.membershipPlanNightTitle, 'price': '80 zł', 'desc': l10n.membershipPlanNightDescription},
+      {'type': 'STUDENT', 'title': l10n.membershipPlanStudentTitle, 'price': '100 zł', 'desc': l10n.membershipPlanStudentDescription},
     ];
 
     return Container(
@@ -54,14 +56,14 @@ class MembershipPurchaseModal extends ConsumerWidget {
               ),
             ),
 
-            const Text(
-              'Wybierz Karnet',
-              style: TextStyle(color: AppColors.textPrimary, fontSize: 28, fontWeight: FontWeight.bold, letterSpacing: -0.5),
+            Text(
+              l10n.membershipPurchaseTitle,
+              style: const TextStyle(color: AppColors.textPrimary, fontSize: 28, fontWeight: FontWeight.bold, letterSpacing: -0.5),
             ).animate().fadeIn(duration: 300.ms).slideY(begin: 0.1),
             const SizedBox(height: 8),
-            const Text(
-              'Uzyskaj pełny dostęp do klubu dopasowany do Twojego stylu życia.',
-              style: TextStyle(color: AppColors.textSecondary, fontSize: 16, height: 1.4),
+            Text(
+              l10n.membershipPurchaseSubtitle,
+              style: const TextStyle(color: AppColors.textSecondary, fontSize: 16, height: 1.4),
             ).animate().fadeIn(delay: 100.ms),
 
             const SizedBox(height: 32),
@@ -115,7 +117,7 @@ class MembershipPurchaseModal extends ConsumerWidget {
                                   Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                     decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(8)),
-                                    child: const Text('HIT', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                                    child: Text(l10n.membershipPurchasePopular, style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
                                   ),
                                 ]
                               ],
@@ -150,8 +152,8 @@ class MembershipPurchaseModal extends ConsumerWidget {
                   if (success) {
                     context.pop();
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Karnet zakupiony pomyślnie! 🎉'),
+                      SnackBar(
+                        content: Text(l10n.membershipPurchaseSuccess),
                         backgroundColor: AppColors.success,
                       ),
                     );
@@ -173,7 +175,7 @@ class MembershipPurchaseModal extends ConsumerWidget {
                 ),
                 child: purchaseState.isLoading
                     ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                    : const Text('Kupuję i płacę', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    : Text(l10n.membershipPurchaseButton, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               ),
             ).animate().fadeIn(delay: 600.ms).slideY(begin: 0.2),
           ],

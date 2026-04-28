@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../l10n/app_localizations.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../notifications/providers/notification_provider.dart';
 import '../../user/providers/user_provider.dart';
@@ -21,6 +22,7 @@ class DashboardPage extends ConsumerWidget {
     final hasError = ref.watch(currentUserProvider).hasError ||
         ref.watch(todayClassesProvider).hasError ||
         ref.watch(currentMembershipProvider).hasError;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -69,8 +71,8 @@ class DashboardPage extends ConsumerWidget {
                         children: [
                           const Icon(Icons.wifi_off_rounded, color: AppColors.error, size: 24),
                           const SizedBox(width: 12),
-                          const Expanded(
-                            child: Text('Brak połączenia', style: TextStyle(color: AppColors.error, fontSize: 14, fontWeight: FontWeight.bold)),
+                          Expanded(
+                            child: Text(l10n.dashboardNoConnection, style: const TextStyle(color: AppColors.error, fontSize: 14, fontWeight: FontWeight.bold)),
                           ),
                           TextButton(
                             onPressed: () {
@@ -84,7 +86,7 @@ class DashboardPage extends ConsumerWidget {
                               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                               minimumSize: Size.zero,
                             ),
-                            child: const Text('ODŚWIEŻ', style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold, fontSize: 12)),
+                            child: Text(l10n.commonRefresh.toUpperCase(), style: const TextStyle(color: AppColors.error, fontWeight: FontWeight.bold, fontSize: 12)),
                           ),
                         ],
                       ),
@@ -107,8 +109,8 @@ class DashboardPage extends ConsumerWidget {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20.0),
                     child: _buildSectionHeader(
-                        title: 'Twoja Siłownia',
-                        action: 'MAPA',
+                        title: l10n.dashboardSectionGym,
+                        action: l10n.dashboardMapAction,
                         onTap: () {}
                     ).animate().fadeIn(delay: 200.ms),
                   ),
@@ -126,8 +128,8 @@ class DashboardPage extends ConsumerWidget {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20.0),
                     child: _buildSectionHeader(
-                      title: 'Dzisiejsze zajęcia',
-                      action: 'ZOBACZ WSZYSTKIE',
+                      title: l10n.dashboardSectionTodayClasses,
+                      action: l10n.dashboardSeeAll,
                       onTap: () => ref.read(mainNavigationProvider.notifier).state = 1,
                     ).animate().fadeIn(delay: 400.ms),
                   ),

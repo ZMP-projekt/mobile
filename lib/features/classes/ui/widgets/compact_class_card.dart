@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../data/models/gym_class.dart';
 import '../../utils/gym_class_extension.dart';
 
@@ -17,6 +18,7 @@ class CompactClassCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final imageUrl = gymClass.displayImageUrl;
+    final l10n = AppLocalizations.of(context)!;
 
     return GestureDetector(
       onTap: () => context.push('/class-details', extra: {
@@ -83,8 +85,11 @@ class CompactClassCard extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     isTrainer
-                        ? 'Uczestnicy: ${gymClass.currentParticipants}/${gymClass.maxParticipants}'
-                        : 'Trener: ${gymClass.trainer.fullName}',
+                        ? l10n.classesParticipantsCount(
+                            gymClass.currentParticipants,
+                            gymClass.maxParticipants,
+                          )
+                        : l10n.classesTrainer(gymClass.trainer.fullName),
                     style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 13),
                   ),
                 ],

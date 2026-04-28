@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
 
 class CalendarViewToggle extends StatelessWidget {
   final bool isMyClassesSelected;
@@ -13,6 +14,8 @@ class CalendarViewToggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Container(
       height: 46,
       padding: const EdgeInsets.all(4),
@@ -47,7 +50,7 @@ class CalendarViewToggle extends StatelessWidget {
                   behavior: HitTestBehavior.opaque,
                   child: Center(
                     child: Text(
-                      'Wszystkie zajęcia',
+                      l10n.classesAll,
                       style: TextStyle(
                         color: !isMyClassesSelected ? AppColors.primary : AppColors.textSecondary,
                         fontWeight: !isMyClassesSelected ? FontWeight.bold : FontWeight.w500,
@@ -63,7 +66,7 @@ class CalendarViewToggle extends StatelessWidget {
                   behavior: HitTestBehavior.opaque,
                   child: Center(
                     child: Text(
-                      'Moje rezerwacje',
+                      l10n.classesMyBookings,
                       style: TextStyle(
                         color: isMyClassesSelected ? AppColors.primary : AppColors.textSecondary,
                         fontWeight: isMyClassesSelected ? FontWeight.bold : FontWeight.w500,

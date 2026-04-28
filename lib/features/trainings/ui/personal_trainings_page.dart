@@ -7,6 +7,7 @@ import '../../../core/ui/success_overlay.dart';
 import '../../../core/ui/widgets/full_screen_empty_state.dart';
 import '../../../core/ui/widgets/horizontal_calendar.dart';
 import '../../../core/ui/widgets/no_connection_view.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../classes/providers/classes_provider.dart';
 import '../../classes/data/models/gym_class.dart';
 import '../../classes/utils/gym_class_extension.dart';
@@ -18,6 +19,7 @@ class PersonalTrainingsPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final selectedDate = ref.watch(selectedDateProvider);
     final classesAsync = ref.watch(classesForDateProvider(selectedDate));
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -31,9 +33,9 @@ class PersonalTrainingsPage extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Treningi Personalne',
-                    style: TextStyle(color: AppColors.textPrimary,
+                  Text(
+                    l10n.trainerDashboardPersonalTrainings,
+                    style: const TextStyle(color: AppColors.textPrimary,
                         fontSize: 34,
                         fontWeight: FontWeight.w800,
                         letterSpacing: -1.0),
@@ -68,10 +70,10 @@ class PersonalTrainingsPage extends ConsumerWidget {
                       .toList();
 
                   if (ptClasses.isEmpty) {
-                    return const FullScreenEmptyState(
+                    return FullScreenEmptyState(
                       icon: Icons.person_search_rounded,
-                      title: 'Brak dostępnych\ntreningów w tym dniu',
-                      subtitle: 'Wybierz inną datę z kalendarza powyżej',
+                      title: l10n.classesNoTrainingsDateTitle,
+                      subtitle: l10n.classesChooseAnotherDate,
                       iconColor: AppColors.primary,
                     );
                   }
@@ -109,6 +111,7 @@ class _UserPtCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isProcessing = ref.watch(bookingNotifierProvider).isLoading;
+    final l10n = AppLocalizations.of(context)!;
 
     return GestureDetector(
       onTap: () {
@@ -149,7 +152,7 @@ class _UserPtCard extends ConsumerWidget {
                   Text(
                     gymClass.description != null && gymClass.description!.isNotEmpty
                         ? gymClass.description!
-                        : 'Trening personalny',
+                        : l10n.trainerPersonalTraining,
                     style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -170,14 +173,14 @@ class _UserPtCard extends ConsumerWidget {
             ),
             const SizedBox(width: 12),
 
-            _buildActionArea(context, ref, isProcessing),
+            _buildActionArea(context, ref, isProcessing, l10n),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildActionArea(BuildContext context, WidgetRef ref, bool isProcessing) {
+  Widget _buildActionArea(BuildContext context, WidgetRef ref, bool isProcessing, AppLocalizations l10n) {
     if (gymClass.userEnrolled) {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -186,7 +189,7 @@ class _UserPtCard extends ConsumerWidget {
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: AppColors.primary.withValues(alpha: 0.5)),
         ),
-        child: const Text('ZAPISANO', style: TextStyle(color: AppColors.primary, fontSize: 11, fontWeight: FontWeight.bold)),
+        child: Text(l10n.classesBooked, style: const TextStyle(color: AppColors.primary, fontSize: 11, fontWeight: FontWeight.bold)),
       );
     }
 
@@ -198,7 +201,7 @@ class _UserPtCard extends ConsumerWidget {
           borderRadius: BorderRadius.circular(12),
         ),
         child: Text(
-            gymClass.isPast ? 'ZAKOŃCZONE' : 'BRAK MIEJSC',
+            gymClass.isPast ? l10n.classesFinished.toUpperCase() : l10n.classesFull,
             style: const TextStyle(color: AppColors.textSecondary, fontSize: 10, fontWeight: FontWeight.bold)
         ),
       );
@@ -209,11 +212,11 @@ class _UserPtCard extends ConsumerWidget {
         try {
           await ref.read(bookingNotifierProvider.notifier).bookClass(gymClass.id);
           if (!context.mounted) return;
-          await SuccessOverlay.show(context, "Zapisano na\ntrening!");
+          await SuccessOverlay.show(context, l10n.classesBookingSuccess);
         } catch (e) {
           if (!context.mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Błąd: $e'), backgroundColor: AppColors.error)
+              SnackBar(content: Text(l10n.classesGenericError(e)), backgroundColor: AppColors.error)
           );
         }
       },
@@ -225,7 +228,7 @@ class _UserPtCard extends ConsumerWidget {
         ),
         child: isProcessing
             ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-            : const Text('Zapisz', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+            : Text(l10n.classesBook, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
       ),
     );
   }

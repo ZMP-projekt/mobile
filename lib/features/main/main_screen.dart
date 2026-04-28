@@ -6,6 +6,7 @@ import '../../core/network/dio_client.dart';
 import '../../core/ui/widgets/async_value_widget.dart';
 import '../../core/ui/widgets/no_connection_view.dart';
 import '../../core/ui/widgets/offline_access_modal.dart';
+import '../../l10n/app_localizations.dart';
 import '../auth/providers/auth_provider.dart';
 import '../membership/ui/widgets/membership_guard.dart';
 import '../membership/ui/widgets/membership_purchase_modal.dart';
@@ -69,6 +70,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     ref.watch(notificationsProvider);
 
     ref.listen<AppNotification?>(toastNotificationProvider, (prev, next) {
@@ -140,7 +143,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             ref.invalidate(currentUserProvider);
           }
         },
-        message: 'Nie udało się zweryfikować uprawnień konta. Sprawdź sieć.',
+        message: l10n.errorVerifyAccountAccess,
       ),
     );
   }

@@ -1,19 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../theme/app_colors.dart';
+import '../../../l10n/app_localizations.dart';
 
 class NoConnectionView extends StatelessWidget {
   final VoidCallback onRetry;
-  final String message;
+  final String? message;
 
   const NoConnectionView({
     super.key,
     required this.onRetry,
-    this.message = 'Nie udało się pobrać danych. Sprawdź połączenie internetowe i spróbuj ponownie.',
+    this.message,
   });
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -31,15 +34,15 @@ class NoConnectionView extends StatelessWidget {
 
                 const SizedBox(height: 32),
 
-                const Text(
-                  'Brak połączenia',
-                  style: TextStyle(color: AppColors.textPrimary, fontSize: 24, fontWeight: FontWeight.bold),
+                Text(
+                  l10n.offlineModalTitle,
+                  style: const TextStyle(color: AppColors.textPrimary, fontSize: 24, fontWeight: FontWeight.bold),
                 ).animate().fadeIn(delay: 200.ms),
 
                 const SizedBox(height: 16),
 
                 Text(
-                  message,
+                  message ?? l10n.offlineModalSubtitle,
                   textAlign: TextAlign.center,
                   style: const TextStyle(color: AppColors.textSecondary, fontSize: 16, height: 1.5),
                 ).animate().fadeIn(delay: 300.ms),
@@ -56,7 +59,7 @@ class NoConnectionView extends StatelessWidget {
                       backgroundColor: AppColors.primary,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                     ),
-                    label: const Text('Spróbuj ponownie', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                    label: Text(l10n.commonRetry, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
                   ),
                 ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.2),
               ],

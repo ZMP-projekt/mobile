@@ -6,6 +6,7 @@ import 'package:mobile_gym_app/core/ui/widgets/full_screen_empty_state.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/ui/widgets/horizontal_calendar.dart';
 import '../../../core/ui/widgets/no_connection_view.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../user/providers/user_provider.dart';
 import '../providers/classes_provider.dart';
 import '../data/models/gym_class.dart';
@@ -27,6 +28,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     final selectedDate = ref.watch(selectedDateProvider);
     final userAsync = ref.watch(currentUserProvider);
     final isTrainer = userAsync.valueOrNull?.isTrainer ?? false;
+    final l10n = AppLocalizations.of(context)!;
 
     final classesAsync = isTrainer
         ? ref.watch(trainerClassesProvider(selectedDate))
@@ -44,9 +46,9 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Grafik',
-                    style: TextStyle(
+                  Text(
+                    l10n.classesSchedule,
+                    style: const TextStyle(
                       color: AppColors.textPrimary,
                       fontSize: 34,
                       fontWeight: FontWeight.w800,
@@ -101,8 +103,8 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                     key: ValueKey(
                         'empty_${selectedDate}_$_showOnlyMyClasses'),
                     icon: Icons.event_busy_rounded,
-                    title: 'Brak zajęć w tym dniu',
-                    subtitle: 'Wybierz inną datę z kalendarza powyżej',
+                    title: l10n.classesNoClassesDateTitle,
+                    subtitle: l10n.classesChooseAnotherDate,
                     iconColor: AppColors.primary,
                   )
                       : _buildClassesList(
@@ -166,7 +168,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      _getDateLabel(selectedDate).toUpperCase(),
+                      _getDateLabel(context, selectedDate).toUpperCase(),
                       style: const TextStyle(
                         color: AppColors.textPrimary,
                         fontSize: 14,
@@ -190,10 +192,11 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     );
   }
 
-  String _getDateLabel(DateTime date) {
+  String _getDateLabel(BuildContext context, DateTime date) {
+    final l10n = AppLocalizations.of(context)!;
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    if (date.isAtSameMomentAs(today)) return 'Dzisiaj';
-    return DateFormat('EEEE, d MMMM', 'pl_PL').format(date);
+    if (date.isAtSameMomentAs(today)) return l10n.notificationsToday;
+    return DateFormat('EEEE, d MMMM', l10n.localeName).format(date);
   }
 }

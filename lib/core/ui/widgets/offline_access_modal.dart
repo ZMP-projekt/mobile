@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/app_colors.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../features/membership/providers/membership_provider.dart';
 
 class OfflineAccessModal extends ConsumerWidget {
@@ -10,6 +11,8 @@ class OfflineAccessModal extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+
     return ClipRRect(
       borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
       child: BackdropFilter(
@@ -38,17 +41,17 @@ class OfflineAccessModal extends ConsumerWidget {
 
               const SizedBox(height: 32),
 
-              const Text(
-                'Brak Połączenia',
-                style: TextStyle(color: AppColors.textPrimary, fontSize: 24, fontWeight: FontWeight.bold),
+              Text(
+                l10n.offlineModalTitle,
+                style: const TextStyle(color: AppColors.textPrimary, fontSize: 24, fontWeight: FontWeight.bold),
               ).animate().fadeIn(delay: 200.ms),
 
               const SizedBox(height: 16),
 
-              const Text(
-                'Nie możemy zweryfikować Twojego karnetu bez dostępu do sieci.',
+              Text(
+                l10n.offlineModalSubtitle,
                 textAlign: TextAlign.center,
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 16, height: 1.5),
+                style: const TextStyle(color: AppColors.textSecondary, fontSize: 16, height: 1.5),
               ).animate().fadeIn(delay: 300.ms),
 
               const SizedBox(height: 48),
@@ -67,7 +70,7 @@ class OfflineAccessModal extends ConsumerWidget {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                     elevation: 0,
                   ),
-                  label: const Text('SPRÓBUJ PONOWNIE', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                  label: Text(l10n.commonRetryUppercase, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
                 ),
               ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.2),
 
@@ -82,7 +85,7 @@ class OfflineAccessModal extends ConsumerWidget {
                     foregroundColor: AppColors.textSecondary,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   ),
-                  child: const Text('ZAMKNIJ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                  child: Text(l10n.commonClose.toUpperCase(), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                 ),
               ).animate().fadeIn(delay: 500.ms),
             ],

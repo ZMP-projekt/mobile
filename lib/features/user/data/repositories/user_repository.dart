@@ -12,9 +12,9 @@ class UserRepository {
       final response = await _dio.get('/api/users/me');
       return User.fromJson(response.data);
     } on DioException catch (e) {
-      throw Exception(DioErrorParser.extract(e.response, e.type, defaultMessage: 'Nie udało się pobrać profilu użytkownika.'));
+      throw Exception(DioErrorParser.extract(e.response, e.type, defaultMessageBuilder: (l10n) => l10n.errorUserProfileFetch));
     } catch (e) {
-      throw Exception('Wystąpił nieoczekiwany błąd podczas pobierania profilu.');
+      throw Exception(DioErrorParser.localized((l10n) => l10n.errorUserProfileUnexpected));
     }
   }
 }

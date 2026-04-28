@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/ui/widgets/app_skeleton.dart';
 import '../../../../core/ui/widgets/empty_state_view.dart';
 import '../../../../core/ui/success_overlay.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../classes/data/models/gym_class.dart';
 import '../../../classes/providers/classes_provider.dart';
 import '../../../classes/ui/widgets/compact_class_card.dart';
@@ -19,6 +20,7 @@ class TodayClassesCarousel extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final todayClassesAsync = ref.watch(todayClassesProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     final membershipAsync = ref.watch(currentMembershipProvider);
     final hasActiveMembership = membershipAsync.valueOrNull?.active == true &&
@@ -26,18 +28,18 @@ class TodayClassesCarousel extends ConsumerWidget {
 
     return todayClassesAsync.when(
       loading: () => _buildSkeleton(),
-      error: (err, stack) => const Padding(
-        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-        child: Text('Nie udało się pobrać dzisiejszych zajęć.', style: TextStyle(color: AppColors.error, fontSize: 14)),
+      error: (err, stack) => Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+        child: Text(l10n.dashboardTodayClassesError, style: const TextStyle(color: AppColors.error, fontSize: 14)),
       ),
       data: (classes) {
         if (!hasActiveMembership && membershipAsync.hasValue) {
           return GestureDetector(
             onTap: () => MembershipPurchaseModal.show(context),
-            child: const EmptyStateView(
+            child: EmptyStateView(
               icon: Icons.lock_outline,
-              title: 'Dzisiejsze zajęcia',
-              subtitle: 'Kup karnet, aby zobaczyć grafik na dziś i zapisać się na trening! ⚡',
+              title: l10n.classesToday,
+              subtitle: l10n.dashboardMembershipRequiredForToday,
             ).animate().fadeIn(),
           );
         }
@@ -46,10 +48,10 @@ class TodayClassesCarousel extends ConsumerWidget {
         final ptClasses = classes.where((c) => c.personalTraining).toList();
 
         if (classes.isEmpty) {
-          return const EmptyStateView(
+          return EmptyStateView(
             icon: Icons.wb_sunny_rounded,
-            title: 'Czas na odpoczynek',
-            subtitle: 'Brak nadchodzących zajęć na dziś. Zregeneruj siły!',
+            title: l10n.dashboardRestTitle,
+            subtitle: l10n.dashboardRestSubtitle,
           ).animate().fadeIn();
         }
 
@@ -70,22 +72,22 @@ class TodayClassesCarousel extends ConsumerWidget {
                 ),
               ).animate().fadeIn(duration: 400.ms)
             else
-              const Padding(
-                padding: EdgeInsets.only(bottom: 20),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 20),
                 child: EmptyStateView(
                   icon: Icons.event_busy_rounded,
-                  title: 'Brak zajęć grupowych',
-                  subtitle: 'Nie ma już dzisiaj zaplanowanych zajęć grupowych.',
+                  title: l10n.dashboardNoGroupClassesTitle,
+                  subtitle: l10n.dashboardNoGroupClassesSubtitle,
                 ),
               ).animate().fadeIn(),
 
             if (ptClasses.isNotEmpty) ...[
               const SizedBox(height: 30),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Text(
-                  'Dostępne Treningi 1 na 1',
-                  style: TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.bold),
+                  l10n.dashboardAvailablePersonalTrainings,
+                  style: const TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ),
               const SizedBox(height: 15),
@@ -127,6 +129,7 @@ class _DashboardUserPtCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isProcessing = ref.watch(bookingNotifierProvider).isLoading;
+    final l10n = AppLocalizations.of(context)!;
 
     return GestureDetector(
       onTap: () {
@@ -164,7 +167,7 @@ class _DashboardUserPtCard extends ConsumerWidget {
                   Text(
                     gymClass.description != null && gymClass.description!.isNotEmpty
                         ? gymClass.description!
-                        : 'Trening personalny',
+                        : l10n.trainerPersonalTraining,
                     style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -200,7 +203,7 @@ class _DashboardUserPtCard extends ConsumerWidget {
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: AppColors.primary.withValues(alpha: 0.5)),
         ),
-        child: const Text('ZAPISANO', style: TextStyle(color: AppColors.primary, fontSize: 10, fontWeight: FontWeight.bold)),
+        child: Text(AppLocalizations.of(context)!.classesBooked, style: const TextStyle(color: AppColors.primary, fontSize: 10, fontWeight: FontWeight.bold)),
       );
     }
 
@@ -209,7 +212,9 @@ class _DashboardUserPtCard extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(color: AppColors.background, borderRadius: BorderRadius.circular(12)),
         child: Text(
-          gymClass.isPast ? 'ZAKOŃCZONE' : 'BRAK MIEJSC',
+          gymClass.isPast
+              ? AppLocalizations.of(context)!.classesFinished.toUpperCase()
+              : AppLocalizations.of(context)!.classesFull,
           style: const TextStyle(color: AppColors.textSecondary, fontSize: 10, fontWeight: FontWeight.bold),
         ),
       );
@@ -220,10 +225,13 @@ class _DashboardUserPtCard extends ConsumerWidget {
         try {
           await ref.read(bookingNotifierProvider.notifier).bookClass(gymClass.id);
           if (!context.mounted) return;
-          await SuccessOverlay.show(context, "Zapisano na\ntrening!");
+          await SuccessOverlay.show(
+            context,
+            AppLocalizations.of(context)!.classesBookingSuccess,
+          );
         } catch (e) {
           if (!context.mounted) return;
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Błąd: $e'), backgroundColor: AppColors.error));
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.classesGenericError(e)), backgroundColor: AppColors.error));
         }
       },
       child: Container(
@@ -231,7 +239,7 @@ class _DashboardUserPtCard extends ConsumerWidget {
         decoration: BoxDecoration(gradient: AppColors.primaryGradient, borderRadius: BorderRadius.circular(12)),
         child: isProcessing
             ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-            : const Text('Zapisz', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
+            : Text(AppLocalizations.of(context)!.classesBook, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
       ),
     );
   }

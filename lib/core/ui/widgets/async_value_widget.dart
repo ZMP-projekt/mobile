@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/app_colors.dart';
+import '../../../l10n/app_localizations.dart';
 
 class AsyncValueWidget<T> extends StatelessWidget {
   final AsyncValue<T> value;
@@ -18,6 +19,8 @@ class AsyncValueWidget<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return value.when(
       skipLoadingOnReload: true,
       data: data,
@@ -31,7 +34,7 @@ class AsyncValueWidget<T> extends StatelessWidget {
               const Icon(Icons.error_outline_rounded, color: AppColors.error, size: 28),
               const SizedBox(height: 8),
               Text(
-                'Błąd ładowania danych.',
+                l10n.errorDataLoad,
                 style: TextStyle(color: AppColors.textSecondary.withValues(alpha: 0.8), fontSize: 13),
               ),
             ],

@@ -13,9 +13,9 @@ class TrainerRepository {
       final List<dynamic> data = response.data;
       return data.map((json) => Trainer.fromJson(json)).toList();
     } on DioException catch (e) {
-      throw Exception(DioErrorParser.extract(e.response, e.type, defaultMessage: 'Nie udało się pobrać listy trenerów.'));
+      throw Exception(DioErrorParser.extract(e.response, e.type, defaultMessageBuilder: (l10n) => l10n.errorTrainersFetch));
     } catch (e) {
-      throw Exception('Wystąpił nieoczekiwany błąd podczas pobierania trenerów.');
+      throw Exception(DioErrorParser.localized((l10n) => l10n.errorTrainersUnexpected));
     }
   }
 }

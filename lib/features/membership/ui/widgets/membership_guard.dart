@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:mobile_gym_app/core/ui/widgets/no_connection_view.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../user/providers/user_provider.dart';
 import '../../providers/membership_provider.dart';
 import 'membership_purchase_modal.dart';
@@ -49,6 +50,8 @@ class MembershipGuard extends ConsumerWidget {
   }
 
   Widget _buildLockedScreen(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -70,17 +73,17 @@ class MembershipGuard extends ConsumerWidget {
 
               const SizedBox(height: 32),
 
-              const Text(
-                'Dostęp zablokowany',
-                style: TextStyle(color: AppColors.textPrimary, fontSize: 24, fontWeight: FontWeight.bold),
+              Text(
+                l10n.membershipLockedTitle,
+                style: const TextStyle(color: AppColors.textPrimary, fontSize: 24, fontWeight: FontWeight.bold),
               ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.2),
 
               const SizedBox(height: 16),
 
-              const Text(
-                'Aby przeglądać grafik zajęć i rezerwować treningi, musisz posiadać aktywny karnet do naszego klubu.',
+              Text(
+                l10n.membershipLockedSubtitle,
                 textAlign: TextAlign.center,
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 16, height: 1.5),
+                style: const TextStyle(color: AppColors.textSecondary, fontSize: 16, height: 1.5),
               ).animate().fadeIn(delay: 400.ms),
 
               const SizedBox(height: 48),
@@ -100,7 +103,7 @@ class MembershipGuard extends ConsumerWidget {
                     shadowColor: Colors.transparent,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   ),
-                  child: const Text('Kup karnet teraz', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                  child: Text(l10n.membershipBuyNow, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
                 ),
               ).animate().fadeIn(delay: 500.ms).slideY(begin: 0.2)
             ],

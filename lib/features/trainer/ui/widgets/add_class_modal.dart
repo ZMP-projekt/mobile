@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/ui/widgets/custom_text_field.dart';
 import '../../../../core/ui/success_overlay.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../classes/providers/classes_provider.dart';
 import '../../../locations/providers/location_provider.dart';
 
@@ -113,13 +114,15 @@ class _AddClassModalState extends ConsumerState<AddClassModal> {
   }
 
   Future<void> _submitForm() async {
+    final l10n = AppLocalizations.of(context)!;
+
     if (!_formKey.currentState!.validate()) return;
 
     final finalLocationId = _localSelectedLocationId;
 
     if (finalLocationId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Brak dostępnych lokalizacji.'),
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(l10n.trainerNoLocations),
           backgroundColor: AppColors.error));
       return;
     }
@@ -132,14 +135,14 @@ class _AddClassModalState extends ConsumerState<AddClassModal> {
         _endTime.hour, _endTime.minute);
 
     if (startDateTime.isBefore(DateTime.now())) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Zajęcia nie mogą odbywać się w przeszłości.'),
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(l10n.trainerPastClassError),
           backgroundColor: AppColors.error));
       return;
     }
     if (endDateTime.isBefore(startDateTime)) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Zajęcia muszą kończyć się po ich rozpoczęciu.'),
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(l10n.trainerClassEndBeforeStartError),
           backgroundColor: AppColors.error));
       return;
     }
@@ -160,7 +163,7 @@ class _AddClassModalState extends ConsumerState<AddClassModal> {
       await ref.read(bookingNotifierProvider.notifier).createClass(requestData);
 
       if (!mounted) return;
-      await SuccessOverlay.show(context, 'Zajęcia zostały dodane!');
+      await SuccessOverlay.show(context, l10n.trainerClassCreatedSuccess);
       if (mounted) context.pop();
     } catch (e) {
       if (!mounted) return;
@@ -178,6 +181,7 @@ class _AddClassModalState extends ConsumerState<AddClassModal> {
     ref.watch(bookingNotifierProvider);
 
     final locationsAsync = ref.watch(locationsProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     return ClipRRect(
       borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
@@ -209,8 +213,8 @@ class _AddClassModalState extends ConsumerState<AddClassModal> {
                               color: Colors.white24,
                               borderRadius: BorderRadius.circular(2)))),
                   const SizedBox(height: 24),
-                  const Text('Nowe zajęcia',
-                      style: TextStyle(
+                  Text(l10n.trainerAddClassTitle,
+                      style: const TextStyle(
                           color: AppColors.textPrimary,
                           fontSize: 24,
                           fontWeight: FontWeight.bold)),
@@ -218,13 +222,15 @@ class _AddClassModalState extends ConsumerState<AddClassModal> {
                   const SizedBox(height: 16),
                   CustomTextField(
                       controller: _nameController,
-                      label: 'Nazwa',
+                      label: l10n.fieldName,
                       icon: Icons.fitness_center,
-                      validator: (v) => v!.isEmpty ? 'Podaj nazwę' : null),
+                      validator: (v) => v!.isEmpty
+                          ? l10n.validationRequiredField(l10n.fieldName)
+                          : null),
                   const SizedBox(height: 16),
                   CustomTextField(
                       controller: _descriptionController,
-                      label: 'Opis (opcjonalnie)',
+                      label: l10n.fieldDescriptionOptional,
                       icon: Icons.description),
                   const SizedBox(height: 16),
                   Container(
@@ -234,12 +240,12 @@ class _AddClassModalState extends ConsumerState<AddClassModal> {
                         border: Border.all(
                             color: Colors.white.withValues(alpha: 0.1))),
                     child: SwitchListTile(
-                      title: const Text('Trening personalny',
-                          style: TextStyle(
+                      title: Text(l10n.trainerAddPersonalTrainingTitle,
+                          style: const TextStyle(
                               color: AppColors.textPrimary,
                               fontWeight: FontWeight.bold)),
-                      subtitle: const Text('Zajęcia z jednym klientem',
-                          style: TextStyle(
+                      subtitle: Text(l10n.trainerAddPersonalTrainingSubtitle,
+                          style: const TextStyle(
                               color: AppColors.textSecondary, fontSize: 12)),
                       value: _isPersonalTraining,
                       activeThumbColor: AppColors.primary,
@@ -286,7 +292,7 @@ class _AddClassModalState extends ConsumerState<AddClassModal> {
                       );
                     },
                     loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
-                    error: (err, stack) => const Text('Nie udało się załadować lokalizacji', style: TextStyle(color: AppColors.error)),
+                    error: (err, stack) => Text(l10n.trainerLocationsLoadError, style: const TextStyle(color: AppColors.error)),
                   ),
                   const SizedBox(height: 16),
                   Row(
@@ -294,7 +300,7 @@ class _AddClassModalState extends ConsumerState<AddClassModal> {
                       Expanded(
                           flex: 2,
                           child: _buildPickerField(
-                              'Data',
+                              l10n.fieldDate,
                               DateFormat('dd.MM.yyyy').format(_selectedDate),
                               Icons.calendar_month,
                                   () => _selectDate(context))),
@@ -307,12 +313,12 @@ class _AddClassModalState extends ConsumerState<AddClassModal> {
                                   opacity: _isPersonalTraining ? 0.5 : 1.0,
                                   child: CustomTextField(
                                       controller: _maxParticipantsController,
-                                      label: 'Miejsca',
+                                      label: l10n.fieldSeatsLabel,
                                       icon: Icons.people,
                                       keyboardType: TextInputType.number,
                                       validator: (v) =>
                                       (int.tryParse(v ?? '') ?? 0) <= 0
-                                          ? 'Błąd'
+                                          ? l10n.validationSeatsMin
                                           : null)))),
                     ],
                   ),
@@ -321,14 +327,14 @@ class _AddClassModalState extends ConsumerState<AddClassModal> {
                     children: [
                       Expanded(
                           child: _buildPickerField(
-                              'Start',
+                              l10n.fieldStart,
                               _startTime.format(context),
                               Icons.access_time,
                                   () => _selectTime(context, true))),
                       const SizedBox(width: 16),
                       Expanded(
                           child: _buildPickerField(
-                              'Koniec',
+                              l10n.fieldEnd,
                               _endTime.format(context),
                               Icons.access_time_filled,
                                   () => _selectTime(context, false))),
@@ -346,8 +352,8 @@ class _AddClassModalState extends ConsumerState<AddClassModal> {
                               borderRadius: BorderRadius.circular(20))),
                       child: _isLoading
                           ? const CircularProgressIndicator(color: Colors.white)
-                          : const Text('UTWÓRZ ZAJĘCIA',
-                          style: TextStyle(
+                          : Text(l10n.trainerCreateClassButton,
+                          style: const TextStyle(
                               color: Colors.white,
                               fontSize: 18,
                               fontWeight: FontWeight.bold)),

@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/ui/widgets/app_skeleton.dart';
 import '../../../../core/ui/widgets/empty_state_view.dart';
 import '../../classes/data/models/gym_class.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../classes/providers/classes_provider.dart';
 import '../../classes/ui/widgets/compact_class_card.dart';
 import '../../classes/utils/gym_class_extension.dart';
@@ -21,6 +22,7 @@ class TrainerDashboardPage extends ConsumerWidget {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final trainerClassesAsync = ref.watch(trainerClassesProvider(today));
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -66,8 +68,8 @@ class TrainerDashboardPage extends ConsumerWidget {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20.0),
                     child: _buildSectionHeader(
-                      title: 'Twoje zajęcia grupowe',
-                      action: 'DODAJ',
+                      title: l10n.trainerDashboardGroupClasses,
+                      action: l10n.trainerDashboardAdd,
                       onTap: () => showModalBottomSheet(
                         context: context,
                         isScrollControlled: true,
@@ -82,18 +84,18 @@ class TrainerDashboardPage extends ConsumerWidget {
                       padding: EdgeInsets.symmetric(horizontal: 20),
                       child: AppSkeleton(width: 260, height: 180, borderRadius: 24),
                     ),
-                    error: (err, stack) => const Padding(
-                      padding: EdgeInsets.all(20),
-                      child: Text('Błąd pobierania zajęć', style: TextStyle(color: AppColors.error)),
+                    error: (err, stack) => Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Text(l10n.trainerClassFetchError, style: const TextStyle(color: AppColors.error)),
                     ),
                     data: (classes) {
                       final groupClasses = classes.where((c) => !c.personalTraining && c.isFuture).toList();
 
                       if (groupClasses.isEmpty) {
-                        return const EmptyStateView(
+                        return EmptyStateView(
                           icon: Icons.event_available_rounded,
-                          title: 'Wszystko gotowe',
-                          subtitle: 'Nie masz już dziś zaplanowanych zajęć grupowych.',
+                          title: l10n.trainerDashboardAllReadyTitle,
+                          subtitle: l10n.trainerDashboardAllReadySubtitle,
                         );
                       }
 
@@ -118,8 +120,8 @@ class TrainerDashboardPage extends ConsumerWidget {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20.0),
                     child: _buildSectionHeader(
-                      title: 'Treningi personalne',
-                      action: 'DODAJ',
+                      title: l10n.trainerDashboardPersonalTrainings,
+                      action: l10n.trainerDashboardAdd,
                       onTap: () => showModalBottomSheet(
                         context: context,
                         isScrollControlled: true,
@@ -141,10 +143,10 @@ class TrainerDashboardPage extends ConsumerWidget {
                       final personalTrainings = classes.where((c) => c.personalTraining && c.isFuture).toList();
 
                       if (personalTrainings.isEmpty) {
-                        return const EmptyStateView(
+                        return EmptyStateView(
                           icon: Icons.person_search_rounded,
-                          title: 'Brak podopiecznych',
-                          subtitle: 'Nie masz zaplanowanych treningów personalnych na dziś.',
+                          title: l10n.trainerDashboardNoClientsTitle,
+                          subtitle: l10n.trainerDashboardNoClientsSubtitle,
                         );
                       }
 
@@ -190,6 +192,7 @@ class TrainerDashboardPage extends ConsumerWidget {
     final isBooked = gymClass.currentParticipants > 0;
     final participantsAsync = ref.watch(classParticipantsProvider(gymClass.id));
     final isActive = gymClass.isOngoing;
+    final l10n = AppLocalizations.of(context)!;
 
     return GestureDetector(
       onTap: () {
@@ -239,10 +242,10 @@ class TrainerDashboardPage extends ConsumerWidget {
                       style: const TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                     loading: () => const AppSkeleton(width: 100, height: 16),
-                    error: (_, _) => const Text('Błąd danych', style: TextStyle(color: AppColors.error)),
+                    error: (_, _) => Text(l10n.trainerDataError, style: const TextStyle(color: AppColors.error)),
                   )
-                      : const Text('Wolny termin', style: TextStyle(color: AppColors.textSecondary, fontSize: 16, fontWeight: FontWeight.bold)),
-                  Text(gymClass.description ?? 'Trening personalny', style: const TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+                      : Text(l10n.trainerFreeSlot, style: const TextStyle(color: AppColors.textSecondary, fontSize: 16, fontWeight: FontWeight.bold)),
+                  Text(gymClass.description ?? l10n.trainerPersonalTraining, style: const TextStyle(color: AppColors.textSecondary, fontSize: 13)),
                 ],
               ),
             ),

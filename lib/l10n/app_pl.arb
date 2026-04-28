@@ -1,0 +1,399 @@
+{
+  "@@locale": "pl",
+  "appName": "Gym App",
+  "@appName": {
+    "description": "Application name."
+  },
+  "commonBack": "Wróć",
+  "commonCancel": "Anuluj",
+  "commonClose": "Zamknij",
+  "commonConfirm": "Potwierdź",
+  "commonCreate": "Utwórz",
+  "commonError": "Błąd",
+  "commonLoadError": "Błąd ładowania",
+  "commonNoData": "Brak danych",
+  "commonRefresh": "Odśwież",
+  "commonRetry": "Spróbuj ponownie",
+  "commonRetryUppercase": "SPRÓBUJ PONOWNIE",
+  "commonSave": "Zapisz",
+  "commonUnknownError": "Wystąpił nieoczekiwany błąd.",
+  "criticalError": "Błąd krytyczny: {error}",
+  "@criticalError": {
+    "description": "Fatal app initialization error.",
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "fieldEmail": "Email",
+  "fieldFirstName": "Imię",
+  "fieldLastName": "Nazwisko",
+  "fieldPassword": "Hasło",
+  "fieldRepeatPassword": "Powtórz hasło",
+  "fieldName": "Nazwa",
+  "fieldDescriptionOptional": "Opis (opcjonalnie)",
+  "fieldSeatsLabel": "Miejsca",
+  "fieldSeats": "{count, plural, =0{Brak miejsc} one{1 miejsce} few{{count} miejsca} many{{count} miejsc} other{{count} miejsca}}",
+  "@fieldSeats": {
+    "description": "Seat count with Polish plural forms.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "fieldDate": "Data",
+  "fieldStart": "Start",
+  "fieldEnd": "Koniec",
+  "authLoginTitle": "Zaloguj się",
+  "authLoginSubtitle": "Witaj z powrotem",
+  "authLoginContinue": "Zaloguj się, aby kontynuować",
+  "authLoginAction": "Zaloguj się",
+  "authRegisterTitle": "Zarejestruj się",
+  "authRegisterSubtitle": "Stwórz konto i trenuj wygodniej",
+  "authRegisterAction": "Zarejestruj się",
+  "authForgotPassword": "Zapomniałeś hasła?",
+  "authNoAccount": "Nie masz konta? ",
+  "authAlreadyHaveAccount": "Masz już konto? ",
+  "dashboardNoConnection": "Brak połączenia",
+  "dashboardGreeting": "Cześć, {name}!",
+  "@dashboardGreeting": {
+    "description": "Dashboard greeting with first name.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardReadyQuestion": "Gotowy na trening?",
+  "dashboardSectionGym": "Twoja Siłownia",
+  "dashboardSectionTodayClasses": "Dzisiejsze zajęcia",
+  "dashboardMapAction": "MAPA",
+  "dashboardSeeAll": "ZOBACZ WSZYSTKIE",
+  "dashboardTodayClassesError": "Nie udało się pobrać dzisiejszych zajęć.",
+  "dashboardMembershipRequiredForToday": "Kup karnet, aby zobaczyć grafik na dziś i zapisać się na trening!",
+  "dashboardRestTitle": "Czas na odpoczynek",
+  "dashboardRestSubtitle": "Brak nadchodzących zajęć na dziś. Zregeneruj siły!",
+  "dashboardNoGroupClassesTitle": "Brak zajęć grupowych",
+  "dashboardNoGroupClassesSubtitle": "Nie ma już dzisiaj zaplanowanych zajęć grupowych.",
+  "dashboardAvailablePersonalTrainings": "Dostępne treningi 1 na 1",
+  "locationChooseGym": "Wybierz siłownię",
+  "locationUnknown": "Lokalizacja nieznana",
+  "locationDistanceMeters": "{meters} m",
+  "@locationDistanceMeters": {
+    "description": "Distance in meters.",
+    "placeholders": {
+      "meters": {
+        "type": "int"
+      }
+    }
+  },
+  "locationDistanceKilometers": "{kilometers} km",
+  "@locationDistanceKilometers": {
+    "description": "Distance in kilometers.",
+    "placeholders": {
+      "kilometers": {
+        "type": "String"
+      }
+    }
+  },
+  "membershipCardType": "Karnet {type}",
+  "@membershipCardType": {
+    "description": "Membership type label.",
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+  "membershipActiveDays": "{days, plural, =0{Karnet wygasł} one{Aktywny jeszcze 1 dzień} few{Aktywny jeszcze {days} dni} many{Aktywny jeszcze {days} dni} other{Aktywny jeszcze {days} dnia}}",
+  "@membershipActiveDays": {
+    "description": "Remaining membership days with Polish plural forms.",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "membershipNoActive": "Brak aktywnego karnetu",
+  "membershipBuyAccessToday": "Kup dostęp już dziś!",
+  "membershipGuardTitle": "Aktywny karnet wymagany",
+  "membershipGuardSubtitle": "Kup karnet, aby zobaczyć grafik i zapisać się na trening.",
+  "membershipBuyNow": "Kup karnet teraz",
+  "membershipPurchaseTitle": "Wybierz karnet",
+  "membershipPurchaseSubtitle": "Wybierz plan, który najlepiej pasuje do Twojego rytmu treningów.",
+  "membershipPurchasePopular": "HIT",
+  "membershipPurchaseButton": "Kupuję i płacę",
+  "membershipPurchaseSuccess": "Karnet zakupiony pomyślnie!",
+  "membershipPlanOpenTitle": "Karnet OPEN",
+  "membershipPlanOpenDescription": "Całodobowy dostęp do klubu",
+  "membershipPlanNightTitle": "Karnet NIGHT",
+  "membershipPlanNightDescription": "Dostęp w godzinach 22:00 - 06:00",
+  "membershipPlanStudentTitle": "Karnet STUDENT",
+  "membershipPlanStudentDescription": "Dla osób z ważną legitymacją",
+  "membershipLockedTitle": "Dostęp zablokowany",
+  "membershipLockedSubtitle": "Aby przeglądać grafik zajęć i rezerwować treningi, musisz posiadać aktywny karnet do naszego klubu.",
+  "classesSchedule": "Grafik",
+  "classesAll": "Wszystkie zajęcia",
+  "classesMyBookings": "Moje rezerwacje",
+  "classesToday": "Dzisiejsze zajęcia",
+  "classesNoClassesDateTitle": "Brak zajęć w tym dniu",
+  "classesNoTrainingsDateTitle": "Brak dostępnych\ntreningów w tym dniu",
+  "classesChooseAnotherDate": "Wybierz inną datę z kalendarza powyżej",
+  "classesTrainer": "Trener: {name}",
+  "@classesTrainer": {
+    "description": "Trainer label with name.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "classesInstructor": "Instruktor",
+  "classesAboutTraining": "O treningu",
+  "classesBooked": "ZAPISANO",
+  "classesFull": "BRAK MIEJSC",
+  "classesBook": "Zapisz",
+  "classesBookLong": "Zapisz się",
+  "classesCancelBooking": "Zrezygnuj z zajęć",
+  "classesCancelBookingShort": "Zrezygnuj",
+  "classesFinished": "Zakończone",
+  "classesParticipantsRegistered": "Zapisani uczestnicy",
+  "classesParticipantsEmpty": "Brak zapisanych osób",
+  "classesParticipantsCount": "Uczestnicy: {current}/{max}",
+  "@classesParticipantsCount": {
+    "description": "Current and maximum class participants.",
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "classesParticipantsLoadError": "Błąd ładowania listy",
+  "classesBookingError": "Błąd rezerwacji: {error}",
+  "@classesBookingError": {
+    "description": "Booking failure message.",
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "classesBookingSuccess": "Zapisano na\ntrening!",
+  "classesGenericError": "Błąd: {error}",
+  "@classesGenericError": {
+    "description": "Generic class action error.",
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "classesCancelDialogTitle": "Zrezygnować?",
+  "classesCancelDialogBody": "Czy na pewno chcesz anulować:\n{name}?",
+  "@classesCancelDialogBody": {
+    "description": "Cancel booking confirmation body.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "classesDeleteDialogTitle": "Odwołać zajęcia?",
+  "classesDeleteAction": "Odwołaj zajęcia",
+  "classesDeleteDialogBody": "Zapisani uczestnicy otrzymają powiadomienie. Tej operacji nie można cofnąć.",
+  "classesDeleteConfirm": "Tak, odwołaj",
+  "classesRescheduleTitle": "Przełóż",
+  "classesRescheduleConfirm": "Zatwierdź zmianę",
+  "classesReschedulePastError": "Nowy termin nie może być w przeszłości!",
+  "classesNewDate": "Nowa data",
+  "classesNewTime": "Nowa godzina",
+  "classesDurationMinutes": "{minutes, plural, one{1 min} few{{minutes} min} many{{minutes} min} other{{minutes} min}}",
+  "@classesDurationMinutes": {
+    "description": "Duration in minutes.",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "classesUnknownTrainer": "Nieznany Trener",
+  "classesUnknownTrainerFirstName": "Nieznany",
+  "classesOngoing": "Zajęcia w toku",
+  "classesRescheduledSuccess": "Zajęcia\nprzełożone!",
+  "classesDefaultDescription": "Dołącz do nas i poczuj energię grupowego treningu. Idealne dla każdego poziomu zaawansowania.",
+  "trainerDashboardGroupClasses": "Twoje zajęcia grupowe",
+  "trainerDashboardAdd": "DODAJ",
+  "trainerSummaryToday": "DZISIAJ",
+  "trainerSummaryReadyTitle": "Harmonogram gotowy",
+  "trainerSummaryReadySubtitle": "Wszystkie zajęcia są zaplanowane.",
+  "trainerSummaryEmptyTitle": "Brak zaplanowanych zajęć",
+  "trainerSummaryLoadErrorSubtitle": "Nie udało się pobrać grafiku.",
+  "trainerDashboardAllReadyTitle": "Wszystko gotowe",
+  "trainerDashboardAllReadySubtitle": "Nie masz już dziś zaplanowanych zajęć grupowych.",
+  "trainerDashboardPersonalTrainings": "Treningi personalne",
+  "trainerDashboardNoClientsTitle": "Brak podopiecznych",
+  "trainerDashboardNoClientsSubtitle": "Nie masz zaplanowanych treningów personalnych na dziś.",
+  "trainerClassFetchError": "Błąd pobierania zajęć",
+  "trainerDataError": "Błąd danych",
+  "trainerFreeSlot": "Wolny termin",
+  "trainerPersonalTraining": "Trening personalny",
+  "trainerClientsTitle": "Podopieczni",
+  "trainerClientsSubtitle": "Zarządzaj swoimi treningami 1 na 1.",
+  "trainerManageSoon": "Zarządzanie treningiem wkrótce!",
+  "trainerFetchErrorShort": "Błąd pobierania",
+  "trainerAddClassTitle": "Nowe zajęcia",
+  "trainerAddPersonalTrainingTitle": "Trening personalny",
+  "trainerAddPersonalTrainingSubtitle": "Zajęcia z jednym klientem",
+  "trainerCreateClassButton": "UTWÓRZ ZAJĘCIA",
+  "trainerClassCreatedSuccess": "Zajęcia zostały dodane!",
+  "trainerNoLocations": "Brak dostępnych lokalizacji.",
+  "trainerPastClassError": "Zajęcia nie mogą odbywać się w przeszłości.",
+  "trainerClassEndBeforeStartError": "Zajęcia muszą kończyć się po ich rozpoczęciu.",
+  "trainerLocationsLoadError": "Nie udało się załadować lokalizacji",
+  "profileNoData": "Brak danych",
+  "profileInfoSection": "Informacje",
+  "profileSettingsSection": "Ustawienia",
+  "profileAboutSection": "O aplikacji",
+  "profileTrainerAccount": "Konto Trenera",
+  "profileUserAccount": "Konto Użytkownika",
+  "profileLanguage": "Język aplikacji",
+  "profileSelectLanguage": "Wybierz język",
+  "profileLanguagePolish": "Polski",
+  "profileLanguageEnglish": "Angielski",
+  "profilePushNotifications": "Powiadomienia Push",
+  "profileHelpContact": "Pomoc i kontakt",
+  "profileClubRules": "Regulamin klubu",
+  "profileLogout": "Wyloguj się",
+  "profileAppVersion": "Wersja aplikacji",
+  "profileVersion": "Wersja {version}",
+  "@profileVersion": {
+    "description": "Application version label.",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsTitle": "Powiadomienia",
+  "notificationsEmptyTitle": "Brak powiadomień",
+  "notificationsEmptySubtitle": "Gdy coś się wydarzy, damy Ci znać.",
+  "notificationsToday": "Dzisiaj",
+  "notificationsEarlier": "Wcześniejsze",
+  "notificationsNewUppercase": "NOWE POWIADOMIENIE",
+  "notificationsDateToday": "Dzisiaj, {time}",
+  "@notificationsDateToday": {
+    "description": "Today date label in notification list.",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsDateYesterday": "Wczoraj, {time}",
+  "@notificationsDateYesterday": {
+    "description": "Yesterday date label in notification list.",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsError": "Błąd: {error}",
+  "@notificationsError": {
+    "description": "Notifications screen error.",
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "qrEntryTitle": "Kod wejścia",
+  "qrEntrySubtitle": "Pokaż kod przy wejściu do klubu.",
+  "offlineModalTitle": "Brak połączenia",
+  "offlineModalSubtitle": "Nie udało się pobrać danych. Sprawdź połączenie internetowe i spróbuj ponownie.",
+  "offlineActionUnavailable": "Ta akcja wymaga połączenia z internetem.",
+  "offlineBookingUnavailable": "Połącz się z internetem, aby zapisać się na zajęcia.",
+  "offlineCancelBookingUnavailable": "Połącz się z internetem, aby anulować zapis.",
+  "syncOfflineBadge": "Tryb offline",
+  "syncCachedDataNotice": "Pokazujemy ostatnio zapisane dane.",
+  "syncLastUpdated": "Ostatnia aktualizacja: {date}",
+  "@syncLastUpdated": {
+    "description": "Shows when cached data was last refreshed.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "syncRefreshing": "Aktualizowanie danych...",
+  "syncRefreshSuccess": "Dane zostały zaktualizowane.",
+  "syncRefreshFailed": "Nie udało się odświeżyć danych.",
+  "gpsPermissionTitle": "Dostęp do lokalizacji",
+  "gpsPermissionRationale": "Pozwól aplikacji używać lokalizacji, aby pokazać najbliższą siłownię.",
+  "gpsPermissionDenied": "Nie przyznano dostępu do lokalizacji.",
+  "gpsPermissionDeniedForever": "Dostęp do lokalizacji jest zablokowany. Zmień ustawienia systemowe, aby go włączyć.",
+  "gpsServiceDisabled": "Usługi lokalizacji są wyłączone.",
+  "gpsOpenSettings": "Otwórz ustawienia",
+  "gpsDistanceUnavailable": "Odległość niedostępna",
+  "validationRequired": "To pole jest wymagane.",
+  "validationRequiredField": "Pole {fieldName} jest wymagane.",
+  "@validationRequiredField": {
+    "description": "Required field validation message.",
+    "placeholders": {
+      "fieldName": {
+        "type": "String"
+      }
+    }
+  },
+  "validationEmailRequired": "Podaj adres email.",
+  "validationEmailInvalid": "Podaj poprawny adres email.",
+  "validationPasswordRequired": "Podaj hasło.",
+  "validationPasswordConfirmationRequired": "Potwierdź hasło.",
+  "validationPasswordMinLength": "{length, plural, one{Hasło musi mieć co najmniej 1 znak.} few{Hasło musi mieć co najmniej {length} znaki.} many{Hasło musi mieć co najmniej {length} znaków.} other{Hasło musi mieć co najmniej {length} znaku.}}",
+  "@validationPasswordMinLength": {
+    "description": "Password minimum length validation message.",
+    "placeholders": {
+      "length": {
+        "type": "int"
+      }
+    }
+  },
+  "validationPasswordsDoNotMatch": "Hasła nie są takie same.",
+  "validationSeatsMin": "Liczba miejsc musi być większa od zera.",
+  "classSeatsAvailable": "{count, plural, =0{Brak wolnych miejsc} one{1 wolne miejsce} few{{count} wolne miejsca} many{{count} wolnych miejsc} other{{count} wolnego miejsca}}",
+  "@classSeatsAvailable": {
+    "description": "Available seats label.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "errorServer": "Błąd serwera. Spróbuj ponownie później.",
+  "errorServerWaking": "Serwer się wybudza, spróbuj za chwilę.",
+  "errorConnectionTimeout": "Przekroczono czas połączenia. Sprawdź połączenie z internetem.",
+  "errorRequestCanceled": "Żądanie zostało anulowane.",
+  "errorNoInternet": "Brak połączenia z internetem.",
+  "errorDataLoad": "Błąd ładowania danych.",
+  "errorVerifyAccountAccess": "Nie udało się zweryfikować uprawnień konta. Sprawdź sieć.",
+  "errorUserProfileFetch": "Nie udało się pobrać profilu użytkownika.",
+  "errorUserProfileUnexpected": "Wystąpił nieoczekiwany błąd podczas pobierania profilu.",
+  "errorTrainersFetch": "Nie udało się pobrać listy trenerów.",
+  "errorTrainersUnexpected": "Wystąpił nieoczekiwany błąd podczas pobierania trenerów.",
+  "errorMembershipFetch": "Nie udało się pobrać karnetu.",
+  "errorMembershipUnexpected": "Wystąpił nieoczekiwany błąd podczas pobierania karnetu.",
+  "errorMembershipPurchase": "Nie udało się zakupić karnetu.",
+  "errorClassesFetch": "Nie udało się pobrać grafiku zajęć.",
+  "errorTrainerScheduleFetch": "Nie udało się pobrać Twojego grafiku.",
+  "errorClassParticipantsFetch": "Nie udało się pobrać listy uczestników.",
+  "errorBookClass": "Nie udało się zarezerwować zajęć.",
+  "errorCancelBooking": "Nie udało się anulować rezerwacji.",
+  "errorCreateClass": "Błąd tworzenia zajęć.",
+  "errorRescheduleClass": "Błąd przekładania zajęć.",
+  "errorDeleteClass": "Błąd usuwania zajęć."
+}

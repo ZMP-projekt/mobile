@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../providers/shared_preferences_provider.dart';
@@ -10,7 +11,9 @@ final localeNotifierProvider =
 });
 
 class LocaleNotifier extends StateNotifier<Locale> {
-  LocaleNotifier(this._prefs) : super(_readInitialLocale(_prefs));
+  LocaleNotifier(this._prefs) : super(_readInitialLocale(_prefs)) {
+    Intl.defaultLocale = state.languageCode;
+  }
 
   static const _key = 'app_locale';
   static const supportedLocales = [
@@ -35,6 +38,7 @@ class LocaleNotifier extends StateNotifier<Locale> {
     );
 
     state = normalizedLocale;
+    Intl.defaultLocale = normalizedLocale.languageCode;
     await _prefs.setString(_key, normalizedLocale.languageCode);
   }
 

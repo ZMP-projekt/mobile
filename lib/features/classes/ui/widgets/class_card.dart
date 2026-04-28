@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/ui/success_overlay.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../user/providers/user_provider.dart';
 import '../../data/models/gym_class.dart';
 import '../../providers/classes_provider.dart';
@@ -54,7 +55,7 @@ class ClassCard extends ConsumerWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _buildStatusTag(),
+                    _buildStatusTag(context),
                     ClipRRect(
                       borderRadius: BorderRadius.circular(12),
                       child: BackdropFilter(
@@ -96,7 +97,7 @@ class ClassCard extends ConsumerWidget {
                                 maxLines: 1, overflow: TextOverflow.ellipsis,
                               ),
                               const SizedBox(height: 2),
-                              Text('Trener: ${gymClass.trainer.fullName}', style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 13)),
+                              Text(AppLocalizations.of(context)!.classesTrainer(gymClass.trainer.fullName), style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 13)),
                             ],
                           ),
                         ),
@@ -113,7 +114,9 @@ class ClassCard extends ConsumerWidget {
     );
   }
 
-  Widget _buildStatusTag() {
+  Widget _buildStatusTag(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     if (gymClass.userEnrolled) {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -122,7 +125,7 @@ class ClassCard extends ConsumerWidget {
           border: Border.all(color: AppColors.primary, width: 1.5),
           boxShadow: [BoxShadow(color: AppColors.primary.withValues(alpha: 0.5), blurRadius: 8, spreadRadius: 1)],
         ),
-        child: const Text('ZAPISANO', style: TextStyle(color: AppColors.primary, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+        child: Text(l10n.classesBooked, style: const TextStyle(color: AppColors.primary, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
       );
     }
     if (gymClass.isFull) {
@@ -132,13 +135,15 @@ class ClassCard extends ConsumerWidget {
           color: AppColors.error.withValues(alpha: 0.8), borderRadius: BorderRadius.circular(8),
           border: Border.all(color: Colors.white24, width: 1),
         ),
-        child: const Text('BRAK MIEJSC', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+        child: Text(l10n.classesFull, style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
       );
     }
     return const SizedBox.shrink();
   }
 
   Widget _buildQuickActionButton(BuildContext context, WidgetRef ref, bool isProcessing, bool isTrainer) {
+    final l10n = AppLocalizations.of(context)!;
+
     if (isTrainer || gymClass.userEnrolled || gymClass.isFull || gymClass.isPast) {
       return Container(
         padding: const EdgeInsets.all(8),
@@ -153,12 +158,12 @@ class ClassCard extends ConsumerWidget {
           await ref.read(bookingNotifierProvider.notifier).bookClass(gymClass.id);
           if (!context.mounted) return;
 
-          await SuccessOverlay.show(context, "Zapisano na\nzajęcia!");
+          await SuccessOverlay.show(context, l10n.classesBookingSuccess);
 
         } catch (e) {
           if (!context.mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Błąd rezerwacji: $e'), backgroundColor: AppColors.error),
+            SnackBar(content: Text(l10n.classesBookingError(e)), backgroundColor: AppColors.error),
           );
         }
       },
@@ -167,7 +172,7 @@ class ClassCard extends ConsumerWidget {
         decoration: BoxDecoration(gradient: AppColors.primaryGradient.withOpacity(0.9), borderRadius: BorderRadius.circular(14)),
         child: isProcessing
             ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.textPrimary))
-            : const Text('Zapisz', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 13)),
+            : Text(l10n.classesBook, style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 13)),
       ),
     );
   }
