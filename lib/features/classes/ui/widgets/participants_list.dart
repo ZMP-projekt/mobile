@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/ui/widgets/app_skeleton.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../providers/classes_provider.dart';
 
 class ParticipantsList extends ConsumerWidget {
@@ -18,6 +19,7 @@ class ParticipantsList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final participantsAsync = ref.watch(classParticipantsProvider(classId));
+    final l10n = AppLocalizations.of(context)!;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -25,9 +27,9 @@ class ParticipantsList extends ConsumerWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              'Zapisani uczestnicy',
-              style: TextStyle(
+            Text(
+              l10n.classesParticipantsRegistered,
+              style: const TextStyle(
                 color: AppColors.textPrimary,
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
@@ -58,10 +60,10 @@ class ParticipantsList extends ConsumerWidget {
           child: participantsAsync.when(
             data: (users) {
               if (users.isEmpty) {
-                return const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 24),
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 24),
                   child: Center(
-                    child: Text('Brak zapisanych osób', style: TextStyle(color: AppColors.textSecondary, fontSize: 15)),
+                    child: Text(l10n.classesParticipantsEmpty, style: const TextStyle(color: AppColors.textSecondary, fontSize: 15)),
                   ),
                 );
               }
@@ -93,8 +95,8 @@ class ParticipantsList extends ConsumerWidget {
             loading: () => Column(
               children: List.generate(3, (index) => const _ParticipantSkeleton()),
             ),
-            error: (err, _) => const Center(
-              child: Text('Błąd ładowania listy', style: TextStyle(color: AppColors.error, fontSize: 14)),
+            error: (err, _) => Center(
+              child: Text(l10n.classesParticipantsLoadError, style: const TextStyle(color: AppColors.error, fontSize: 14)),
             ),
           ),
         ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.1, end: 0),

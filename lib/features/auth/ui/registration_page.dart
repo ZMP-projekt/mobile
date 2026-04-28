@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/ui/widgets/custom_text_field.dart';
 import '../../../core/util/validators.dart';
+import '../../../l10n/app_localizations.dart';
 import '../providers/auth_provider.dart';
 
 class RegistrationPage extends ConsumerStatefulWidget {
@@ -61,6 +62,7 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authStateProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     ref.listen<AuthState>(authStateProvider, (previous, next) {
       if (next.errorMessage != null && next.errorMessage != previous?.errorMessage) {
@@ -113,70 +115,84 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      const Text(
-                        'Dołącz do nas',
-                        style: TextStyle(color: AppColors.textPrimary, fontSize: 32, fontWeight: FontWeight.w800, letterSpacing: -1.0),
+                      Text(
+                        l10n.authRegisterTitle,
+                        style: const TextStyle(color: AppColors.textPrimary, fontSize: 32, fontWeight: FontWeight.w800, letterSpacing: -1.0),
                       ).animate().fadeIn(delay: 100.ms).slideY(begin: 0.2, end: 0),
 
                       const SizedBox(height: 8),
 
-                      const Text(
-                        'Stwórz konto i zacznij trening',
-                        style: TextStyle(color: AppColors.textSecondary, fontSize: 16),
+                      Text(
+                        l10n.authRegisterSubtitle,
+                        style: const TextStyle(color: AppColors.textSecondary, fontSize: 16),
                       ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.2, end: 0),
 
                       const SizedBox(height: 40),
 
                       CustomTextField(
-                        label: 'Imię',
+                        label: l10n.fieldFirstName,
                         icon: Icons.person_outline_rounded,
                         controller: _firstNameController,
-                        validator: (val) => AppValidators.validateRequired(val, 'Imię'),
+                        validator: (val) => AppValidators.validateRequired(
+                          val,
+                          l10n.fieldFirstName,
+                          l10n,
+                        ),
                       ).animate().fadeIn(delay: 300.ms).slideX(begin: 0.1, end: 0),
 
                       const SizedBox(height: 20),
 
                       CustomTextField(
-                        label: 'Nazwisko',
+                        label: l10n.fieldLastName,
                         icon: Icons.person_outline_rounded,
                         controller: _lastNameController,
-                        validator: (val) => AppValidators.validateRequired(val, 'Nazwisko'),
+                        validator: (val) => AppValidators.validateRequired(
+                          val,
+                          l10n.fieldLastName,
+                          l10n,
+                        ),
                       ).animate().fadeIn(delay: 400.ms).slideX(begin: 0.1, end: 0),
 
                       const SizedBox(height: 20),
 
                       CustomTextField(
-                        label: 'Email',
+                        label: l10n.fieldEmail,
                         icon: Icons.email_outlined,
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
-                        validator: AppValidators.validateEmail,
+                        validator: (value) =>
+                            AppValidators.validateEmail(value, l10n),
                       ).animate().fadeIn(delay: 500.ms).slideX(begin: 0.1, end: 0),
 
                       const SizedBox(height: 20),
 
                       CustomTextField(
-                        label: 'Hasło',
+                        label: l10n.fieldPassword,
                         icon: Icons.lock_outline_rounded,
                         controller: _passwordController,
                         isPassword: true,
                         isPasswordVisible: _isPasswordVisible,
                         onTogglePassword: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
-                        validator: AppValidators.validatePassword,
+                        validator: (value) =>
+                            AppValidators.validatePassword(value, l10n),
                       ).animate().fadeIn(delay: 600.ms).slideX(begin: 0.1, end: 0),
 
                       const SizedBox(height: 20),
 
                       CustomTextField(
-                        label: 'Powtórz hasło',
+                        label: l10n.fieldRepeatPassword,
                         icon: Icons.lock_outline_rounded,
                         controller: _confirmPasswordController,
                         isPassword: true,
                         isPasswordVisible: _isConfirmPasswordVisible,
                         onTogglePassword: () => setState(() => _isConfirmPasswordVisible = !_isConfirmPasswordVisible),
                         validator: (value) {
-                          if (value == null || value.isEmpty) return 'Potwierdź hasło';
-                          if (value != _passwordController.text) return 'Hasła nie są identyczne';
+                          if (value == null || value.isEmpty) {
+                            return l10n.validationPasswordConfirmationRequired;
+                          }
+                          if (value != _passwordController.text) {
+                            return l10n.validationPasswordsDoNotMatch;
+                          }
                           return null;
                         },
                       ).animate().fadeIn(delay: 700.ms).slideX(begin: 0.1, end: 0),
@@ -201,7 +217,7 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
                           ),
                           child: authState.isLoading
                               ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                              : const Text('Zarejestruj się', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                              : Text(l10n.authRegisterAction, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
                         ),
                       ).animate().fadeIn(delay: 800.ms).slideY(begin: 0.2, end: 0),
 
@@ -210,10 +226,10 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Text('Masz już konto? ', style: TextStyle(color: AppColors.textSecondary)),
+                          Text(l10n.authAlreadyHaveAccount, style: const TextStyle(color: AppColors.textSecondary)),
                           GestureDetector(
                             onTap: () => context.pop(),
-                            child: const Text('Zaloguj się', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
+                            child: Text(l10n.authLoginAction, style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
                           ),
                         ],
                       ).animate().fadeIn(delay: 900.ms),

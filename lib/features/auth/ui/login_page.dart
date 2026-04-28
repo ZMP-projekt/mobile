@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/ui/widgets/custom_text_field.dart';
 import '../../../core/util/validators.dart';
+import '../../../l10n/app_localizations.dart';
 import '../providers/auth_provider.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
@@ -40,6 +41,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authStateProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     ref.listen<AuthState>(authStateProvider, (previous, next) {
       if (next.errorMessage != null && next.errorMessage != previous?.errorMessage) {
@@ -85,40 +87,42 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     children: [
                       const SizedBox(height: 32),
 
-                      const Text(
-                        'Witaj ponownie',
-                        style: TextStyle(color: AppColors.textPrimary, fontSize: 32, fontWeight: FontWeight.w800, letterSpacing: -1.0),
+                      Text(
+                        l10n.authLoginSubtitle,
+                        style: const TextStyle(color: AppColors.textPrimary, fontSize: 32, fontWeight: FontWeight.w800, letterSpacing: -1.0),
                         textAlign: TextAlign.center,
                       ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.2, end: 0),
 
                       const SizedBox(height: 8),
 
-                      const Text(
-                        'Zaloguj się, aby kontynuować',
-                        style: TextStyle(color: AppColors.textSecondary, fontSize: 16),
+                      Text(
+                        l10n.authLoginContinue,
+                        style: const TextStyle(color: AppColors.textSecondary, fontSize: 16),
                         textAlign: TextAlign.center,
                       ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.2, end: 0),
 
                       const SizedBox(height: 48),
 
                       CustomTextField(
-                        label: 'Email',
+                        label: l10n.fieldEmail,
                         icon: Icons.email_outlined,
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
-                        validator: AppValidators.validateEmail,
+                        validator: (value) =>
+                            AppValidators.validateEmail(value, l10n),
                       ).animate().fadeIn(delay: 400.ms).slideX(begin: 0.1, end: 0),
 
                       const SizedBox(height: 20),
 
                       CustomTextField(
-                        label: 'Hasło',
+                        label: l10n.fieldPassword,
                         icon: Icons.lock_outline_rounded,
                         controller: _passwordController,
                         isPassword: true,
                         isPasswordVisible: _isPasswordVisible,
                         onTogglePassword: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
-                        validator: AppValidators.validatePassword,
+                        validator: (value) =>
+                            AppValidators.validatePassword(value, l10n),
                       ).animate().fadeIn(delay: 500.ms).slideX(begin: 0.1, end: 0),
 
                       const SizedBox(height: 12),
@@ -128,7 +132,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         child: TextButton(
                           onPressed: () {
                           },
-                          child: const Text('Zapomniałeś hasła?', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600)),
+                          child: Text(l10n.authForgotPassword, style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600)),
                         ),
                       ).animate().fadeIn(delay: 600.ms),
 
@@ -152,7 +156,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           ),
                           child: authState.isLoading
                               ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                              : const Text('Zaloguj się', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                              : Text(l10n.authLoginAction, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
                         ),
                       ).animate().fadeIn(delay: 700.ms).slideY(begin: 0.2, end: 0),
 
@@ -161,10 +165,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Text('Nie masz konta? ', style: TextStyle(color: AppColors.textSecondary)),
+                          Text(l10n.authNoAccount, style: const TextStyle(color: AppColors.textSecondary)),
                           GestureDetector(
                             onTap: () => context.push('/register'),
-                            child: const Text('Zarejestruj się', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
+                            child: Text(l10n.authRegisterAction, style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
                           ),
                         ],
                       ).animate().fadeIn(delay: 800.ms),

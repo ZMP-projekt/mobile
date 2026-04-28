@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../locations/providers/location_provider.dart';
 
 class GymLocationCard extends ConsumerWidget {
@@ -203,6 +204,8 @@ class _LocationPickerSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.only(
@@ -219,9 +222,9 @@ class _LocationPickerSheet extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Wybierz silownie',
-                style: TextStyle(
+              Text(
+                l10n.locationChooseGym,
+                style: const TextStyle(
                   color: AppColors.textPrimary,
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -266,6 +269,8 @@ class _LocationPickerTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return ListTile(
       contentPadding: EdgeInsets.zero,
       leading: Icon(
@@ -282,7 +287,7 @@ class _LocationPickerTile extends StatelessWidget {
       subtitle: Text(
         [
           '${location.address}, ${location.city}',
-          formatDistance(userPosition, location),
+          formatDistance(l10n, userPosition, location),
         ].whereType<String>().join(' - '),
         style: const TextStyle(
           color: AppColors.textSecondary,

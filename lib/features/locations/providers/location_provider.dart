@@ -1,7 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
-import '../../../../core/network/dio_client.dart';
-import '../../../../core/providers/shared_preferences_provider.dart';
+import 'package:mobile_gym_app/core/network/dio_client.dart';
+import 'package:mobile_gym_app/core/providers/shared_preferences_provider.dart';
+import 'package:mobile_gym_app/l10n/app_localizations.dart';
 
 const _locationTimeout = Duration(seconds: 8);
 
@@ -164,12 +165,16 @@ final effectiveSelectedLocationIdProvider = FutureProvider<int?>((ref) async {
   }
 });
 
-String? formatDistance(Position? userPos, GymLocation loc) {
+String? formatDistance(
+  AppLocalizations l10n,
+  Position? userPos,
+  GymLocation loc,
+) {
   final meters = distanceInMeters(userPos, loc);
   if (meters == null) return null;
 
-  if (meters < 1000) return '${meters.round()} m';
-  return '${(meters / 1000).toStringAsFixed(1)} km';
+  if (meters < 1000) return l10n.locationDistanceMeters(meters.round());
+  return l10n.locationDistanceKilometers((meters / 1000).toStringAsFixed(1));
 }
 
 double? distanceInMeters(Position? userPos, GymLocation loc) {

@@ -36,7 +36,7 @@ class ApiClassesRepository implements IClassesRepository {
       final List<dynamic> data = response.data;
       return data.map((json) => GymClass.fromJson(json)).toList();
     } on DioException catch (e) {
-      throw Exception(DioErrorParser.extract(e.response, e.type, defaultMessage: 'Nie udało się pobrać grafiku zajęć.'));
+      throw Exception(DioErrorParser.extract(e.response, e.type, defaultMessageBuilder: (l10n) => l10n.errorClassesFetch));
     }
   }
 
@@ -48,7 +48,7 @@ class ApiClassesRepository implements IClassesRepository {
       final List<dynamic> data = response.data;
       return data.map((json) => GymClass.fromJson(json)).toList();
     } on DioException catch (e) {
-      throw Exception(DioErrorParser.extract(e.response, e.type, defaultMessage: 'Nie udało się pobrać Twojego grafiku.'));
+      throw Exception(DioErrorParser.extract(e.response, e.type, defaultMessageBuilder: (l10n) => l10n.errorTrainerScheduleFetch));
     }
   }
 
@@ -59,7 +59,7 @@ class ApiClassesRepository implements IClassesRepository {
       final List<dynamic> data = response.data;
       return data.map((json) => User.fromJson(json)).toList();
     } on DioException catch (e) {
-      throw Exception(DioErrorParser.extract(e.response, e.type, defaultMessage: 'Nie udało się pobrać listy uczestników.'));
+      throw Exception(DioErrorParser.extract(e.response, e.type, defaultMessageBuilder: (l10n) => l10n.errorClassParticipantsFetch));
     }
   }
 
@@ -68,7 +68,7 @@ class ApiClassesRepository implements IClassesRepository {
     try {
       await _dio.post('/api/classes/$classId/book');
     } on DioException catch (e) {
-      throw Exception(DioErrorParser.extract(e.response, e.type, defaultMessage: 'Nie udało się zarezerwować zajęć.'));
+      throw Exception(DioErrorParser.extract(e.response, e.type, defaultMessageBuilder: (l10n) => l10n.errorBookClass));
     }
   }
 
@@ -77,7 +77,7 @@ class ApiClassesRepository implements IClassesRepository {
     try {
       await _dio.delete('/api/classes/$classId/cancel');
     } on DioException catch (e) {
-      throw Exception(DioErrorParser.extract(e.response, e.type, defaultMessage: 'Nie udało się anulować rezerwacji.'));
+      throw Exception(DioErrorParser.extract(e.response, e.type, defaultMessageBuilder: (l10n) => l10n.errorCancelBooking));
     }
   }
 
@@ -86,7 +86,7 @@ class ApiClassesRepository implements IClassesRepository {
     try {
       await _dio.post('/api/classes', data: classData);
     } on DioException catch (e) {
-      throw Exception(DioErrorParser.extract(e.response, e.type, defaultMessage: 'Błąd tworzenia zajęć.'));
+      throw Exception(DioErrorParser.extract(e.response, e.type, defaultMessageBuilder: (l10n) => l10n.errorCreateClass));
     }
   }
 
@@ -100,7 +100,7 @@ class ApiClassesRepository implements IClassesRepository {
         },
       );
     } on DioException catch (e) {
-      throw Exception(DioErrorParser.extract(e.response, e.type, defaultMessage: 'Błąd przekładania zajęć.'));
+      throw Exception(DioErrorParser.extract(e.response, e.type, defaultMessageBuilder: (l10n) => l10n.errorRescheduleClass));
     }
   }
 
@@ -109,7 +109,7 @@ class ApiClassesRepository implements IClassesRepository {
     try {
       await _dio.delete('/api/classes/$classId');
     } on DioException catch (e) {
-      throw Exception(DioErrorParser.extract(e.response, e.type, defaultMessage: 'Błąd usuwania zajęć.'));
+      throw Exception(DioErrorParser.extract(e.response, e.type, defaultMessageBuilder: (l10n) => l10n.errorDeleteClass));
     }
   }
 }

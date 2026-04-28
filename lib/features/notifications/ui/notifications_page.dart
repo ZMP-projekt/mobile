@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/ui/widgets/full_screen_empty_state.dart';
+import '../../../l10n/app_localizations.dart';
 import '../data/models/notification.dart';
 import '../providers/notification_provider.dart';
 
@@ -15,6 +16,7 @@ class NotificationsPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final notificationsAsync = ref.watch(notificationsProvider);
     final unreadCount = ref.watch(unreadCountProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -28,9 +30,9 @@ class NotificationsPage extends ConsumerWidget {
         ),
         title: Row(
           children: [
-            const Text(
-              'Powiadomienia',
-              style: TextStyle(
+            Text(
+              l10n.notificationsTitle,
+              style: const TextStyle(
                 color: AppColors.textPrimary,
                 fontWeight: FontWeight.bold,
                 fontSize: 20,
@@ -63,15 +65,15 @@ class NotificationsPage extends ConsumerWidget {
           child: CircularProgressIndicator(color: AppColors.primary),
         ),
         error: (err, stack) => Center(
-          child: Text('Błąd: $err',
+          child: Text(l10n.notificationsError(err),
               style: const TextStyle(color: AppColors.error)),
         ),
         data: (notifications) {
           if (notifications.isEmpty) {
-            return const FullScreenEmptyState(
+            return FullScreenEmptyState(
               icon: Icons.notifications_off_outlined,
-              title: 'Brak powiadomień',
-              subtitle: 'Gdy coś się wydarzy, damy Ci znać.',
+              title: l10n.notificationsEmptyTitle,
+              subtitle: l10n.notificationsEmptySubtitle,
             );
           }
 
@@ -87,7 +89,7 @@ class NotificationsPage extends ConsumerWidget {
             children: [
               if (todayItems.isNotEmpty) ...[
                 _SectionHeader(
-                    title: 'Dzisiaj',
+                    title: l10n.notificationsToday,
                     count: todayItems.where((n) => !n.read).length),
                 const SizedBox(height: 8),
                 ...todayItems.asMap().entries.map((e) =>
@@ -102,7 +104,7 @@ class NotificationsPage extends ConsumerWidget {
               ],
               if (earlierItems.isNotEmpty) ...[
                 if (todayItems.isNotEmpty) const SizedBox(height: 20),
-                _SectionHeader(title: 'Wcześniejsze', count: 0),
+                _SectionHeader(title: l10n.notificationsEarlier, count: 0),
                 const SizedBox(height: 8),
                 ...earlierItems.asMap().entries.map((e) =>
                     _buildActionableCard(e.value, todayItems.length + e.key, ref) // Zmiana tutaj!
@@ -283,7 +285,7 @@ class _NotificationCard extends StatelessWidget {
                             ),
                             const SizedBox(height: 6),
                             Text(
-                              _formatDate(notification.createdAt),
+                              _formatDate(context, notification.createdAt),
                               style: TextStyle(
                                 color: isUnread
                                     ? AppColors.primary.withValues(alpha: 0.7)
@@ -326,7 +328,8 @@ class _NotificationCard extends StatelessWidget {
     );
   }
 
-  String _formatDate(DateTime date) {
+  String _formatDate(BuildContext context, DateTime date) {
+    final l10n = AppLocalizations.of(context)!;
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final yesterday = today.subtract(const Duration(days: 1));
@@ -334,8 +337,10 @@ class _NotificationCard extends StatelessWidget {
 
     final timeStr = DateFormat('HH:mm').format(date);
 
-    if (dateOnly == today) return 'Dzisiaj, $timeStr';
-    if (dateOnly == yesterday) return 'Wczoraj, $timeStr';
-    return DateFormat('dd MMM, HH:mm', 'pl_PL').format(date);
+    if (dateOnly == today) return l10n.notificationsDateToday(timeStr);
+    if (dateOnly == yesterday) {
+      return l10n.notificationsDateYesterday(timeStr);
+    }
+    return DateFormat('dd MMM, HH:mm', l10n.localeName).format(date);
   }
 }

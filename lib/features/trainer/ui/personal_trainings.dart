@@ -6,6 +6,7 @@ import '../../../core/ui/widgets/app_skeleton.dart';
 import '../../../core/ui/widgets/full_screen_empty_state.dart';
 import '../../../core/ui/widgets/horizontal_calendar.dart';
 import '../../../core/ui/widgets/no_connection_view.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../classes/providers/classes_provider.dart';
 import '../../classes/data/models/gym_class.dart';
 
@@ -16,6 +17,7 @@ class TrainerPersonalTrainingsPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final selectedDate = ref.watch(selectedDateProvider);
     final classesAsync = ref.watch(trainerClassesProvider(selectedDate));
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -29,15 +31,15 @@ class TrainerPersonalTrainingsPage extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Podopieczni', style: TextStyle(
+                  Text(l10n.trainerClientsTitle, style: const TextStyle(
                       color: AppColors.textPrimary,
                       fontSize: 34,
                       fontWeight: FontWeight.w800,
                       letterSpacing: -1.0))
                       .animate().fadeIn(duration: 400.ms).slideY(begin: 0.1),
                   const SizedBox(height: 8),
-                  const Text('Zarządzaj swoimi treningami 1 na 1.',
-                      style: TextStyle(color: AppColors.textSecondary,
+                  Text(l10n.trainerClientsSubtitle,
+                      style: const TextStyle(color: AppColors.textSecondary,
                           fontSize: 16,
                           height: 1.4))
                       .animate().fadeIn(delay: 200.ms).slideY(begin: 0.1),
@@ -69,10 +71,10 @@ class TrainerPersonalTrainingsPage extends ConsumerWidget {
                       .toList();
 
                   if (ptClasses.isEmpty) {
-                    return const FullScreenEmptyState(
+                    return FullScreenEmptyState(
                       icon: Icons.person_off_rounded,
-                      title: 'Brak zaplanowanych\ntreningów w tym dniu',
-                      subtitle: 'Wybierz inną datę z kalendarza powyżej',
+                      title: l10n.classesNoTrainingsDateTitle,
+                      subtitle: l10n.classesChooseAnotherDate,
                       iconColor: AppColors.primary,
                     );
                   }
@@ -106,6 +108,7 @@ class _TrainerPtCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isBooked = gymClass.currentParticipants > 0;
+    final l10n = AppLocalizations.of(context)!;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -133,9 +136,9 @@ class _TrainerPtCard extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (isBooked)
-                  _buildClientName(ref)
+                  _buildClientName(context, ref)
                 else
-                  const Text('Wolny termin', style: TextStyle(color: AppColors.textSecondary, fontSize: 17, fontWeight: FontWeight.bold)),
+                  Text(l10n.trainerFreeSlot, style: const TextStyle(color: AppColors.textSecondary, fontSize: 17, fontWeight: FontWeight.bold)),
 
                 const SizedBox(height: 4),
                 Row(
@@ -152,7 +155,7 @@ class _TrainerPtCard extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
             onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Zarządzanie treningiem wkrótce!')));
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.trainerManageSoon)));
             },
           )
         ],
@@ -177,19 +180,20 @@ class _TrainerPtCard extends ConsumerWidget {
     );
   }
 
-  Widget _buildClientName(WidgetRef ref) {
+  Widget _buildClientName(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final participantsAsync = ref.watch(classParticipantsProvider(gymClass.id));
 
     return participantsAsync.when(
       data: (users) {
-        if (users.isEmpty) return const Text('Błąd pobierania', style: TextStyle(color: AppColors.error));
+        if (users.isEmpty) return Text(l10n.trainerFetchErrorShort, style: const TextStyle(color: AppColors.error));
         return Text(
             '${users.first.firstName} ${users.first.lastName}',
             style: const TextStyle(color: AppColors.textPrimary, fontSize: 17, fontWeight: FontWeight.bold, letterSpacing: -0.3)
         );
       },
       loading: () => const AppSkeleton(width: 120, height: 20),
-      error: (_, _) => const Text('Błąd', style: TextStyle(color: AppColors.error)),
+      error: (_, _) => Text(l10n.commonError, style: const TextStyle(color: AppColors.error)),
     );
   }
 }

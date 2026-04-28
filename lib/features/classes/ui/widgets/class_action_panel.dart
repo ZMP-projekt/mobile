@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/ui/success_overlay.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../data/models/gym_class.dart';
 import '../../providers/classes_provider.dart';
 
@@ -44,6 +45,8 @@ class ClassActionPanel extends ConsumerWidget {
   }
 
   Widget _buildMainActionButton(BuildContext context, WidgetRef ref, bool isProcessing) {
+    final l10n = AppLocalizations.of(context)!;
+
     if (gymClass.userEnrolled) {
       return SizedBox(
         height: 58, width: double.infinity,
@@ -54,7 +57,7 @@ class ClassActionPanel extends ConsumerWidget {
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: BorderSide(color: AppColors.error.withValues(alpha: 0.3), width: 1)),
             elevation: 0,
           ),
-          child: isProcessing ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.error)) : const Text('Zrezygnuj z zajęć', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, letterSpacing: -0.5)),
+          child: isProcessing ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.error)) : Text(l10n.classesCancelBooking, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, letterSpacing: -0.5)),
         ),
       );
     }
@@ -74,20 +77,21 @@ class ClassActionPanel extends ConsumerWidget {
           try {
             await ref.read(bookingNotifierProvider.notifier).bookClass(gymClass.id);
             if (!context.mounted) return;
-            await SuccessOverlay.show(context, "Zapisano na\nzajęcia!");
+            await SuccessOverlay.show(context, l10n.classesBookingSuccess);
           } catch (e) {
             if (!context.mounted) return;
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()), backgroundColor: AppColors.error));
           }
         },
         style: ElevatedButton.styleFrom(backgroundColor: Colors.transparent, foregroundColor: Colors.white, shadowColor: Colors.transparent, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20))),
-        child: isProcessing ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) : Text(gymClass.isPast ? 'Zakończone' : gymClass.isFull ? 'Brak miejsc' : 'Zapisz się', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, letterSpacing: -0.5)),
+        child: isProcessing ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) : Text(gymClass.isPast ? l10n.classesFinished : gymClass.isFull ? l10n.classesFull : l10n.classesBookLong, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, letterSpacing: -0.5)),
       ),
     );
   }
 
   Widget _buildTrainerActionButtons(BuildContext context, WidgetRef ref, bool isProcessing) {
     final bool isStarted = !gymClass.isFuture;
+    final l10n = AppLocalizations.of(context)!;
 
     return Row(
       children: [
@@ -100,7 +104,7 @@ class ClassActionPanel extends ConsumerWidget {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             ),
             child: Text(
-              'Przełóż',
+              l10n.classesRescheduleTitle,
               style: TextStyle(
                   color: isStarted ? AppColors.textSecondary : AppColors.textPrimary,
                   fontSize: 16,
@@ -124,8 +128,8 @@ class ClassActionPanel extends ConsumerWidget {
                 ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                 : Text(
               isStarted
-                  ? (gymClass.isPast ? 'Zakończone' : 'Zajęcia w toku')
-                  : 'Odwołaj zajęcia',
+                  ? (gymClass.isPast ? l10n.classesFinished : l10n.classesOngoing)
+                  : l10n.classesDeleteAction,
               style: TextStyle(
                   color: isStarted ? AppColors.textSecondary : Colors.white,
                   fontSize: 16,
@@ -139,20 +143,22 @@ class ClassActionPanel extends ConsumerWidget {
   }
 
   void _confirmCancel(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surface, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: const Text('Zrezygnować?', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold)),
-        content: Text('Czy na pewno chcesz anulować:\n${gymClass.name}?', style: const TextStyle(color: AppColors.textSecondary, height: 1.5)),
+        title: Text(l10n.classesCancelDialogTitle, style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold)),
+        content: Text(l10n.classesCancelDialogBody(gymClass.name), style: const TextStyle(color: AppColors.textSecondary, height: 1.5)),
         actions: [
-          TextButton(onPressed: () => ctx.pop(), child: const Text('Wróć', style: TextStyle(color: AppColors.textSecondary))),
+          TextButton(onPressed: () => ctx.pop(), child: Text(l10n.commonBack, style: const TextStyle(color: AppColors.textSecondary))),
           TextButton(
             onPressed: () {
               ctx.pop();
               ref.read(bookingNotifierProvider.notifier).cancelBooking(gymClass.id);
             },
-            child: const Text('Zrezygnuj', style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold)),
+            child: Text(l10n.classesCancelBookingShort, style: const TextStyle(color: AppColors.error, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -160,14 +166,16 @@ class ClassActionPanel extends ConsumerWidget {
   }
 
   void _showCancelClassDialog(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surface, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: const Text('Odwołać zajęcia?', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold)),
-        content: const Text('Zapisani uczestnicy otrzymają powiadomienie. Tej operacji nie można cofnąć.', style: TextStyle(color: AppColors.textSecondary, height: 1.5)),
+        title: Text(l10n.classesDeleteDialogTitle, style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold)),
+        content: Text(l10n.classesDeleteDialogBody, style: const TextStyle(color: AppColors.textSecondary, height: 1.5)),
         actions: [
-          TextButton(onPressed: () => ctx.pop(), child: const Text('Wróć', style: TextStyle(color: AppColors.textSecondary))),
+          TextButton(onPressed: () => ctx.pop(), child: Text(l10n.commonBack, style: const TextStyle(color: AppColors.textSecondary))),
           ElevatedButton(
             onPressed: () async {
               ctx.pop();
@@ -178,7 +186,7 @@ class ClassActionPanel extends ConsumerWidget {
               }
             },
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.error, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-            child: const Text('Tak, odwołaj', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            child: Text(l10n.classesDeleteConfirm, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -216,6 +224,7 @@ class _RescheduleModalState extends ConsumerState<_RescheduleModal> {
   }
 
   Future<void> _submit() async {
+    final l10n = AppLocalizations.of(context)!;
     final newTime = DateTime(
       _selectedDate.year, _selectedDate.month, _selectedDate.day,
       _selectedTime.hour, _selectedTime.minute,
@@ -223,7 +232,7 @@ class _RescheduleModalState extends ConsumerState<_RescheduleModal> {
 
     if (newTime.isBefore(DateTime.now())) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Nowy termin nie może być w przeszłości!'), backgroundColor: AppColors.error),
+        SnackBar(content: Text(l10n.classesReschedulePastError), backgroundColor: AppColors.error),
       );
       return;
     }
@@ -235,7 +244,7 @@ class _RescheduleModalState extends ConsumerState<_RescheduleModal> {
 
       if (!mounted) return;
       context.pop();
-      await SuccessOverlay.show(context, 'Zajęcia\nprzełożone!');
+      await SuccessOverlay.show(context, l10n.classesRescheduledSuccess);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -269,6 +278,8 @@ class _RescheduleModalState extends ConsumerState<_RescheduleModal> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Container(
       padding: EdgeInsets.only(
         top: 24, left: 24, right: 24,
@@ -282,11 +293,11 @@ class _RescheduleModalState extends ConsumerState<_RescheduleModal> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Przełóż zajęcia', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+          Text(l10n.classesRescheduleTitle, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
           const SizedBox(height: 24),
 
           _buildPickerTile(
-            label: 'Nowa data',
+            label: l10n.classesNewDate,
             value: DateFormat('dd.MM.yyyy').format(_selectedDate),
             icon: Icons.calendar_today_rounded,
             onTap: _pickDate,
@@ -294,7 +305,7 @@ class _RescheduleModalState extends ConsumerState<_RescheduleModal> {
           const SizedBox(height: 12),
 
           _buildPickerTile(
-            label: 'Nowa godzina',
+            label: l10n.classesNewTime,
             value: _selectedTime.format(context),
             icon: Icons.access_time_rounded,
             onTap: _pickTime,
@@ -313,7 +324,7 @@ class _RescheduleModalState extends ConsumerState<_RescheduleModal> {
               ),
               child: _isLoading
                   ? const CircularProgressIndicator(color: Colors.white)
-                  : const Text('Zatwierdź zmianę', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                  : Text(l10n.classesRescheduleConfirm, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
             ),
           ),
         ],

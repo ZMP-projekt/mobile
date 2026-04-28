@@ -20,13 +20,13 @@ class AuthRepository {
         return Result.success(token);
       }
 
-      return const Result.failure('Nieoczekiwany błąd serwera');
+      return Result.failure(DioErrorParser.localized((l10n) => l10n.errorServer));
     } on DioException catch (e) {
       AppLogger.e("Błąd logowania", e);
       return Result.failure(DioErrorParser.extract(e.response, e.type));
     } catch (e) {
       AppLogger.e("Nieoczekiwany błąd", e);
-      return const Result.failure('Wystąpił nieoczekiwany błąd');
+      return Result.failure(DioErrorParser.localized((l10n) => l10n.commonUnknownError));
     }
   }
 
@@ -53,13 +53,13 @@ class AuthRepository {
         return Result.success(token);
       }
 
-      return const Result.failure('Nieoczekiwany błąd serwera');
+      return Result.failure(DioErrorParser.localized((l10n) => l10n.errorServer));
     } on DioException catch (e) {
       AppLogger.e("Błąd rejestracji", e);
       return Result.failure(DioErrorParser.extract(e.response, e.type));
     } catch (e) {
       AppLogger.e("Nieoczekiwany błąd rejestracji", e);
-      return const Result.failure('Wystąpił nieoczekiwany błąd');
+      return Result.failure(DioErrorParser.localized((l10n) => l10n.commonUnknownError));
     }
   }
 }

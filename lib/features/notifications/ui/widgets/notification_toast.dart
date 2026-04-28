@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../data/models/notification.dart';
 
 class NotificationToast {
@@ -66,6 +67,8 @@ class _ToastWidgetState extends State<_ToastWidget>
   @override
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Positioned(
         top: 0,
         left: 0,
@@ -134,9 +137,9 @@ class _ToastWidgetState extends State<_ToastWidget>
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
-                                  'NOWE POWIADOMIENIE',
-                                  style: TextStyle(
+                                Text(
+                                  l10n.notificationsNewUppercase,
+                                  style: const TextStyle(
                                     color: AppColors.primary,
                                     fontSize: 10,
                                     fontWeight: FontWeight.bold,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../theme/app_colors.dart';
+import '../../../l10n/app_localizations.dart';
 
 class HorizontalCalendar extends StatelessWidget {
   final DateTime selectedDate;
@@ -15,6 +16,7 @@ class HorizontalCalendar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final now = DateTime.now();
+    final l10n = AppLocalizations.of(context)!;
     final startDate = DateTime(now.year, now.month, now.day);
     final days = List.generate(15, (i) => startDate.add(Duration(days: i)));
 
@@ -54,7 +56,9 @@ class HorizontalCalendar extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    DateFormat('E', 'pl_PL').format(date).toUpperCase(),
+                    DateFormat('E', l10n.localeName)
+                        .format(date)
+                        .toUpperCase(),
                     style: TextStyle(
                       color: isSelected ? AppColors.background : AppColors.textSecondary,
                       fontSize: 12,

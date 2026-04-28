@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/ui/widgets/app_skeleton.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../classes/providers/classes_provider.dart';
 
 class TrainerSummaryCard extends ConsumerWidget {
@@ -13,6 +14,7 @@ class TrainerSummaryCard extends ConsumerWidget {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final trainerClassesAsync = ref.watch(trainerClassesProvider(today));
+    final l10n = AppLocalizations.of(context)!;
 
     return Container(
       width: double.infinity,
@@ -41,9 +43,9 @@ class TrainerSummaryCard extends ConsumerWidget {
         ),
         child: trainerClassesAsync.when(
           loading: () => _buildSkeleton(),
-          error: (error, stack) => _buildErrorState(),
+          error: (error, stack) => _buildErrorState(l10n),
           data: (classes) {
-            if (classes.isEmpty) return _buildEmptyState();
+            if (classes.isEmpty) return _buildEmptyState(l10n);
 
             final classCount = classes.length;
             final isBusy = classCount > 2;
@@ -56,7 +58,7 @@ class TrainerSummaryCard extends ConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'DZISIAJ',
+                      l10n.trainerSummaryToday,
                       style: TextStyle(
                           color: isBusy ? AppColors.success : AppColors.textSecondary,
                           fontSize: 16,
@@ -66,14 +68,14 @@ class TrainerSummaryCard extends ConsumerWidget {
                     const Icon(Icons.check_circle_outline_rounded, color: AppColors.success),
                   ],
                 ),
-                const Text(
-                  'Harmonogram gotowy',
-                  style: TextStyle(color: AppColors.textPrimary, fontSize: 24, fontWeight: FontWeight.w800),
+                Text(
+                  l10n.trainerSummaryReadyTitle,
+                  style: const TextStyle(color: AppColors.textPrimary, fontSize: 24, fontWeight: FontWeight.w800),
                 ),
                 const SizedBox(height: 8),
-                const Text(
-                  'Wszystkie zajęcia są zaplanowane.',
-                  style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+                Text(
+                  l10n.trainerSummaryReadySubtitle,
+                  style: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
                 ),
               ],
             ).animate().fadeIn(duration: 400.ms);
@@ -102,16 +104,16 @@ class TrainerSummaryCard extends ConsumerWidget {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(AppLocalizations l10n) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-                'DZISIAJ',
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1)
+            Text(
+                l10n.trainerSummaryToday,
+                style: const TextStyle(color: AppColors.textSecondary, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1)
             ),
             Icon(Icons.event_available_rounded, color: AppColors.textSecondary.withValues(alpha: 0.5)),
           ],
@@ -122,9 +124,9 @@ class TrainerSummaryCard extends ConsumerWidget {
             alignment: Alignment.centerLeft,
             child: FittedBox(
               fit: BoxFit.scaleDown,
-              child: const Text(
-                'Brak zaplanowanych zajęć',
-                style: TextStyle(
+              child: Text(
+                l10n.trainerSummaryEmptyTitle,
+                style: const TextStyle(
                   color: AppColors.textPrimary,
                   fontSize: 24,
                   fontWeight: FontWeight.w800,
@@ -146,15 +148,15 @@ class TrainerSummaryCard extends ConsumerWidget {
     ).animate().fadeIn(duration: 400.ms);
   }
 
-  Widget _buildErrorState() {
+  Widget _buildErrorState(AppLocalizations l10n) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         const Icon(Icons.error_outline_rounded, color: AppColors.error, size: 28),
         const SizedBox(height: 8),
-        const Text('Błąd ładowania', style: TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.bold)),
-        Text('Nie udało się pobrać grafiku.', style: TextStyle(color: AppColors.textSecondary.withValues(alpha: 0.8), fontSize: 13)),
+        Text(l10n.commonLoadError, style: const TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.bold)),
+        Text(l10n.trainerSummaryLoadErrorSubtitle, style: TextStyle(color: AppColors.textSecondary.withValues(alpha: 0.8), fontSize: 13)),
       ],
     ).animate().fadeIn();
   }

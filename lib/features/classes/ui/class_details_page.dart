@@ -5,6 +5,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import '../ui/widgets/participants_list.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../l10n/app_localizations.dart';
 import '../data/models/gym_class.dart';
 import '../../user/providers/user_provider.dart';
 import '../providers/classes_provider.dart';
@@ -58,7 +59,7 @@ class ClassDetailsPage extends ConsumerWidget {
                   _buildTitleSection(currentClass),
                   const SizedBox(height: 15),
 
-                  _buildBadgesRow(currentClass),
+                  _buildBadgesRow(context, currentClass),
 
                   const SizedBox(height: 35),
                   if (isTrainer)
@@ -67,7 +68,7 @@ class ClassDetailsPage extends ConsumerWidget {
                       maxParticipants: currentClass.maxParticipants,
                     )
                   else
-                    _buildInstructorAndDescription(currentClass),
+                    _buildInstructorAndDescription(context, currentClass),
                 ],
               ),
             ),
@@ -138,8 +139,9 @@ class ClassDetailsPage extends ConsumerWidget {
     ).animate().fadeIn(delay: 100.ms).slideY(begin: 0.1, end: 0);
   }
 
-  Widget _buildBadgesRow(GymClass currentClass) {
-    final locName = currentClass.locationName ?? 'Lokalizacja nieznana';
+  Widget _buildBadgesRow(BuildContext context, GymClass currentClass) {
+    final l10n = AppLocalizations.of(context)!;
+    final locName = currentClass.locationName ?? l10n.locationUnknown;
 
     return Wrap(
       spacing: 12,
@@ -148,7 +150,7 @@ class ClassDetailsPage extends ConsumerWidget {
         _buildBadge(Icons.access_time_rounded, '${currentClass.startTimeFormatted} (${currentClass.durationMinutes} min)'),
         _buildBadge(
             Icons.people_alt_rounded,
-            '${currentClass.spotsLeft} wolnych',
+            l10n.classSeatsAvailable(currentClass.spotsLeft),
             color: currentClass.isFull ? AppColors.error : AppColors.primary
         ),
         _buildBadge(Icons.location_on_rounded, locName),
@@ -156,7 +158,9 @@ class ClassDetailsPage extends ConsumerWidget {
     ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.1, end: 0);
   }
 
-  Widget _buildInstructorAndDescription(GymClass currentClass) {
+  Widget _buildInstructorAndDescription(BuildContext context, GymClass currentClass) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -179,7 +183,7 @@ class ClassDetailsPage extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Instruktor', style: TextStyle(color: AppColors.textSecondary, fontSize: 14, fontWeight: FontWeight.w500)),
+                    Text(l10n.classesInstructor, style: const TextStyle(color: AppColors.textSecondary, fontSize: 14, fontWeight: FontWeight.w500)),
                     const SizedBox(height: 4),
                     Text(currentClass.trainer.fullName, style: const TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.bold)),
                   ],
@@ -189,10 +193,10 @@ class ClassDetailsPage extends ConsumerWidget {
           ),
         ).animate().fadeIn(delay: 350.ms).slideY(begin: 0.1, end: 0),
         const SizedBox(height: 35),
-        const Text('O treningu', style: TextStyle(color: AppColors.textPrimary, fontSize: 22, fontWeight: FontWeight.bold, letterSpacing: -0.5)).animate().fadeIn(delay: 400.ms),
+        Text(l10n.classesAboutTraining, style: const TextStyle(color: AppColors.textPrimary, fontSize: 22, fontWeight: FontWeight.bold, letterSpacing: -0.5)).animate().fadeIn(delay: 400.ms),
         const SizedBox(height: 12),
         Text(
-            currentClass.description ?? 'Dołącz do nas i poczuj energię grupowego treningu. Idealne dla każdego poziomu zaawansowania.',
+            currentClass.description ?? l10n.classesDefaultDescription,
             style: TextStyle(color: AppColors.textSecondary.withValues(alpha: 0.8), fontSize: 16, height: 1.6)
         ).animate().fadeIn(delay: 450.ms),
       ],

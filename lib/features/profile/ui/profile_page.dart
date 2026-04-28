@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import '../../../core/locale/locale_provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/ui/widgets/async_value_widget.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../user/providers/user_provider.dart';
 
@@ -12,6 +14,8 @@ class ProfilePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userAsync = ref.watch(currentUserProvider);
+    final locale = ref.watch(localeNotifierProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -20,7 +24,7 @@ class ProfilePage extends ConsumerWidget {
           value: userAsync,
           data: (user) {
             if (user == null) {
-              return const Center(child: Text('Brak danych', style: TextStyle(color: AppColors.textSecondary)));
+              return Center(child: Text(l10n.profileNoData, style: const TextStyle(color: AppColors.textSecondary)));
             }
 
             return SingleChildScrollView(
@@ -59,7 +63,7 @@ class ProfilePage extends ConsumerWidget {
 
                   const SizedBox(height: 32),
 
-                  _buildSectionHeader('INFORMACJE'),
+                  _buildSectionHeader(l10n.profileInfoSection),
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(20),
@@ -76,7 +80,9 @@ class ProfilePage extends ConsumerWidget {
                         ),
                         const SizedBox(width: 12),
                         Text(
-                          user.role == 'ROLE_TRAINER' ? 'Konto Trenera' : 'Konto Użytkownika',
+                          user.role == 'ROLE_TRAINER'
+                              ? l10n.profileTrainerAccount
+                              : l10n.profileUserAccount,
                           style: const TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w600),
                         ),
                       ],
@@ -85,7 +91,7 @@ class ProfilePage extends ConsumerWidget {
 
                   const SizedBox(height: 24),
 
-                  _buildSectionHeader('USTAWIENIA'),
+                  _buildSectionHeader(l10n.profileSettingsSection),
                   Container(
                     decoration: BoxDecoration(
                       color: AppColors.surface,
@@ -96,15 +102,31 @@ class ProfilePage extends ConsumerWidget {
                       children: [
                         _buildActionTile(
                           icon: Icons.language_rounded,
-                          title: 'Język aplikacji',
-                          trailing: const Text('Polski', style: TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.w500)),
-                          onTap: () {
-                          },
+                          title: l10n.profileLanguage,
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                _languageName(l10n, locale),
+                                style: const TextStyle(
+                                  color: AppColors.textSecondary,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              const Icon(
+                                Icons.keyboard_arrow_down_rounded,
+                                color: AppColors.textSecondary,
+                                size: 20,
+                              ),
+                            ],
+                          ),
+                          onTap: () => _showLanguagePicker(context, ref),
                         ),
                         Divider(color: Colors.white.withValues(alpha: 0.05), height: 1),
                         _buildActionTile(
                           icon: Icons.notifications_active_outlined,
-                          title: 'Powiadomienia Push',
+                          title: l10n.profilePushNotifications,
                           trailing: Switch(
                             value: true,
                             onChanged: (val) {},
@@ -118,7 +140,7 @@ class ProfilePage extends ConsumerWidget {
 
                   const SizedBox(height: 24),
 
-                  _buildSectionHeader('O APLIKACJI'),
+                  _buildSectionHeader(l10n.profileAboutSection),
                   Container(
                     decoration: BoxDecoration(
                       color: AppColors.surface,
@@ -129,13 +151,13 @@ class ProfilePage extends ConsumerWidget {
                       children: [
                         _buildActionTile(
                           icon: Icons.help_outline_rounded,
-                          title: 'Pomoc i kontakt',
+                          title: l10n.profileHelpContact,
                           onTap: () {},
                         ),
                         Divider(color: Colors.white.withValues(alpha: 0.05), height: 1),
                         _buildActionTile(
                           icon: Icons.description_outlined,
-                          title: 'Regulamin klubu',
+                          title: l10n.profileClubRules,
                           onTap: () {},
                         ),
                       ],
@@ -152,9 +174,9 @@ class ProfilePage extends ConsumerWidget {
                         ref.read(authStateProvider.notifier).logout();
                       },
                       icon: const Icon(Icons.logout_rounded, size: 22),
-                      label: const Text(
-                        'Wyloguj się',
-                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, letterSpacing: -0.5),
+                      label: Text(
+                        l10n.profileLogout,
+                        style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700, letterSpacing: -0.5),
                       ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.error.withValues(alpha: 0.1),
@@ -170,9 +192,9 @@ class ProfilePage extends ConsumerWidget {
 
                   const SizedBox(height: 32),
 
-                  const Text(
-                    'Wersja 1.0.0',
-                    style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                  Text(
+                    l10n.profileVersion('1.0.0'),
+                    style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
                   ).animate().fadeIn(delay: 700.ms),
 
                   const SizedBox(height: 80),
@@ -195,6 +217,77 @@ class ProfilePage extends ConsumerWidget {
           style: const TextStyle(color: AppColors.textSecondary, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1),
         ),
       ),
+    );
+  }
+
+  String _languageName(AppLocalizations l10n, Locale locale) {
+    return switch (locale.languageCode) {
+      'en' => l10n.profileLanguageEnglish,
+      _ => l10n.profileLanguagePolish,
+    };
+  }
+
+  void _showLanguagePicker(BuildContext context, WidgetRef ref) {
+    final currentLocale = ref.read(localeNotifierProvider);
+    final l10n = AppLocalizations.of(context)!;
+
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.profileSelectLanguage,
+                  style: const TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                ...LocaleNotifier.supportedLocales.map((locale) {
+                  final isSelected =
+                      locale.languageCode == currentLocale.languageCode;
+
+                  return RadioListTile<String>(
+                    value: locale.languageCode,
+                    groupValue: currentLocale.languageCode,
+                    activeColor: AppColors.primary,
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(
+                      _languageName(l10n, locale),
+                      style: const TextStyle(color: AppColors.textPrimary),
+                    ),
+                    secondary: Icon(
+                      locale.languageCode == 'pl'
+                          ? Icons.flag_rounded
+                          : Icons.language_rounded,
+                      color: isSelected
+                          ? AppColors.primary
+                          : AppColors.textSecondary,
+                    ),
+                    onChanged: (_) {
+                      ref
+                          .read(localeNotifierProvider.notifier)
+                          .setLocale(locale);
+                      Navigator.pop(context);
+                    },
+                  );
+                }),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
