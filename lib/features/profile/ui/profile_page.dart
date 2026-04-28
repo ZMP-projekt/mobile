@@ -228,7 +228,6 @@ class ProfilePage extends ConsumerWidget {
   }
 
   void _showLanguagePicker(BuildContext context, WidgetRef ref) {
-    final currentLocale = ref.read(localeNotifierProvider);
     final l10n = AppLocalizations.of(context)!;
 
     showModalBottomSheet<void>(
@@ -238,54 +237,71 @@ class ProfilePage extends ConsumerWidget {
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (context) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.profileSelectLanguage,
-                  style: const TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                ...LocaleNotifier.supportedLocales.map((locale) {
-                  final isSelected =
-                      locale.languageCode == currentLocale.languageCode;
+        return Consumer(
+          builder: (context, ref, child) {
+            final currentLocale = ref.watch(localeNotifierProvider);
 
-                  return RadioListTile<String>(
-                    value: locale.languageCode,
-                    groupValue: currentLocale.languageCode,
-                    activeColor: AppColors.primary,
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(
-                      _languageName(l10n, locale),
-                      style: const TextStyle(color: AppColors.textPrimary),
+            return SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.profileSelectLanguage,
+                      style: const TextStyle(
+                        color: AppColors.textPrimary,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                    secondary: Icon(
-                      locale.languageCode == 'pl'
-                          ? Icons.flag_rounded
-                          : Icons.language_rounded,
-                      color: isSelected
-                          ? AppColors.primary
-                          : AppColors.textSecondary,
+                    const SizedBox(height: 16),
+
+                    RadioGroup<String>(
+                      groupValue: currentLocale.languageCode,
+                      onChanged: (String? value) {
+                        if (value != null) {
+                          final newLocale = LocaleNotifier.supportedLocales
+                              .firstWhere((l) => l.languageCode == value);
+
+                          ref.read(localeNotifierProvider.notifier).setLocale(newLocale);
+
+                          Future.delayed(const Duration(milliseconds: 200), () {
+                            if (context.mounted) Navigator.pop(context);
+                          });
+                        }
+                      },
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: LocaleNotifier.supportedLocales.map((locale) {
+                          final isSelected = locale.languageCode == currentLocale.languageCode;
+
+                          return RadioListTile<String>(
+                            value: locale.languageCode,
+                            activeColor: AppColors.primary,
+                            contentPadding: EdgeInsets.zero,
+                            title: Text(
+                              _languageName(l10n, locale),
+                              style: const TextStyle(color: AppColors.textPrimary),
+                            ),
+                            secondary: Icon(
+                              locale.languageCode == 'pl'
+                                  ? Icons.flag_rounded
+                                  : Icons.language_rounded,
+                              color: isSelected
+                                  ? AppColors.primary
+                                  : AppColors.textSecondary,
+                            ),
+                          );
+                        }).toList(),
+                      ),
                     ),
-                    onChanged: (_) {
-                      ref
-                          .read(localeNotifierProvider.notifier)
-                          .setLocale(locale);
-                      Navigator.pop(context);
-                    },
-                  );
-                }),
-              ],
-            ),
-          ),
+                  ],
+                ),
+              ),
+            );
+          },
         );
       },
     );
