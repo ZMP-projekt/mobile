@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../../../../core/models/result.dart';
+import '../../../../core/network/dio_error_parser.dart';
 import '../models/membership.dart';
 
 class MembershipRepository {
@@ -12,7 +13,7 @@ class MembershipRepository {
       final response = await _dio.get('/api/memberships/me');
       return Membership.fromJson(response.data);
     } on DioException catch (e) {
-      if (e.response?.statusCode == 404) {
+      if (e.response?.statusCode == 403 || e.response?.statusCode == 404) {
         return Membership(
           active: false,
           endDate: DateTime.now().subtract(const Duration(days: 1)),
@@ -20,9 +21,9 @@ class MembershipRepository {
           type: 'BRAK',
         );
       }
-      throw Exception(e.response?.data['message'] ?? 'Nie udało się pobrać karnetu.');
+      throw Exception(DioErrorParser.extract(e.response, e.type, defaultMessageBuilder: (l10n) => l10n.errorMembershipFetch));
     } catch (e) {
-      throw Exception('Wystąpił nieoczekiwany błąd podczas pobierania karnetu.');
+      throw Exception(DioErrorParser.localized((l10n) => l10n.errorMembershipUnexpected));
     }
   }
 
@@ -35,9 +36,9 @@ class MembershipRepository {
       return Result.success(null);
     } on DioException catch (e) {
       final backendError = e.response?.data?['message'];
-      return Result.failure(backendError ?? e.message ?? 'Nie udało się zakupić karnetu.');
+      return Result.failure(backendError ?? DioErrorParser.extract(e.response, e.type, defaultMessageBuilder: (l10n) => l10n.errorMembershipPurchase));
     } catch (e) {
-      return Result.failure('Wystąpił nieoczekiwany błąd.');
+      return Result.failure(DioErrorParser.localized((l10n) => l10n.commonUnknownError));
     }
   }
 }

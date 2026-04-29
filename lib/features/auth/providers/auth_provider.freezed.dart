@@ -17,6 +17,7 @@ final _privateConstructorUsedError = UnsupportedError(
 
 /// @nodoc
 mixin _$AuthState {
+  bool get isInitializing => throw _privateConstructorUsedError;
   bool get isLoading => throw _privateConstructorUsedError;
   bool get isAuthenticated => throw _privateConstructorUsedError;
   String? get errorMessage => throw _privateConstructorUsedError;
@@ -33,7 +34,12 @@ abstract class $AuthStateCopyWith<$Res> {
   factory $AuthStateCopyWith(AuthState value, $Res Function(AuthState) then) =
       _$AuthStateCopyWithImpl<$Res, AuthState>;
   @useResult
-  $Res call({bool isLoading, bool isAuthenticated, String? errorMessage});
+  $Res call({
+    bool isInitializing,
+    bool isLoading,
+    bool isAuthenticated,
+    String? errorMessage,
+  });
 }
 
 /// @nodoc
@@ -51,12 +57,17 @@ class _$AuthStateCopyWithImpl<$Res, $Val extends AuthState>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
+    Object? isInitializing = null,
     Object? isLoading = null,
     Object? isAuthenticated = null,
     Object? errorMessage = freezed,
   }) {
     return _then(
       _value.copyWith(
+            isInitializing: null == isInitializing
+                ? _value.isInitializing
+                : isInitializing // ignore: cast_nullable_to_non_nullable
+                      as bool,
             isLoading: null == isLoading
                 ? _value.isLoading
                 : isLoading // ignore: cast_nullable_to_non_nullable
@@ -84,7 +95,12 @@ abstract class _$$AuthStateImplCopyWith<$Res>
   ) = __$$AuthStateImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({bool isLoading, bool isAuthenticated, String? errorMessage});
+  $Res call({
+    bool isInitializing,
+    bool isLoading,
+    bool isAuthenticated,
+    String? errorMessage,
+  });
 }
 
 /// @nodoc
@@ -101,12 +117,17 @@ class __$$AuthStateImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
+    Object? isInitializing = null,
     Object? isLoading = null,
     Object? isAuthenticated = null,
     Object? errorMessage = freezed,
   }) {
     return _then(
       _$AuthStateImpl(
+        isInitializing: null == isInitializing
+            ? _value.isInitializing
+            : isInitializing // ignore: cast_nullable_to_non_nullable
+                  as bool,
         isLoading: null == isLoading
             ? _value.isLoading
             : isLoading // ignore: cast_nullable_to_non_nullable
@@ -128,11 +149,15 @@ class __$$AuthStateImplCopyWithImpl<$Res>
 
 class _$AuthStateImpl implements _AuthState {
   const _$AuthStateImpl({
+    this.isInitializing = true,
     this.isLoading = false,
     this.isAuthenticated = false,
     this.errorMessage,
   });
 
+  @override
+  @JsonKey()
+  final bool isInitializing;
   @override
   @JsonKey()
   final bool isLoading;
@@ -144,7 +169,7 @@ class _$AuthStateImpl implements _AuthState {
 
   @override
   String toString() {
-    return 'AuthState(isLoading: $isLoading, isAuthenticated: $isAuthenticated, errorMessage: $errorMessage)';
+    return 'AuthState(isInitializing: $isInitializing, isLoading: $isLoading, isAuthenticated: $isAuthenticated, errorMessage: $errorMessage)';
   }
 
   @override
@@ -152,6 +177,8 @@ class _$AuthStateImpl implements _AuthState {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$AuthStateImpl &&
+            (identical(other.isInitializing, isInitializing) ||
+                other.isInitializing == isInitializing) &&
             (identical(other.isLoading, isLoading) ||
                 other.isLoading == isLoading) &&
             (identical(other.isAuthenticated, isAuthenticated) ||
@@ -161,8 +188,13 @@ class _$AuthStateImpl implements _AuthState {
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, isLoading, isAuthenticated, errorMessage);
+  int get hashCode => Object.hash(
+    runtimeType,
+    isInitializing,
+    isLoading,
+    isAuthenticated,
+    errorMessage,
+  );
 
   /// Create a copy of AuthState
   /// with the given fields replaced by the non-null parameter values.
@@ -175,11 +207,14 @@ class _$AuthStateImpl implements _AuthState {
 
 abstract class _AuthState implements AuthState {
   const factory _AuthState({
+    final bool isInitializing,
     final bool isLoading,
     final bool isAuthenticated,
     final String? errorMessage,
   }) = _$AuthStateImpl;
 
+  @override
+  bool get isInitializing;
   @override
   bool get isLoading;
   @override

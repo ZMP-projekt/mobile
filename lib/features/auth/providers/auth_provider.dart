@@ -26,6 +26,7 @@ final authStateProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
 @freezed
 class AuthState with _$AuthState {
   const factory AuthState({
+    @Default(true) bool isInitializing,
     @Default(false) bool isLoading,
     @Default(false) bool isAuthenticated,
     String? errorMessage,
@@ -52,8 +53,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
     if (token != null) {
       ref.read(authTokenProvider.notifier).state = token;
-      state = state.copyWith(isAuthenticated: true);
+      state = state.copyWith(
+        isAuthenticated: true,
+        isInitializing: false,
+      );
+      return;
     }
+
+    state = state.copyWith(isInitializing: false);
   }
 
   Future<bool> login(String email, String password) async {
