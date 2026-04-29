@@ -20,9 +20,11 @@ final dioProvider = Provider<Dio>((ref) {
 
   if (kDebugMode) {
     dio.interceptors.add(LogInterceptor(
-      requestHeader: true,
-      requestBody: true,
-      responseBody: true,
+      requestHeader: false,
+      requestBody: false,
+      responseHeader: false,
+      responseBody: false,
+      error: true,
     ));
   }
 
@@ -41,9 +43,9 @@ final dioProvider = Provider<Dio>((ref) {
 
         if (token != null) {
           options.headers['Authorization'] = 'Bearer $token';
-          AppLogger.d("Dodano token do nagłówka: ${options.path}");
+          AppLogger.d('Dodano nagłówek Authorization dla: ${options.path}');
         } else {
-          AppLogger.w("Brak tokena dla żądania: ${options.path}");
+          AppLogger.w('Brak tokena dla żądania: ${options.path}');
         }
 
         return handler.next(options);

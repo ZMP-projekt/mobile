@@ -80,7 +80,6 @@ class BookingNotifier extends AutoDisposeAsyncNotifier<void> {
     state = const AsyncLoading();
     try {
       await ref.read(classesRepositoryProvider).bookClass(classId);
-      await Future.delayed(const Duration(milliseconds: 300));
       state = const AsyncData(null);
     } catch (error, stack) {
       state = AsyncError(error, stack);
@@ -94,7 +93,6 @@ class BookingNotifier extends AutoDisposeAsyncNotifier<void> {
     state = const AsyncLoading();
     try {
       await ref.read(classesRepositoryProvider).cancelBooking(classId);
-      await Future.delayed(const Duration(milliseconds: 300));
       state = const AsyncData(null);
     } catch (error, stack) {
       state = AsyncError(error, stack);
@@ -106,18 +104,13 @@ class BookingNotifier extends AutoDisposeAsyncNotifier<void> {
 
   Future<void> createClass(Map<String, dynamic> classData) async {
     state = const AsyncLoading();
+
     try {
       await ref.read(classesRepositoryProvider).createClass(classData);
-      await Future.delayed(const Duration(milliseconds: 300));
       state = const AsyncData(null);
     } catch (error, stack) {
-      if (error.toString().contains('500') ||
-          error.toString().contains('Internal Server Error')) {
-        state = const AsyncData(null);
-      } else {
-        state = AsyncError(error, stack);
-        rethrow;
-      }
+      state = AsyncError(error, stack);
+      rethrow;
     } finally {
       _refreshAllClasses(null);
     }
@@ -129,7 +122,6 @@ class BookingNotifier extends AutoDisposeAsyncNotifier<void> {
       await ref
           .read(classesRepositoryProvider)
           .rescheduleClass(classId, newTime);
-      await Future.delayed(const Duration(milliseconds: 300));
       state = const AsyncData(null);
     } catch (error, stack) {
       state = AsyncError(error, stack);
@@ -143,7 +135,6 @@ class BookingNotifier extends AutoDisposeAsyncNotifier<void> {
     state = const AsyncLoading();
     try {
       await ref.read(classesRepositoryProvider).deleteClass(classId);
-      await Future.delayed(const Duration(milliseconds: 300));
       state = const AsyncData(null);
     } catch (error, stack) {
       state = AsyncError(error, stack);

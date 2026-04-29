@@ -31,9 +31,9 @@ class NotificationsNotifier extends AsyncNotifier<List<AppNotification>> {
     }
 
     final token = ref.read(authTokenProvider);
-    AppLogger.i('🔌 Łączę WebSocket z tokenem: ${token?.substring(0, 20)}...');
 
-    if (token != null) {
+    if (token != null && token.isNotEmpty) {
+      AppLogger.i('Łączę WebSocket');
       _wsService = WebSocketService(
         token: token,
         onNotification: _onNewNotification,

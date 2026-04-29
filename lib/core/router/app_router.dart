@@ -17,21 +17,20 @@ final routerProvider = Provider<GoRouter>((ref) {
   final router = GoRouter(
     initialLocation: '/',
     redirect: (context, state) {
-
       final authState = ref.read(authStateProvider);
       final token = ref.read(authTokenProvider);
 
+      if (authState.isInitializing) {
+        return null;
+      }
+
       final isAuth = authState.isAuthenticated && token != null;
+      final isLoggingIn =
+          state.matchedLocation == '/login' ||
+              state.matchedLocation == '/register';
 
-      final isLoggingIn = state.matchedLocation == '/login' || state.matchedLocation == '/register';
-
-      if (!isAuth && !isLoggingIn) {
-        return '/login';
-      }
-
-      if (isAuth && isLoggingIn) {
-        return '/';
-      }
+      if (!isAuth && !isLoggingIn) return '/login';
+      if (isAuth && isLoggingIn) return '/';
 
       return null;
     },
