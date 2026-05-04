@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../config/env.dart';
+import 'network_status_provider.dart';
 import '../util/app_logger.dart';
 
 final secureStorageProvider = Provider<FlutterSecureStorage>((ref) {
@@ -12,23 +13,28 @@ final secureStorageProvider = Provider<FlutterSecureStorage>((ref) {
 final authTokenProvider = StateProvider<String?>((ref) => null);
 
 final dioProvider = Provider<Dio>((ref) {
-  final dio = Dio(BaseOptions(
-    baseUrl: Env.apiUrl,
-    connectTimeout: const Duration(seconds: 10),
-    receiveTimeout: const Duration(seconds: 10),
-  ));
+  final dio = Dio(
+    BaseOptions(
+      baseUrl: Env.apiUrl,
+      connectTimeout: const Duration(seconds: 10),
+      receiveTimeout: const Duration(seconds: 10),
+    ),
+  );
 
   if (kDebugMode) {
-    dio.interceptors.add(LogInterceptor(
-      requestHeader: false,
-      requestBody: false,
-      responseHeader: false,
-      responseBody: false,
-      error: true,
-    ));
+    dio.interceptors.add(
+      LogInterceptor(
+        requestHeader: false,
+        requestBody: false,
+        responseHeader: false,
+        responseBody: false,
+        error: true,
+      ),
+    );
   }
 
-  dio.interceptors.add(InterceptorsWrapper(
+  dio.interceptors.add(
+    InterceptorsWrapper(
       onRequest: (options, handler) async {
         var token = ref.read(authTokenProvider);
 
@@ -50,8 +56,21 @@ final dioProvider = Provider<Dio>((ref) {
 
         return handler.next(options);
       },
+      onResponse: (response, handler) {
+        ref.read(isOfflineProvider.notifier).state = false;
+        return handler.next(response);
+      },
       onError: (DioException e, handler) {
         final isAuthEndpoint = e.requestOptions.path.contains('/auth/');
+        final isConnectionProblem =
+            e.type == DioExceptionType.connectionError ||
+            e.type == DioExceptionType.connectionTimeout ||
+            e.type == DioExceptionType.receiveTimeout ||
+            e.type == DioExceptionType.sendTimeout;
+
+        if (isConnectionProblem) {
+          ref.read(isOfflineProvider.notifier).state = true;
+        }
 
         if (e.response?.statusCode == 401 && !isAuthEndpoint) {
           AppLogger.w("Token wygasł lub jest nieprawidłowy.");
@@ -60,8 +79,9 @@ final dioProvider = Provider<Dio>((ref) {
         }
 
         return handler.next(e);
-      }
-  ));
+      },
+    ),
+  );
 
   return dio;
 });

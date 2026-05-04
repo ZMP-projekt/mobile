@@ -510,6 +510,11 @@ class AppLocalizationsPl extends AppLocalizations {
       'Zajęcia muszą kończyć się po ich rozpoczęciu.';
 
   @override
+  String trainerClassTimeConflictError(String className, String startTime) {
+    return 'Masz już zajęcia „$className” o $startTime. Wybierz inną godzinę.';
+  }
+
+  @override
   String get trainerLocationsLoadError => 'Nie udało się załadować lokalizacji';
 
   @override
@@ -544,12 +549,6 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get profilePushNotifications => 'Powiadomienia Push';
-
-  @override
-  String get profileHelpContact => 'Pomoc i kontakt';
-
-  @override
-  String get profileClubRules => 'Regulamin klubu';
 
   @override
   String get profileLogout => 'Wyloguj się';

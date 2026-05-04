@@ -254,6 +254,18 @@
   "trainerNoLocations": "Brak dostępnych lokalizacji.",
   "trainerPastClassError": "Zajęcia nie mogą odbywać się w przeszłości.",
   "trainerClassEndBeforeStartError": "Zajęcia muszą kończyć się po ich rozpoczęciu.",
+  "trainerClassTimeConflictError": "Masz już zajęcia „{className}” o {startTime}. Wybierz inną godzinę.",
+  "@trainerClassTimeConflictError": {
+    "description": "Shown when a trainer tries to create a class that overlaps with another class.",
+    "placeholders": {
+      "className": {
+        "type": "String"
+      },
+      "startTime": {
+        "type": "String"
+      }
+    }
+  },
   "trainerLocationsLoadError": "Nie udało się załadować lokalizacji",
   "profileNoData": "Brak danych",
   "profileInfoSection": "Informacje",
@@ -266,8 +278,6 @@
   "profileLanguagePolish": "Polski",
   "profileLanguageEnglish": "Angielski",
   "profilePushNotifications": "Powiadomienia Push",
-  "profileHelpContact": "Pomoc i kontakt",
-  "profileClubRules": "Regulamin klubu",
   "profileLogout": "Wyloguj się",
   "profileAppVersion": "Wersja aplikacji",
   "profileVersion": "Wersja {version}",

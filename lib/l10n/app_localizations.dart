@@ -962,6 +962,12 @@ abstract class AppLocalizations {
   /// **'Zajęcia muszą kończyć się po ich rozpoczęciu.'**
   String get trainerClassEndBeforeStartError;
 
+  /// Shown when a trainer tries to create a class that overlaps with another class.
+  ///
+  /// In pl, this message translates to:
+  /// **'Masz już zajęcia „{className}” o {startTime}. Wybierz inną godzinę.'**
+  String trainerClassTimeConflictError(String className, String startTime);
+
   /// No description provided for @trainerLocationsLoadError.
   ///
   /// In pl, this message translates to:
@@ -1033,18 +1039,6 @@ abstract class AppLocalizations {
   /// In pl, this message translates to:
   /// **'Powiadomienia Push'**
   String get profilePushNotifications;
-
-  /// No description provided for @profileHelpContact.
-  ///
-  /// In pl, this message translates to:
-  /// **'Pomoc i kontakt'**
-  String get profileHelpContact;
-
-  /// No description provided for @profileClubRules.
-  ///
-  /// In pl, this message translates to:
-  /// **'Regulamin klubu'**
-  String get profileClubRules;
 
   /// No description provided for @profileLogout.
   ///
