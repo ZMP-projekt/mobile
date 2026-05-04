@@ -13,15 +13,30 @@ final notificationRepositoryProvider = Provider<NotificationRepository>((ref) {
 });
 
 final notificationsProvider =
-AsyncNotifierProvider<NotificationsNotifier, List<AppNotification>>(
-  NotificationsNotifier.new,
-);
+    AsyncNotifierProvider<NotificationsNotifier, List<AppNotification>>(
+      NotificationsNotifier.new,
+    );
 
 class NotificationsNotifier extends AsyncNotifier<List<AppNotification>> {
   WebSocketService? _wsService;
 
   @override
   Future<List<AppNotification>> build() async {
+    var authToken = ref.read(authTokenProvider);
+
+    if (authToken == null || authToken.isEmpty) {
+      final storage = ref.read(secureStorageProvider);
+      authToken = await storage.read(key: 'jwt_token');
+
+      if (authToken != null && authToken.isNotEmpty) {
+        ref.read(authTokenProvider.notifier).state = authToken;
+      }
+    }
+
+    if (authToken == null || authToken.isEmpty) {
+      return [];
+    }
+
     final repo = ref.read(notificationRepositoryProvider);
     final history = await repo.getNotifications();
 
@@ -30,9 +45,9 @@ class NotificationsNotifier extends AsyncNotifier<List<AppNotification>> {
       AppLogger.i('  → [${n.id}] ${n.content} (read: ${n.read})');
     }
 
-    final token = ref.read(authTokenProvider);
+    final token = authToken;
 
-    if (token != null && token.isNotEmpty) {
+    if (token.isNotEmpty) {
       AppLogger.i('Łączę WebSocket');
       _wsService = WebSocketService(
         token: token,
@@ -70,7 +85,10 @@ class NotificationsNotifier extends AsyncNotifier<List<AppNotification>> {
     try {
       await ref.read(notificationRepositoryProvider).markAsRead(id);
     } catch (e) {
-      AppLogger.e('Błąd oznaczania powiadomienia jako przeczytane. Przywracam stan...', e);
+      AppLogger.e(
+        'Błąd oznaczania powiadomienia jako przeczytane. Przywracam stan...',
+        e,
+      );
       state = AsyncData(backupList);
     }
   }
@@ -91,8 +109,7 @@ class NotificationsNotifier extends AsyncNotifier<List<AppNotification>> {
     }
   }
 
-  int get unreadCount =>
-      state.valueOrNull?.where((n) => !n.read).length ?? 0;
+  int get unreadCount => state.valueOrNull?.where((n) => !n.read).length ?? 0;
 }
 
 final unreadCountProvider = Provider<int>((ref) {
@@ -100,4 +117,6 @@ final unreadCountProvider = Provider<int>((ref) {
   return notifications.where((n) => !n.read).length;
 });
 
-final toastNotificationProvider = StateProvider<AppNotification?>((ref) => null);
+final toastNotificationProvider = StateProvider<AppNotification?>(
+  (ref) => null,
+);

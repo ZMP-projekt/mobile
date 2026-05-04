@@ -53,10 +53,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
     if (token != null) {
       ref.read(authTokenProvider.notifier).state = token;
-      state = state.copyWith(
-        isAuthenticated: true,
-        isInitializing: false,
-      );
+      state = state.copyWith(isAuthenticated: true, isInitializing: false);
       return;
     }
 
@@ -72,6 +69,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       success: (token) async {
         await _storage.write(key: 'jwt_token', value: token);
         ref.read(authTokenProvider.notifier).state = token;
+        ref.read(mainNavigationProvider.notifier).state = 0;
 
         try {
           await ref.read(currentUserProvider.future);
@@ -91,7 +89,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
     );
   }
 
-  Future<bool> register(String firstName, String lastName, String email, String password) async {
+  Future<bool> register(
+    String firstName,
+    String lastName,
+    String email,
+    String password,
+  ) async {
     state = state.copyWith(isLoading: true, errorMessage: null);
 
     final result = await _repo.register(firstName, lastName, email, password);
@@ -100,6 +103,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       success: (token) async {
         await _storage.write(key: 'jwt_token', value: token);
         ref.read(authTokenProvider.notifier).state = token;
+        ref.read(mainNavigationProvider.notifier).state = 0;
 
         state = state.copyWith(isLoading: false, isAuthenticated: true);
         return true;
@@ -114,6 +118,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<void> logout() async {
     if (!state.isAuthenticated) return;
 
+    ref.read(mainNavigationProvider.notifier).state = 0;
     state = state.copyWith(isAuthenticated: false);
 
     await _storage.delete(key: 'jwt_token');
@@ -126,7 +131,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
       ref.invalidate(todayClassesProvider);
       ref.invalidate(trainerClassesProvider);
       ref.invalidate(notificationsProvider);
-      ref.read(mainNavigationProvider.notifier).state = 0;
     });
 
     AppLogger.i("👋 Wylogowano");

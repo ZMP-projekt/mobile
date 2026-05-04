@@ -42,7 +42,9 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(initialPage: ref.read(mainNavigationProvider));
+    _pageController = PageController(
+      initialPage: ref.read(mainNavigationProvider),
+    );
   }
 
   @override
@@ -77,8 +79,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     ref.listen<AppNotification?>(toastNotificationProvider, (prev, next) {
       if (next != null && context.mounted) {
         NotificationToast.show(context, next);
-        Future.microtask(() =>
-        ref.read(toastNotificationProvider.notifier).state = null,
+        Future.microtask(
+          () => ref.read(toastNotificationProvider.notifier).state = null,
         );
       }
     });
@@ -96,7 +98,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     final currentIndex = ref.watch(mainNavigationProvider);
     final userAsync = ref.watch(currentUserProvider);
 
-    if (!_pageController.hasClients && _pageController.initialPage != currentIndex) {
+    if (!_pageController.hasClients &&
+        _pageController.initialPage != currentIndex) {
       _pageController.dispose();
       _pageController = PageController(initialPage: currentIndex);
     }
@@ -128,14 +131,14 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             physics: const NeverScrollableScrollPhysics(),
             children: screens,
           ),
-          floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+          floatingActionButtonLocation:
+              FloatingActionButtonLocation.centerDocked,
           floatingActionButton: _buildFAB(context, isTrainer),
           bottomNavigationBar: _buildBottomNav(safeIndex, isTrainer),
         );
       },
       error: (err, stack) => NoConnectionView(
         onRetry: () {
-
           final token = ref.read(authTokenProvider);
           if (token != null) {
             ref.read(authStateProvider.notifier).logout();
@@ -160,9 +163,19 @@ class _MainScreenState extends ConsumerState<MainScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             _buildNavItem(Icons.home_filled, 0, currentIndex),
-            _buildNavItem(isTrainer ? Icons.calendar_month_outlined : Icons.calendar_today, 1, currentIndex),
+            _buildNavItem(
+              isTrainer ? Icons.calendar_month_outlined : Icons.calendar_today,
+              1,
+              currentIndex,
+            ),
             const SizedBox(width: 40),
-            _buildNavItem(isTrainer ? Icons.people_alt_outlined : Icons.fitness_center_rounded, 2, currentIndex),
+            _buildNavItem(
+              isTrainer
+                  ? Icons.people_alt_outlined
+                  : Icons.fitness_center_rounded,
+              2,
+              currentIndex,
+            ),
             _buildNavItem(Icons.person_outline, 3, currentIndex),
           ],
         ),
@@ -196,7 +209,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
     final membershipAsync = ref.read(currentMembershipProvider);
     final membership = membershipAsync.valueOrNull;
-    final hasActiveMembership = membership != null && membership.active && membership.daysRemaining > 0;
+    final hasActiveMembership =
+        membership != null && membership.active && membership.daysRemaining > 0;
 
     if (hasActiveMembership) {
       _showQRModal(context);
@@ -223,4 +237,3 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     );
   }
 }
-
