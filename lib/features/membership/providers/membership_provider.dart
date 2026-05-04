@@ -1,15 +1,19 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/dio_client.dart';
+import '../../../core/offline/offline_cache_provider.dart';
 import '../data/models/membership.dart';
 import '../data/repositories/membership_repository.dart';
 
 final membershipRepositoryProvider = Provider<MembershipRepository>((ref) {
   final dio = ref.watch(dioProvider);
-  return MembershipRepository(dio);
+  final cache = ref.watch(offlineCacheStoreProvider);
+  return MembershipRepository(dio, cache);
 });
 
-final currentMembershipProvider = FutureProvider.autoDispose<Membership>((ref) async {
+final currentMembershipProvider = FutureProvider.autoDispose<Membership>((
+  ref,
+) async {
   final repo = ref.watch(membershipRepositoryProvider);
   return await repo.getMyMembership();
 });
@@ -38,6 +42,7 @@ class PurchaseMembershipNotifier extends AutoDisposeAsyncNotifier<void> {
   }
 }
 
-final purchaseMembershipProvider = AsyncNotifierProvider.autoDispose<PurchaseMembershipNotifier, void>(
-  PurchaseMembershipNotifier.new,
-);
+final purchaseMembershipProvider =
+    AsyncNotifierProvider.autoDispose<PurchaseMembershipNotifier, void>(
+      PurchaseMembershipNotifier.new,
+    );

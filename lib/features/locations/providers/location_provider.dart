@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:mobile_gym_app/core/network/dio_client.dart';
+import 'package:mobile_gym_app/core/offline/offline_cache_provider.dart';
 import 'package:mobile_gym_app/core/providers/shared_preferences_provider.dart';
 import 'package:mobile_gym_app/l10n/app_localizations.dart';
 
@@ -34,6 +35,17 @@ class GymLocation {
     );
   }
 
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'city': city,
+      'address': address,
+      'latitude': latitude,
+      'longitude': longitude,
+    };
+  }
+
   bool get hasCoordinates => latitude != null && longitude != null;
 }
 
@@ -50,10 +62,32 @@ double? _optionalDouble(Object? value) {
 
 final locationsProvider = FutureProvider<List<GymLocation>>((ref) async {
   final dio = ref.watch(dioProvider);
-  final response = await dio.get('/api/locations');
-  final List<dynamic> data = response.data;
-  return data.map((json) => GymLocation.fromJson(json)).toList();
+  final cache = ref.watch(offlineCacheStoreProvider);
+
+  return cache.getOrFetch(
+    key: 'gym_locations',
+    fetch: () async {
+      final response = await dio.get('/api/locations');
+      final List<dynamic> data = response.data;
+      return data.map((json) => GymLocation.fromJson(json)).toList();
+    },
+    toJson: _locationsToJson,
+    fromJson: _locationsFromJson,
+  );
 });
+
+List<Map<String, dynamic>> _locationsToJson(List<GymLocation> locations) {
+  return locations.map((location) => location.toJson()).toList();
+}
+
+List<GymLocation> _locationsFromJson(Object? json) {
+  final data = json as List<dynamic>;
+  return data
+      .map(
+        (item) => GymLocation.fromJson(Map<String, dynamic>.from(item as Map)),
+      )
+      .toList();
+}
 
 class SelectedLocationNotifier extends Notifier<int?> {
   static const _key = 'selected_gym_location_id';
@@ -81,9 +115,10 @@ class SelectedLocationNotifier extends Notifier<int?> {
   }
 }
 
-final selectedLocationIdProvider = NotifierProvider<SelectedLocationNotifier, int?>(
-  SelectedLocationNotifier.new,
-);
+final selectedLocationIdProvider =
+    NotifierProvider<SelectedLocationNotifier, int?>(
+      SelectedLocationNotifier.new,
+    );
 
 final userPositionProvider = FutureProvider<Position?>((ref) async {
   final serviceEnabled = await Geolocator.isLocationServiceEnabled();
