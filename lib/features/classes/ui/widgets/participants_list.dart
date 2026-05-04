@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/ui/widgets/app_avatar.dart';
 import '../../../../core/ui/widgets/app_skeleton.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../providers/classes_provider.dart';
@@ -39,10 +40,24 @@ class ParticipantsList extends ConsumerWidget {
             participantsAsync.when(
               data: (users) => Text(
                 '${users.length}/$maxParticipants',
-                style: const TextStyle(color: AppColors.primary, fontSize: 16, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  color: AppColors.primary,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              loading: () => const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary)),
-              error: (_, _) => const Text('0', style: TextStyle(color: AppColors.textSecondary)),
+              loading: () => const SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: AppColors.primary,
+                ),
+              ),
+              error: (_, _) => const Text(
+                '0',
+                style: TextStyle(color: AppColors.textSecondary),
+              ),
             ),
           ],
         ).animate().fadeIn(delay: 300.ms),
@@ -63,7 +78,13 @@ class ParticipantsList extends ConsumerWidget {
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 24),
                   child: Center(
-                    child: Text(l10n.classesParticipantsEmpty, style: const TextStyle(color: AppColors.textSecondary, fontSize: 15)),
+                    child: Text(
+                      l10n.classesParticipantsEmpty,
+                      style: const TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 15,
+                      ),
+                    ),
                   ),
                 );
               }
@@ -77,8 +98,7 @@ class ParticipantsList extends ConsumerWidget {
                     children: [
                       _ParticipantTile(
                         key: ValueKey(user.id),
-                        name: '${user.firstName} ${user.lastName}',
-                        avatarUrl: user.displayAvatarUrl,
+                        name: user.fullName,
                       ),
                       if (!isLast)
                         Divider(
@@ -93,10 +113,16 @@ class ParticipantsList extends ConsumerWidget {
               );
             },
             loading: () => Column(
-              children: List.generate(3, (index) => const _ParticipantSkeleton()),
+              children: List.generate(
+                3,
+                (index) => const _ParticipantSkeleton(),
+              ),
             ),
             error: (err, _) => Center(
-              child: Text(l10n.classesParticipantsLoadError, style: const TextStyle(color: AppColors.error, fontSize: 14)),
+              child: Text(
+                l10n.classesParticipantsLoadError,
+                style: const TextStyle(color: AppColors.error, fontSize: 14),
+              ),
             ),
           ),
         ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.1, end: 0),
@@ -107,9 +133,8 @@ class ParticipantsList extends ConsumerWidget {
 
 class _ParticipantTile extends StatelessWidget {
   final String name;
-  final String avatarUrl;
 
-  const _ParticipantTile({required this.name, required this.avatarUrl, super.key});
+  const _ParticipantTile({required this.name, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -117,25 +142,15 @@ class _ParticipantTile extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 10.0),
       child: Row(
         children: [
-          Container(
-            width: 42,
-            height: 42,
-            decoration: const BoxDecoration(color: AppColors.background, shape: BoxShape.circle),
-            clipBehavior: Clip.antiAlias,
-            child: Image.network(
-              avatarUrl,
-              fit: BoxFit.cover,
-              errorBuilder: (_, _, _) => const Icon(Icons.person, color: AppColors.textSecondary),
-            ),
-          ),
+          AppAvatar(label: name, radius: 21),
           const SizedBox(width: 16),
           Text(
-              name,
-              style: const TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600
-              )
+            name,
+            style: const TextStyle(
+              color: AppColors.textPrimary,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ],
       ),
