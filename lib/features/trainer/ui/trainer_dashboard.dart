@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/ui/widgets/app_avatar.dart';
 import '../../../../core/ui/widgets/app_skeleton.dart';
 import '../../../../core/ui/widgets/empty_state_view.dart';
 import '../../classes/data/models/gym_class.dart';
@@ -82,14 +83,23 @@ class TrainerDashboardPage extends ConsumerWidget {
                   trainerClassesAsync.when(
                     loading: () => const Padding(
                       padding: EdgeInsets.symmetric(horizontal: 20),
-                      child: AppSkeleton(width: 260, height: 180, borderRadius: 24),
+                      child: AppSkeleton(
+                        width: 260,
+                        height: 180,
+                        borderRadius: 24,
+                      ),
                     ),
                     error: (err, stack) => Padding(
                       padding: const EdgeInsets.all(20),
-                      child: Text(l10n.trainerClassFetchError, style: const TextStyle(color: AppColors.error)),
+                      child: Text(
+                        l10n.trainerClassFetchError,
+                        style: const TextStyle(color: AppColors.error),
+                      ),
                     ),
                     data: (classes) {
-                      final groupClasses = classes.where((c) => !c.personalTraining && c.isFuture).toList();
+                      final groupClasses = classes
+                          .where((c) => !c.personalTraining && c.isFuture)
+                          .toList();
 
                       if (groupClasses.isEmpty) {
                         return EmptyStateView(
@@ -105,10 +115,11 @@ class TrainerDashboardPage extends ConsumerWidget {
                           padding: const EdgeInsets.symmetric(horizontal: 20),
                           scrollDirection: Axis.horizontal,
                           itemCount: groupClasses.length,
-                          separatorBuilder: (context, index) => const SizedBox(width: 15),
+                          separatorBuilder: (context, index) =>
+                              const SizedBox(width: 15),
                           itemBuilder: (context, index) => CompactClassCard(
-                              gymClass: groupClasses[index],
-                              isTrainer: true
+                            gymClass: groupClasses[index],
+                            isTrainer: true,
                           ),
                         ),
                       ).animate().fadeIn().slideX(begin: 0.1);
@@ -136,11 +147,17 @@ class TrainerDashboardPage extends ConsumerWidget {
                   trainerClassesAsync.when(
                     loading: () => const Padding(
                       padding: EdgeInsets.symmetric(horizontal: 20),
-                      child: AppSkeleton(width: double.infinity, height: 80, borderRadius: 20),
+                      child: AppSkeleton(
+                        width: double.infinity,
+                        height: 80,
+                        borderRadius: 20,
+                      ),
                     ),
                     error: (_, _) => const SizedBox.shrink(),
                     data: (classes) {
-                      final personalTrainings = classes.where((c) => c.personalTraining && c.isFuture).toList();
+                      final personalTrainings = classes
+                          .where((c) => c.personalTraining && c.isFuture)
+                          .toList();
 
                       if (personalTrainings.isEmpty) {
                         return EmptyStateView(
@@ -153,10 +170,18 @@ class TrainerDashboardPage extends ConsumerWidget {
                       return Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20.0),
                         child: Column(
-                          children: personalTrainings.map((pt) => Padding(
-                            padding: const EdgeInsets.only(bottom: 12.0),
-                            child: _buildPersonalTrainingCard(context, ref, pt),
-                          )).toList(),
+                          children: personalTrainings
+                              .map(
+                                (pt) => Padding(
+                                  padding: const EdgeInsets.only(bottom: 12.0),
+                                  child: _buildPersonalTrainingCard(
+                                    context,
+                                    ref,
+                                    pt,
+                                  ),
+                                ),
+                              )
+                              .toList(),
                         ),
                       ).animate().fadeIn(delay: 400.ms);
                     },
@@ -171,24 +196,46 @@ class TrainerDashboardPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildSectionHeader({required String title, required String action, required VoidCallback onTap}) {
+  Widget _buildSectionHeader({
+    required String title,
+    required String action,
+    required VoidCallback onTap,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 15),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(title, style: const TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.bold)),
+          Text(
+            title,
+            style: const TextStyle(
+              color: AppColors.textPrimary,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           if (action.isNotEmpty)
             TextButton(
               onPressed: onTap,
-              child: Text(action, style: const TextStyle(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.bold)),
+              child: Text(
+                action,
+                style: const TextStyle(
+                  color: AppColors.primary,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
         ],
       ),
     );
   }
 
-  Widget _buildPersonalTrainingCard(BuildContext context, WidgetRef ref, GymClass gymClass) {
+  Widget _buildPersonalTrainingCard(
+    BuildContext context,
+    WidgetRef ref,
+    GymClass gymClass,
+  ) {
     final isBooked = gymClass.currentParticipants > 0;
     final participantsAsync = ref.watch(classParticipantsProvider(gymClass.id));
     final isActive = gymClass.isOngoing;
@@ -196,40 +243,68 @@ class TrainerDashboardPage extends ConsumerWidget {
 
     return GestureDetector(
       onTap: () {
-        context.push('/class-details', extra: {
-          'gymClass': gymClass,
-          'imageUrl': gymClass.displayImageUrl,
-        });
+        context.push(
+          '/class-details',
+          extra: {'gymClass': gymClass, 'imageUrl': gymClass.displayImageUrl},
+        );
       },
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isActive ? AppColors.surface : AppColors.surface.withValues(alpha: 0.7),
+          color: isActive
+              ? AppColors.surface
+              : AppColors.surface.withValues(alpha: 0.7),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isActive || isBooked ? AppColors.primary.withValues(alpha: 0.3) : Colors.white10,
+            color: isActive || isBooked
+                ? AppColors.primary.withValues(alpha: 0.3)
+                : Colors.white10,
           ),
         ),
         child: Row(
           children: [
             isBooked
                 ? participantsAsync.when(
-              data: (users) => CircleAvatar(
-                radius: 20,
-                backgroundImage: NetworkImage(users.first.displayAvatarUrl),
-              ),
-              loading: () => const AppSkeleton(width: 40, height: 40, shape: BoxShape.circle),
-              error: (_, _) => const CircleAvatar(radius: 20, child: Icon(Icons.person)),
-            )
+                    data: (users) {
+                      if (users.isEmpty) {
+                        return const CircleAvatar(
+                          radius: 20,
+                          backgroundColor: AppColors.background,
+                          child: Icon(
+                            Icons.person_off_rounded,
+                            color: AppColors.textSecondary,
+                            size: 18,
+                          ),
+                        );
+                      }
+
+                      return AppAvatar(label: users.first.fullName, radius: 20);
+                    },
+                    loading: () => const AppSkeleton(
+                      width: 40,
+                      height: 40,
+                      shape: BoxShape.circle,
+                    ),
+                    error: (_, _) => const CircleAvatar(
+                      radius: 20,
+                      child: Icon(Icons.person),
+                    ),
+                  )
                 : Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                  color: isActive ? AppColors.primary : AppColors.background,
-                  shape: BoxShape.circle
-              ),
-              child: Icon(Icons.person_add_rounded, color: isActive ? Colors.white : AppColors.textSecondary, size: 20),
-            ),
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: isActive
+                          ? AppColors.primary
+                          : AppColors.background,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.person_add_rounded,
+                      color: isActive ? Colors.white : AppColors.textSecondary,
+                      size: 20,
+                    ),
+                  ),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
@@ -237,15 +312,49 @@ class TrainerDashboardPage extends ConsumerWidget {
                 children: [
                   isBooked
                       ? participantsAsync.when(
-                    data: (users) => Text(
-                      users.first.fullName,
-                      style: const TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.bold),
+                          data: (users) {
+                            if (users.isEmpty) {
+                              return Text(
+                                l10n.trainerFetchErrorShort,
+                                style: const TextStyle(
+                                  color: AppColors.textSecondary,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              );
+                            }
+
+                            return Text(
+                              users.first.fullName,
+                              style: const TextStyle(
+                                color: AppColors.textPrimary,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            );
+                          },
+                          loading: () =>
+                              const AppSkeleton(width: 100, height: 16),
+                          error: (_, _) => Text(
+                            l10n.trainerDataError,
+                            style: const TextStyle(color: AppColors.error),
+                          ),
+                        )
+                      : Text(
+                          l10n.trainerFreeSlot,
+                          style: const TextStyle(
+                            color: AppColors.textSecondary,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                  Text(
+                    gymClass.description ?? l10n.trainerPersonalTraining,
+                    style: const TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 13,
                     ),
-                    loading: () => const AppSkeleton(width: 100, height: 16),
-                    error: (_, _) => Text(l10n.trainerDataError, style: const TextStyle(color: AppColors.error)),
-                  )
-                      : Text(l10n.trainerFreeSlot, style: const TextStyle(color: AppColors.textSecondary, fontSize: 16, fontWeight: FontWeight.bold)),
-                  Text(gymClass.description ?? l10n.trainerPersonalTraining, style: const TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+                  ),
                 ],
               ),
             ),
@@ -253,7 +362,14 @@ class TrainerDashboardPage extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(gymClass.startTimeFormatted, style: const TextStyle(color: AppColors.primary, fontSize: 16, fontWeight: FontWeight.bold)),
+                Text(
+                  gymClass.startTimeFormatted,
+                  style: const TextStyle(
+                    color: AppColors.primary,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ],
             ),
           ],

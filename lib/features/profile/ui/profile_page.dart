@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../core/locale/locale_provider.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/ui/widgets/app_avatar.dart';
 import '../../../core/ui/widgets/async_value_widget.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -24,7 +25,12 @@ class ProfilePage extends ConsumerWidget {
           value: userAsync,
           data: (user) {
             if (user == null) {
-              return Center(child: Text(l10n.profileNoData, style: const TextStyle(color: AppColors.textSecondary)));
+              return Center(
+                child: Text(
+                  l10n.profileNoData,
+                  style: const TextStyle(color: AppColors.textSecondary),
+                ),
+              );
             }
 
             return SingleChildScrollView(
@@ -38,27 +44,36 @@ class ProfilePage extends ConsumerWidget {
                     padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      border: Border.all(color: AppColors.primary.withValues(alpha: 0.3), width: 2),
+                      border: Border.all(
+                        color: AppColors.primary.withValues(alpha: 0.3),
+                        width: 2,
+                      ),
                     ),
-                    child: CircleAvatar(
-                      radius: 50,
-                      backgroundColor: AppColors.surface,
-                      backgroundImage: NetworkImage(user.displayAvatarUrl),
-                    ),
-                  ).animate().scale(duration: 300.ms, curve: Curves.easeOutBack),
+                    child: AppAvatar(label: user.fullName, radius: 50),
+                  ).animate().scale(
+                    duration: 300.ms,
+                    curve: Curves.easeOutBack,
+                  ),
 
                   const SizedBox(height: 16),
 
                   Text(
                     '${user.firstName} ${user.lastName}',
-                    style: const TextStyle(color: AppColors.textPrimary, fontSize: 24, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ).animate().fadeIn(delay: 100.ms),
 
                   const SizedBox(height: 4),
 
                   Text(
                     user.email,
-                    style: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
+                    style: const TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 14,
+                    ),
                   ).animate().fadeIn(delay: 200.ms),
 
                   const SizedBox(height: 32),
@@ -70,12 +85,16 @@ class ProfilePage extends ConsumerWidget {
                     decoration: BoxDecoration(
                       color: AppColors.surface,
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.05),
+                      ),
                     ),
                     child: Row(
                       children: [
                         Icon(
-                          user.role == 'ROLE_TRAINER' ? Icons.fitness_center_rounded : Icons.person,
+                          user.role == 'ROLE_TRAINER'
+                              ? Icons.fitness_center_rounded
+                              : Icons.person,
                           color: AppColors.primary,
                         ),
                         const SizedBox(width: 12),
@@ -83,7 +102,11 @@ class ProfilePage extends ConsumerWidget {
                           user.role == 'ROLE_TRAINER'
                               ? l10n.profileTrainerAccount
                               : l10n.profileUserAccount,
-                          style: const TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w600),
+                          style: const TextStyle(
+                            color: AppColors.textPrimary,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ],
                     ),
@@ -96,7 +119,9 @@ class ProfilePage extends ConsumerWidget {
                     decoration: BoxDecoration(
                       color: AppColors.surface,
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.05),
+                      ),
                     ),
                     child: Column(
                       children: [
@@ -123,7 +148,10 @@ class ProfilePage extends ConsumerWidget {
                           ),
                           onTap: () => _showLanguagePicker(context, ref),
                         ),
-                        Divider(color: Colors.white.withValues(alpha: 0.05), height: 1),
+                        Divider(
+                          color: Colors.white.withValues(alpha: 0.05),
+                          height: 1,
+                        ),
                         _buildActionTile(
                           icon: Icons.notifications_active_outlined,
                           title: l10n.profilePushNotifications,
@@ -138,32 +166,6 @@ class ProfilePage extends ConsumerWidget {
                     ),
                   ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.05),
 
-                  const SizedBox(height: 24),
-
-                  _buildSectionHeader(l10n.profileAboutSection),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: AppColors.surface,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
-                    ),
-                    child: Column(
-                      children: [
-                        _buildActionTile(
-                          icon: Icons.help_outline_rounded,
-                          title: l10n.profileHelpContact,
-                          onTap: () {},
-                        ),
-                        Divider(color: Colors.white.withValues(alpha: 0.05), height: 1),
-                        _buildActionTile(
-                          icon: Icons.description_outlined,
-                          title: l10n.profileClubRules,
-                          onTap: () {},
-                        ),
-                      ],
-                    ),
-                  ).animate().fadeIn(delay: 500.ms).slideY(begin: 0.05),
-
                   const SizedBox(height: 40),
 
                   SizedBox(
@@ -176,7 +178,11 @@ class ProfilePage extends ConsumerWidget {
                       icon: const Icon(Icons.logout_rounded, size: 22),
                       label: Text(
                         l10n.profileLogout,
-                        style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700, letterSpacing: -0.5),
+                        style: const TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: -0.5,
+                        ),
                       ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.error.withValues(alpha: 0.1),
@@ -184,7 +190,10 @@ class ProfilePage extends ConsumerWidget {
                         elevation: 0,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
-                          side: BorderSide(color: AppColors.error.withValues(alpha: 0.3), width: 1),
+                          side: BorderSide(
+                            color: AppColors.error.withValues(alpha: 0.3),
+                            width: 1,
+                          ),
                         ),
                       ),
                     ),
@@ -194,7 +203,10 @@ class ProfilePage extends ConsumerWidget {
 
                   Text(
                     l10n.profileVersion('1.0.0'),
-                    style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                    style: const TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 12,
+                    ),
                   ).animate().fadeIn(delay: 700.ms),
 
                   const SizedBox(height: 80),
@@ -214,7 +226,12 @@ class ProfilePage extends ConsumerWidget {
         alignment: Alignment.centerLeft,
         child: Text(
           title.toUpperCase(),
-          style: const TextStyle(color: AppColors.textSecondary, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1),
+          style: const TextStyle(
+            color: AppColors.textSecondary,
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1,
+          ),
         ),
       ),
     );
@@ -265,7 +282,9 @@ class ProfilePage extends ConsumerWidget {
                           final newLocale = LocaleNotifier.supportedLocales
                               .firstWhere((l) => l.languageCode == value);
 
-                          ref.read(localeNotifierProvider.notifier).setLocale(newLocale);
+                          ref
+                              .read(localeNotifierProvider.notifier)
+                              .setLocale(newLocale);
 
                           Future.delayed(const Duration(milliseconds: 200), () {
                             if (context.mounted) Navigator.pop(context);
@@ -275,7 +294,8 @@ class ProfilePage extends ConsumerWidget {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: LocaleNotifier.supportedLocales.map((locale) {
-                          final isSelected = locale.languageCode == currentLocale.languageCode;
+                          final isSelected =
+                              locale.languageCode == currentLocale.languageCode;
 
                           return RadioListTile<String>(
                             value: locale.languageCode,
@@ -283,7 +303,9 @@ class ProfilePage extends ConsumerWidget {
                             contentPadding: EdgeInsets.zero,
                             title: Text(
                               _languageName(l10n, locale),
-                              style: const TextStyle(color: AppColors.textPrimary),
+                              style: const TextStyle(
+                                color: AppColors.textPrimary,
+                              ),
                             ),
                             secondary: Icon(
                               locale.languageCode == 'pl'
@@ -327,11 +349,21 @@ class ProfilePage extends ConsumerWidget {
               Expanded(
                 child: Text(
                   title,
-                  style: const TextStyle(color: AppColors.textPrimary, fontSize: 15, fontWeight: FontWeight.w500),
+                  style: const TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
-              if (trailing != null) trailing
-              else const Icon(Icons.arrow_forward_ios_rounded, color: AppColors.textSecondary, size: 16),
+              if (trailing != null)
+                trailing
+              else
+                const Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  color: AppColors.textSecondary,
+                  size: 16,
+                ),
             ],
           ),
         ),

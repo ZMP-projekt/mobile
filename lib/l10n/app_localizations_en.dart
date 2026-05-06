@@ -149,7 +149,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dashboardSectionTodayClasses => 'Today\'s classes';
 
   @override
-  String get dashboardMapAction => 'MAP';
+  String get dashboardMapAction => 'MAPA';
 
   @override
   String get dashboardSeeAll => 'SEE ALL';
@@ -506,6 +506,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Classes must end after they start.';
 
   @override
+  String trainerClassTimeConflictError(String className, String startTime) {
+    return 'You already have “$className” at $startTime. Choose another time.';
+  }
+
+  @override
   String get trainerLocationsLoadError => 'Could not load locations';
 
   @override
@@ -540,12 +545,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profilePushNotifications => 'Push Notifications';
-
-  @override
-  String get profileHelpContact => 'Help and contact';
-
-  @override
-  String get profileClubRules => 'Club rules';
 
   @override
   String get profileLogout => 'Log out';

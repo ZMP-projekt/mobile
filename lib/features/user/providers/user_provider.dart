@@ -4,12 +4,13 @@ import '../../auth/providers/auth_provider.dart';
 import '../data/models/user.dart';
 import '../data/repositories/user_repository.dart';
 import '../../../core/network/dio_client.dart';
+import '../../../core/offline/offline_cache_provider.dart';
 import '../../../core/util/app_logger.dart';
 
 final userRepositoryProvider = Provider<UserRepository>((ref) {
   final dio = ref.watch(dioProvider);
-  return UserRepository(dio);
-
+  final cache = ref.watch(offlineCacheStoreProvider);
+  return UserRepository(dio, cache);
 });
 
 final currentUserProvider = FutureProvider<User?>((ref) async {
@@ -20,7 +21,6 @@ final currentUserProvider = FutureProvider<User?>((ref) async {
     final repo = ref.watch(userRepositoryProvider);
     return await repo.getMe();
   } on DioException catch (e) {
-
     if (e.response?.statusCode == 401 || e.response?.statusCode == 403) {
       AppLogger.e("Token wygasł — automatyczne wylogowanie.");
       Future.microtask(() => ref.read(authStateProvider.notifier).logout());

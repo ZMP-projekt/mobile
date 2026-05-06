@@ -13,7 +13,6 @@ import '../network/dio_client.dart';
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 
 final routerProvider = Provider<GoRouter>((ref) {
-
   final router = GoRouter(
     initialLocation: '/',
     redirect: (context, state) {
@@ -27,7 +26,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       final isAuth = authState.isAuthenticated && token != null;
       final isLoggingIn =
           state.matchedLocation == '/login' ||
-              state.matchedLocation == '/register';
+          state.matchedLocation == '/register';
 
       if (!isAuth && !isLoggingIn) return '/login';
       if (isAuth && isLoggingIn) return '/';
@@ -35,14 +34,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
-      GoRoute(
-        path: '/',
-        builder: (context, state) => const MainScreen(),
-      ),
-      GoRoute(
-        path: '/login',
-        builder: (context, state) => const LoginPage(),
-      ),
+      GoRoute(path: '/', builder: (context, state) => const MainScreen()),
+      GoRoute(path: '/login', builder: (context, state) => const LoginPage()),
       GoRoute(
         path: '/register',
         builder: (context, state) => const RegistrationPage(),
@@ -70,14 +63,18 @@ final routerProvider = Provider<GoRouter>((ref) {
     ],
   );
 
-  ref.listen(
-    authStateProvider.select((state) => state.isAuthenticated),
-        (previous, next) {
-      if (previous != next) {
-        router.refresh();
-      }
-    },
-  );
+  ref.listen(authStateProvider, (previous, next) {
+    if (previous?.isInitializing != next.isInitializing ||
+        previous?.isAuthenticated != next.isAuthenticated) {
+      router.refresh();
+    }
+  });
+
+  ref.listen(authTokenProvider, (previous, next) {
+    if (previous != next) {
+      router.refresh();
+    }
+  });
 
   return router;
 });

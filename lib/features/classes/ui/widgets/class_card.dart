@@ -9,6 +9,7 @@ import '../../../user/providers/user_provider.dart';
 import '../../data/models/gym_class.dart';
 import '../../providers/classes_provider.dart';
 import '../../utils/gym_class_extension.dart';
+import 'class_image.dart';
 
 class ClassCard extends ConsumerWidget {
   final GymClass gymClass;
@@ -36,79 +37,127 @@ class ClassCard extends ConsumerWidget {
         height: 180,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(28),
-          image: DecorationImage(image: NetworkImage(imageUrl), fit: BoxFit.cover),
-          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.4), blurRadius: 15, offset: const Offset(0, 8))],
-        ),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(28),
-            gradient: const LinearGradient(
-              begin: Alignment.topCenter, end: Alignment.bottomCenter,
-              colors: [Colors.black54, Colors.black87], stops: [0.0, 1.0],
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.4),
+              blurRadius: 15,
+              offset: const Offset(0, 8),
             ),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _buildStatusTag(context),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withValues(alpha: 0.5),
-                            border: Border.all(color: Colors.white.withValues(alpha: 0.1), width: 1),
-                          ),
-                          child: Text(
-                            gymClass.startTimeFormatted,
-                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 0.5),
+          ],
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            ClassImage(name: gymClass.name, imageUrl: imageUrl),
+            Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Colors.black54, Colors.black87],
+                  stops: [0.0, 1.0],
+                ),
+              ),
+            ),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _buildStatusTag(context),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 7,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.5),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.1),
+                                width: 1,
+                              ),
+                            ),
+                            child: Text(
+                              gymClass.startTimeFormatted,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              ClipRRect(
-                borderRadius: const BorderRadius.vertical(bottom: Radius.circular(28)),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                    color: Colors.black.withValues(alpha: 0.4),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                gymClass.name,
-                                style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w700, letterSpacing: -0.5),
-                                maxLines: 1, overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(height: 2),
-                              Text(AppLocalizations.of(context)!.classesTrainer(gymClass.trainer.fullName), style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 13)),
-                            ],
+                ClipRRect(
+                  borderRadius: const BorderRadius.vertical(
+                    bottom: Radius.circular(28),
+                  ),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 16,
+                      ),
+                      color: Colors.black.withValues(alpha: 0.4),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  gymClass.name,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: -0.5,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  AppLocalizations.of(
+                                    context,
+                                  )!.classesTrainer(gymClass.trainer.fullName),
+                                  style: TextStyle(
+                                    color: Colors.white.withValues(alpha: 0.7),
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        _buildQuickActionButton(context, ref, isProcessing, isTrainer),
-                      ],
+                          _buildQuickActionButton(
+                            context,
+                            ref,
+                            isProcessing,
+                            isTrainer,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
+          ],
         ),
       ),
     );
@@ -121,58 +170,120 @@ class ClassCard extends ConsumerWidget {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: AppColors.background.withValues(alpha: 0.7), borderRadius: BorderRadius.circular(8),
+          color: AppColors.background.withValues(alpha: 0.7),
+          borderRadius: BorderRadius.circular(8),
           border: Border.all(color: AppColors.primary, width: 1.5),
-          boxShadow: [BoxShadow(color: AppColors.primary.withValues(alpha: 0.5), blurRadius: 8, spreadRadius: 1)],
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primary.withValues(alpha: 0.5),
+              blurRadius: 8,
+              spreadRadius: 1,
+            ),
+          ],
         ),
-        child: Text(l10n.classesBooked, style: const TextStyle(color: AppColors.primary, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+        child: Text(
+          l10n.classesBooked,
+          style: const TextStyle(
+            color: AppColors.primary,
+            fontSize: 10,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1,
+          ),
+        ),
       );
     }
     if (gymClass.isFull) {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: AppColors.error.withValues(alpha: 0.8), borderRadius: BorderRadius.circular(8),
+          color: AppColors.error.withValues(alpha: 0.8),
+          borderRadius: BorderRadius.circular(8),
           border: Border.all(color: Colors.white24, width: 1),
         ),
-        child: Text(l10n.classesFull, style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+        child: Text(
+          l10n.classesFull,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 10,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1,
+          ),
+        ),
       );
     }
     return const SizedBox.shrink();
   }
 
-  Widget _buildQuickActionButton(BuildContext context, WidgetRef ref, bool isProcessing, bool isTrainer) {
+  Widget _buildQuickActionButton(
+    BuildContext context,
+    WidgetRef ref,
+    bool isProcessing,
+    bool isTrainer,
+  ) {
     final l10n = AppLocalizations.of(context)!;
 
-    if (isTrainer || gymClass.userEnrolled || gymClass.isFull || gymClass.isPast) {
+    if (isTrainer ||
+        gymClass.userEnrolled ||
+        gymClass.isFull ||
+        gymClass.isPast) {
       return Container(
         padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.1), shape: BoxShape.circle),
-        child: const Icon(Icons.chevron_right_rounded, color: Colors.white70, size: 20),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.1),
+          shape: BoxShape.circle,
+        ),
+        child: const Icon(
+          Icons.chevron_right_rounded,
+          color: Colors.white70,
+          size: 20,
+        ),
       );
     }
 
     return GestureDetector(
-      onTap: isProcessing ? null : () async {
-        try {
-          await ref.read(bookingNotifierProvider.notifier).bookClass(gymClass.id);
-          if (!context.mounted) return;
+      onTap: isProcessing
+          ? null
+          : () async {
+              try {
+                await ref
+                    .read(bookingNotifierProvider.notifier)
+                    .bookClass(gymClass.id);
+                if (!context.mounted) return;
 
-          await SuccessOverlay.show(context, l10n.classesBookingSuccess);
-
-        } catch (e) {
-          if (!context.mounted) return;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.classesBookingError(e)), backgroundColor: AppColors.error),
-          );
-        }
-      },
+                await SuccessOverlay.show(context, l10n.classesBookingSuccess);
+              } catch (e) {
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(l10n.classesBookingError(e)),
+                    backgroundColor: AppColors.error,
+                  ),
+                );
+              }
+            },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(gradient: AppColors.primaryGradient.withOpacity(0.9), borderRadius: BorderRadius.circular(14)),
+        decoration: BoxDecoration(
+          gradient: AppColors.primaryGradient.withOpacity(0.9),
+          borderRadius: BorderRadius.circular(14),
+        ),
         child: isProcessing
-            ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.textPrimary))
-            : Text(l10n.classesBook, style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 13)),
+            ? const SizedBox(
+                width: 14,
+                height: 14,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: AppColors.textPrimary,
+                ),
+              )
+            : Text(
+                l10n.classesBook,
+                style: const TextStyle(
+                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                ),
+              ),
       ),
     );
   }

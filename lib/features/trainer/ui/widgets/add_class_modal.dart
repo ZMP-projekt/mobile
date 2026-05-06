@@ -3,20 +3,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import '../../../../core/network/network_status_provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/ui/widgets/custom_text_field.dart';
 import '../../../../core/ui/success_overlay.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../classes/data/models/gym_class.dart';
 import '../../../classes/providers/classes_provider.dart';
 import '../../../locations/providers/location_provider.dart';
 
 class AddClassModal extends ConsumerStatefulWidget {
   final bool initialIsPersonalTraining;
 
-  const AddClassModal({
-    super.key,
-    this.initialIsPersonalTraining = false,
-  });
+  const AddClassModal({super.key, this.initialIsPersonalTraining = false});
 
   @override
   ConsumerState<AddClassModal> createState() => _AddClassModalState();
@@ -35,6 +34,7 @@ class _AddClassModalState extends ConsumerState<AddClassModal> {
 
   bool _isLoading = false;
   late bool _isPersonalTraining;
+  String? _formMessage;
 
   int? _localSelectedLocationId;
 
@@ -80,8 +80,11 @@ class _AddClassModalState extends ConsumerState<AddClassModal> {
       lastDate: DateTime.now().add(const Duration(days: 90)),
       builder: (context, child) => Theme(
         data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.dark(
-                primary: AppColors.primary, surface: AppColors.surface)),
+          colorScheme: const ColorScheme.dark(
+            primary: AppColors.primary,
+            surface: AppColors.surface,
+          ),
+        ),
         child: child!,
       ),
     );
@@ -94,8 +97,11 @@ class _AddClassModalState extends ConsumerState<AddClassModal> {
       initialTime: isStart ? _startTime : _endTime,
       builder: (context, child) => Theme(
         data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.dark(
-                primary: AppColors.primary, surface: AppColors.surface)),
+          colorScheme: const ColorScheme.dark(
+            primary: AppColors.primary,
+            surface: AppColors.surface,
+          ),
+        ),
         child: child!,
       ),
     );
@@ -105,7 +111,9 @@ class _AddClassModalState extends ConsumerState<AddClassModal> {
         if (isStart) {
           _startTime = picked;
           _endTime = TimeOfDay(
-              hour: (picked.hour + 1) % 24, minute: picked.minute);
+            hour: (picked.hour + 1) % 24,
+            minute: picked.minute,
+          );
         } else {
           _endTime = picked;
         }
@@ -116,34 +124,63 @@ class _AddClassModalState extends ConsumerState<AddClassModal> {
   Future<void> _submitForm() async {
     final l10n = AppLocalizations.of(context)!;
 
+    _clearFormMessage();
+
     if (!_formKey.currentState!.validate()) return;
 
-    final finalLocationId = _localSelectedLocationId;
+    final locations = ref.read(locationsProvider).valueOrNull ?? [];
+    final finalLocationId =
+        _localSelectedLocationId ??
+        (locations.isNotEmpty ? locations.first.id : null);
 
     if (finalLocationId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(l10n.trainerNoLocations),
-          backgroundColor: AppColors.error));
+      _showFormMessage(l10n.trainerNoLocations);
       return;
     }
 
     final startDateTime = DateTime(
-        _selectedDate.year, _selectedDate.month, _selectedDate.day,
-        _startTime.hour, _startTime.minute);
+      _selectedDate.year,
+      _selectedDate.month,
+      _selectedDate.day,
+      _startTime.hour,
+      _startTime.minute,
+    );
     final endDateTime = DateTime(
-        _selectedDate.year, _selectedDate.month, _selectedDate.day,
-        _endTime.hour, _endTime.minute);
+      _selectedDate.year,
+      _selectedDate.month,
+      _selectedDate.day,
+      _endTime.hour,
+      _endTime.minute,
+    );
 
     if (startDateTime.isBefore(DateTime.now())) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(l10n.trainerPastClassError),
-          backgroundColor: AppColors.error));
+      _showFormMessage(l10n.trainerPastClassError);
       return;
     }
-    if (endDateTime.isBefore(startDateTime)) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(l10n.trainerClassEndBeforeStartError),
-          backgroundColor: AppColors.error));
+    if (!endDateTime.isAfter(startDateTime)) {
+      _showFormMessage(l10n.trainerClassEndBeforeStartError);
+      return;
+    }
+
+    final selectedDay = DateTime(
+      _selectedDate.year,
+      _selectedDate.month,
+      _selectedDate.day,
+    );
+    final conflictingClass = await _findConflictingClass(
+      selectedDay,
+      startDateTime,
+      endDateTime,
+    );
+
+    if (conflictingClass != null) {
+      if (!mounted) return;
+      _showFormMessage(
+        l10n.trainerClassTimeConflictError(
+          conflictingClass.name,
+          conflictingClass.startTimeFormatted,
+        ),
+      );
       return;
     }
 
@@ -155,8 +192,10 @@ class _AddClassModalState extends ConsumerState<AddClassModal> {
         'description': _descriptionController.text.trim(),
         'startTime': startDateTime.toIso8601String(),
         'endTime': endDateTime.toIso8601String(),
-        'maxParticipants': _isPersonalTraining ? 1 : int.parse(_maxParticipantsController.text.trim()),
-        'isPersonalTraining': _isPersonalTraining,
+        'maxParticipants': _isPersonalTraining
+            ? 1
+            : int.parse(_maxParticipantsController.text.trim()),
+        'personalTraining': _isPersonalTraining,
         'locationId': finalLocationId,
       };
 
@@ -167,13 +206,47 @@ class _AddClassModalState extends ConsumerState<AddClassModal> {
       if (mounted) context.pop();
     } catch (e) {
       if (!mounted) return;
-      final msg = e.toString().replaceFirst('Exception: ', '');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(msg), backgroundColor: AppColors.error),
-      );
+      final msg = ref.read(isOfflineProvider)
+          ? l10n.offlineActionUnavailable
+          : e.toString().replaceFirst('Exception: ', '');
+      _showFormMessage(msg);
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
+  }
+
+  void _showFormMessage(String message) {
+    if (!mounted) return;
+    setState(() => _formMessage = message);
+  }
+
+  void _clearFormMessage() {
+    if (_formMessage == null) return;
+    setState(() => _formMessage = null);
+  }
+
+  Future<GymClass?> _findConflictingClass(
+    DateTime day,
+    DateTime startDateTime,
+    DateTime endDateTime,
+  ) async {
+    try {
+      final classes = await ref.read(trainerClassesProvider(day).future);
+
+      for (final gymClass in classes) {
+        final overlaps =
+            startDateTime.isBefore(gymClass.endTime) &&
+            endDateTime.isAfter(gymClass.startTime);
+
+        if (overlaps) {
+          return gymClass;
+        }
+      }
+    } catch (_) {
+      return null;
+    }
+
+    return null;
   }
 
   @override
@@ -181,6 +254,7 @@ class _AddClassModalState extends ConsumerState<AddClassModal> {
     ref.watch(bookingNotifierProvider);
 
     final locationsAsync = ref.watch(locationsProvider);
+    final isOffline = ref.watch(isOfflineProvider);
     final l10n = AppLocalizations.of(context)!;
 
     return ClipRRect(
@@ -189,15 +263,17 @@ class _AddClassModalState extends ConsumerState<AddClassModal> {
         filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
         child: Container(
           decoration: BoxDecoration(
-              color: AppColors.background.withValues(alpha: 0.9),
-              border: Border(
-                  top: BorderSide(
-                      color: Colors.white.withValues(alpha: 0.1)))),
+            color: AppColors.background.withValues(alpha: 0.9),
+            border: Border(
+              top: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+            ),
+          ),
           padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom + 24,
-              top: 24,
-              left: 24,
-              right: 24),
+            bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+            top: 24,
+            left: 24,
+            right: 24,
+          ),
           child: Form(
             key: _formKey,
             child: SingleChildScrollView(
@@ -206,47 +282,64 @@ class _AddClassModalState extends ConsumerState<AddClassModal> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Center(
-                      child: Container(
-                          width: 40,
-                          height: 4,
-                          decoration: BoxDecoration(
-                              color: Colors.white24,
-                              borderRadius: BorderRadius.circular(2)))),
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.white24,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
                   const SizedBox(height: 24),
-                  Text(l10n.trainerAddClassTitle,
-                      style: const TextStyle(
-                          color: AppColors.textPrimary,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold)),
+                  Text(
+                    l10n.trainerAddClassTitle,
+                    style: const TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
 
                   const SizedBox(height: 16),
                   CustomTextField(
-                      controller: _nameController,
-                      label: l10n.fieldName,
-                      icon: Icons.fitness_center,
-                      validator: (v) => v!.isEmpty
-                          ? l10n.validationRequiredField(l10n.fieldName)
-                          : null),
+                    controller: _nameController,
+                    label: l10n.fieldName,
+                    icon: Icons.fitness_center,
+                    validator: (v) => v!.isEmpty
+                        ? l10n.validationRequiredField(l10n.fieldName)
+                        : null,
+                  ),
                   const SizedBox(height: 16),
                   CustomTextField(
-                      controller: _descriptionController,
-                      label: l10n.fieldDescriptionOptional,
-                      icon: Icons.description),
+                    controller: _descriptionController,
+                    label: l10n.fieldDescriptionOptional,
+                    icon: Icons.description,
+                  ),
                   const SizedBox(height: 16),
                   Container(
                     decoration: BoxDecoration(
-                        color: AppColors.surface,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.1))),
+                      color: AppColors.surface,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.1),
+                      ),
+                    ),
                     child: SwitchListTile(
-                      title: Text(l10n.trainerAddPersonalTrainingTitle,
-                          style: const TextStyle(
-                              color: AppColors.textPrimary,
-                              fontWeight: FontWeight.bold)),
-                      subtitle: Text(l10n.trainerAddPersonalTrainingSubtitle,
-                          style: const TextStyle(
-                              color: AppColors.textSecondary, fontSize: 12)),
+                      title: Text(
+                        l10n.trainerAddPersonalTrainingTitle,
+                        style: const TextStyle(
+                          color: AppColors.textPrimary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      subtitle: Text(
+                        l10n.trainerAddPersonalTrainingSubtitle,
+                        style: const TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 12,
+                        ),
+                      ),
                       value: _isPersonalTraining,
                       activeThumbColor: AppColors.primary,
                       onChanged: (val) => setState(() {
@@ -259,29 +352,55 @@ class _AddClassModalState extends ConsumerState<AddClassModal> {
 
                   locationsAsync.when(
                     data: (locations) {
-                      final selectedLocationId = _localSelectedLocationId ??
+                      final selectedLocationId =
+                          _localSelectedLocationId ??
                           (locations.isNotEmpty ? locations.first.id : null);
 
+                      if (_localSelectedLocationId == null &&
+                          selectedLocationId != null) {
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          if (mounted && _localSelectedLocationId == null) {
+                            setState(() {
+                              _localSelectedLocationId = selectedLocationId;
+                            });
+                          }
+                        });
+                      }
+
                       return Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.surface,
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.1),
+                          ),
                         ),
                         child: DropdownButtonHideUnderline(
                           child: DropdownButton<int>(
                             value: selectedLocationId,
                             isExpanded: true,
                             dropdownColor: AppColors.surface,
-                            icon: const Icon(Icons.location_on, color: AppColors.primary),
-                            items: locations.map((loc) => DropdownMenuItem<int>(
-                              value: loc.id,
-                              child: Text(
-                                '${loc.name} (${loc.city})',
-                                style: const TextStyle(color: AppColors.textPrimary),
-                              ),
-                            )).toList(),
+                            icon: const Icon(
+                              Icons.location_on,
+                              color: AppColors.primary,
+                            ),
+                            items: locations
+                                .map(
+                                  (loc) => DropdownMenuItem<int>(
+                                    value: loc.id,
+                                    child: Text(
+                                      '${loc.name} (${loc.city})',
+                                      style: const TextStyle(
+                                        color: AppColors.textPrimary,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                                .toList(),
                             onChanged: (val) {
                               if (val != null) {
                                 setState(() => _localSelectedLocationId = val);
@@ -291,72 +410,112 @@ class _AddClassModalState extends ConsumerState<AddClassModal> {
                         ),
                       );
                     },
-                    loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
-                    error: (err, stack) => Text(l10n.trainerLocationsLoadError, style: const TextStyle(color: AppColors.error)),
+                    loading: () => const Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.primary,
+                      ),
+                    ),
+                    error: (err, stack) => Text(
+                      l10n.trainerLocationsLoadError,
+                      style: const TextStyle(color: AppColors.error),
+                    ),
                   ),
                   const SizedBox(height: 16),
                   Row(
                     children: [
                       Expanded(
-                          flex: 2,
-                          child: _buildPickerField(
-                              l10n.fieldDate,
-                              DateFormat('dd.MM.yyyy').format(_selectedDate),
-                              Icons.calendar_month,
-                                  () => _selectDate(context))),
+                        flex: 2,
+                        child: _buildPickerField(
+                          l10n.fieldDate,
+                          DateFormat('dd.MM.yyyy').format(_selectedDate),
+                          Icons.calendar_month,
+                          () => _selectDate(context),
+                        ),
+                      ),
                       const SizedBox(width: 16),
                       Expanded(
-                          flex: 1,
-                          child: IgnorePointer(
-                              ignoring: _isPersonalTraining,
-                              child: Opacity(
-                                  opacity: _isPersonalTraining ? 0.5 : 1.0,
-                                  child: CustomTextField(
-                                      controller: _maxParticipantsController,
-                                      label: l10n.fieldSeatsLabel,
-                                      icon: Icons.people,
-                                      keyboardType: TextInputType.number,
-                                      validator: (v) =>
-                                      (int.tryParse(v ?? '') ?? 0) <= 0
-                                          ? l10n.validationSeatsMin
-                                          : null)))),
+                        flex: 1,
+                        child: IgnorePointer(
+                          ignoring: _isPersonalTraining,
+                          child: Opacity(
+                            opacity: _isPersonalTraining ? 0.5 : 1.0,
+                            child: CustomTextField(
+                              controller: _maxParticipantsController,
+                              label: l10n.fieldSeatsLabel,
+                              icon: Icons.people,
+                              keyboardType: TextInputType.number,
+                              validator: (v) =>
+                                  (int.tryParse(v ?? '') ?? 0) <= 0
+                                  ? l10n.validationSeatsMin
+                                  : null,
+                            ),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 16),
                   Row(
                     children: [
                       Expanded(
-                          child: _buildPickerField(
-                              l10n.fieldStart,
-                              _startTime.format(context),
-                              Icons.access_time,
-                                  () => _selectTime(context, true))),
+                        child: _buildPickerField(
+                          l10n.fieldStart,
+                          _startTime.format(context),
+                          Icons.access_time,
+                          () => _selectTime(context, true),
+                        ),
+                      ),
                       const SizedBox(width: 16),
                       Expanded(
-                          child: _buildPickerField(
-                              l10n.fieldEnd,
-                              _endTime.format(context),
-                              Icons.access_time_filled,
-                                  () => _selectTime(context, false))),
+                        child: _buildPickerField(
+                          l10n.fieldEnd,
+                          _endTime.format(context),
+                          Icons.access_time_filled,
+                          () => _selectTime(context, false),
+                        ),
+                      ),
                     ],
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 24),
+                  if (isOffline) ...[
+                    _InlineStatusMessage(
+                      icon: Icons.wifi_off_rounded,
+                      message: l10n.offlineActionUnavailable,
+                      isError: false,
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                  if (_formMessage != null) ...[
+                    _InlineStatusMessage(
+                      icon: Icons.error_outline_rounded,
+                      message: _formMessage!,
+                      isError: true,
+                    ),
+                    const SizedBox(height: 12),
+                  ],
                   SizedBox(
                     width: double.infinity,
                     height: 58,
                     child: ElevatedButton(
-                      onPressed: _isLoading ? null : _submitForm,
+                      onPressed: _isLoading || isOffline ? null : _submitForm,
                       style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20))),
+                        backgroundColor: AppColors.primary,
+                        disabledBackgroundColor: AppColors.surface,
+                        disabledForegroundColor: AppColors.textSecondary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
                       child: _isLoading
                           ? const CircularProgressIndicator(color: Colors.white)
-                          : Text(l10n.trainerCreateClassButton,
-                          style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold)),
+                          : Text(
+                              l10n.trainerCreateClassButton,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                     ),
                   ),
                 ],
@@ -369,33 +528,92 @@ class _AddClassModalState extends ConsumerState<AddClassModal> {
   }
 
   Widget _buildPickerField(
-      String label, String value, IconData icon, VoidCallback onTap) {
+    String label,
+    String value,
+    IconData icon,
+    VoidCallback onTap,
+  ) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.1))),
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(label,
-                style: const TextStyle(
-                    color: AppColors.textSecondary, fontSize: 12)),
+            Text(
+              label,
+              style: const TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 12,
+              ),
+            ),
             const SizedBox(height: 4),
-            Row(children: [
-              Icon(icon, color: AppColors.primary, size: 18),
-              const SizedBox(width: 8),
-              Text(value,
+            Row(
+              children: [
+                Icon(icon, color: AppColors.primary, size: 18),
+                const SizedBox(width: 8),
+                Text(
+                  value,
                   style: const TextStyle(
-                      color: AppColors.textPrimary,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold))
-            ]),
+                    color: AppColors.textPrimary,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _InlineStatusMessage extends StatelessWidget {
+  final IconData icon;
+  final String message;
+  final bool isError;
+
+  const _InlineStatusMessage({
+    required this.icon,
+    required this.message,
+    required this.isError,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = isError ? AppColors.error : AppColors.primary;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: AppColors.surface.withValues(alpha: 0.72),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: accent.withValues(alpha: 0.28)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: accent, size: 18),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              message,
+              style: const TextStyle(
+                color: AppColors.textPrimary,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                height: 1.25,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

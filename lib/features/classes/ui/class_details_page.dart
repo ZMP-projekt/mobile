@@ -5,15 +5,17 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import '../ui/widgets/participants_list.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/ui/widgets/app_avatar.dart';
 import '../../../l10n/app_localizations.dart';
 import '../data/models/gym_class.dart';
 import '../../user/providers/user_provider.dart';
 import '../providers/classes_provider.dart';
 import 'widgets/class_action_panel.dart';
+import 'widgets/class_image.dart';
 
 class ClassDetailsPage extends ConsumerWidget {
   final GymClass gymClass;
-  final String imageUrl;
+  final String? imageUrl;
 
   const ClassDetailsPage({
     super.key,
@@ -27,12 +29,17 @@ class ClassDetailsPage extends ConsumerWidget {
     final isTrainer = userAsync.valueOrNull?.isTrainer ?? false;
     final size = MediaQuery.of(context).size;
 
-    final targetDate = DateTime(gymClass.startTime.year, gymClass.startTime.month, gymClass.startTime.day);
+    final targetDate = DateTime(
+      gymClass.startTime.year,
+      gymClass.startTime.month,
+      gymClass.startTime.day,
+    );
 
-    final classesList = ref.watch(classesForDateProvider(targetDate)).valueOrNull ?? [];
+    final classesList =
+        ref.watch(classesForDateProvider(targetDate)).valueOrNull ?? [];
 
     final currentClass = classesList.firstWhere(
-          (c) => c.id == gymClass.id,
+      (c) => c.id == gymClass.id,
       orElse: () => gymClass,
     );
 
@@ -41,12 +48,14 @@ class ClassDetailsPage extends ConsumerWidget {
       extendBody: true,
 
       bottomNavigationBar: ClassActionPanel(
-          gymClass: currentClass,
-          isTrainer: isTrainer
+        gymClass: currentClass,
+        isTrainer: isTrainer,
       ),
 
       body: SingleChildScrollView(
-        padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom + 100),
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).padding.bottom + 100,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -78,7 +87,11 @@ class ClassDetailsPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildHeaderImage(BuildContext context, Size size, GymClass currentClass) {
+  Widget _buildHeaderImage(
+    BuildContext context,
+    Size size,
+    GymClass currentClass,
+  ) {
     return Stack(
       children: [
         Hero(
@@ -86,9 +99,9 @@ class ClassDetailsPage extends ConsumerWidget {
           child: Container(
             height: size.height * 0.45,
             width: double.infinity,
-            decoration: BoxDecoration(
-              image: DecorationImage(image: NetworkImage(imageUrl), fit: BoxFit.cover),
-            ),
+            clipBehavior: Clip.antiAlias,
+            decoration: const BoxDecoration(),
+            child: ClassImage(name: currentClass.name, imageUrl: imageUrl),
           ),
         ),
         Positioned.fill(
@@ -120,7 +133,11 @@ class ClassDetailsPage extends ConsumerWidget {
                     border: Border.all(color: Colors.white10, width: 1),
                   ),
                   child: IconButton(
-                    icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
+                    icon: const Icon(
+                      Icons.arrow_back_ios_new_rounded,
+                      color: Colors.white,
+                      size: 20,
+                    ),
                     onPressed: () => context.pop(),
                   ),
                 ),
@@ -135,7 +152,13 @@ class ClassDetailsPage extends ConsumerWidget {
   Widget _buildTitleSection(GymClass currentClass) {
     return Text(
       currentClass.name,
-      style: const TextStyle(color: AppColors.textPrimary, fontSize: 34, fontWeight: FontWeight.w800, letterSpacing: -1.0, height: 1.1),
+      style: const TextStyle(
+        color: AppColors.textPrimary,
+        fontSize: 34,
+        fontWeight: FontWeight.w800,
+        letterSpacing: -1.0,
+        height: 1.1,
+      ),
     ).animate().fadeIn(delay: 100.ms).slideY(begin: 0.1, end: 0);
   }
 
@@ -147,18 +170,24 @@ class ClassDetailsPage extends ConsumerWidget {
       spacing: 12,
       runSpacing: 12,
       children: [
-        _buildBadge(Icons.access_time_rounded, '${currentClass.startTimeFormatted} (${currentClass.durationMinutes} min)'),
         _buildBadge(
-            Icons.people_alt_rounded,
-            l10n.classSeatsAvailable(currentClass.spotsLeft),
-            color: currentClass.isFull ? AppColors.error : AppColors.primary
+          Icons.access_time_rounded,
+          '${currentClass.startTimeFormatted} (${currentClass.durationMinutes} min)',
+        ),
+        _buildBadge(
+          Icons.people_alt_rounded,
+          l10n.classSeatsAvailable(currentClass.spotsLeft),
+          color: currentClass.isFull ? AppColors.error : AppColors.primary,
         ),
         _buildBadge(Icons.location_on_rounded, locName),
       ],
     ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.1, end: 0);
   }
 
-  Widget _buildInstructorAndDescription(BuildContext context, GymClass currentClass) {
+  Widget _buildInstructorAndDescription(
+    BuildContext context,
+    GymClass currentClass,
+  ) {
     final l10n = AppLocalizations.of(context)!;
 
     return Column(
@@ -167,25 +196,39 @@ class ClassDetailsPage extends ConsumerWidget {
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.05))
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
           ),
           child: Row(
             children: [
-              CircleAvatar(
+              AppAvatar(
+                label: currentClass.trainer.fullName,
+                imageUrl: currentClass.trainer.photoUrl,
                 radius: 30,
-                backgroundColor: AppColors.background,
-                backgroundImage: NetworkImage(currentClass.trainer.photoUrl ?? currentClass.trainer.displayAvatarUrl),
               ),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(l10n.classesInstructor, style: const TextStyle(color: AppColors.textSecondary, fontSize: 14, fontWeight: FontWeight.w500)),
+                    Text(
+                      l10n.classesInstructor,
+                      style: const TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                     const SizedBox(height: 4),
-                    Text(currentClass.trainer.fullName, style: const TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.bold)),
+                    Text(
+                      currentClass.trainer.fullName,
+                      style: const TextStyle(
+                        color: AppColors.textPrimary,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -193,30 +236,53 @@ class ClassDetailsPage extends ConsumerWidget {
           ),
         ).animate().fadeIn(delay: 350.ms).slideY(begin: 0.1, end: 0),
         const SizedBox(height: 35),
-        Text(l10n.classesAboutTraining, style: const TextStyle(color: AppColors.textPrimary, fontSize: 22, fontWeight: FontWeight.bold, letterSpacing: -0.5)).animate().fadeIn(delay: 400.ms),
+        Text(
+          l10n.classesAboutTraining,
+          style: const TextStyle(
+            color: AppColors.textPrimary,
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            letterSpacing: -0.5,
+          ),
+        ).animate().fadeIn(delay: 400.ms),
         const SizedBox(height: 12),
         Text(
-            currentClass.description ?? l10n.classesDefaultDescription,
-            style: TextStyle(color: AppColors.textSecondary.withValues(alpha: 0.8), fontSize: 16, height: 1.6)
+          currentClass.description ?? l10n.classesDefaultDescription,
+          style: TextStyle(
+            color: AppColors.textSecondary.withValues(alpha: 0.8),
+            fontSize: 16,
+            height: 1.6,
+          ),
         ).animate().fadeIn(delay: 450.ms),
       ],
     );
   }
 
-  Widget _buildBadge(IconData icon, String text, {Color color = AppColors.textSecondary}) {
+  Widget _buildBadge(
+    IconData icon,
+    String text, {
+    Color color = AppColors.textSecondary,
+  }) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.05))
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 18, color: color),
           const SizedBox(width: 8),
-          Text(text, style: TextStyle(color: color, fontSize: 14, fontWeight: FontWeight.w600)),
+          Text(
+            text,
+            style: TextStyle(
+              color: color,
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ],
       ),
     );

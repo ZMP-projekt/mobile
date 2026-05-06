@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/ui/widgets/app_avatar.dart';
 import '../../../core/ui/widgets/app_skeleton.dart';
 import '../../../core/ui/widgets/full_screen_empty_state.dart';
 import '../../../core/ui/widgets/horizontal_calendar.dart';
@@ -31,26 +32,30 @@ class TrainerPersonalTrainingsPage extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(l10n.trainerClientsTitle, style: const TextStyle(
+                  Text(
+                    l10n.trainerClientsTitle,
+                    style: const TextStyle(
                       color: AppColors.textPrimary,
                       fontSize: 34,
                       fontWeight: FontWeight.w800,
-                      letterSpacing: -1.0))
-                      .animate().fadeIn(duration: 400.ms).slideY(begin: 0.1),
+                      letterSpacing: -1.0,
+                    ),
+                  ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.1),
                   const SizedBox(height: 8),
-                  Text(l10n.trainerClientsSubtitle,
-                      style: const TextStyle(color: AppColors.textSecondary,
-                          fontSize: 16,
-                          height: 1.4))
-                      .animate().fadeIn(delay: 200.ms).slideY(begin: 0.1),
+                  Text(
+                    l10n.trainerClientsSubtitle,
+                    style: const TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 16,
+                      height: 1.4,
+                    ),
+                  ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.1),
                   const SizedBox(height: 20),
 
                   HorizontalCalendar(
                     selectedDate: selectedDate,
                     onDateSelected: (date) {
-                      ref
-                          .read(selectedDateProvider.notifier)
-                          .state = date;
+                      ref.read(selectedDateProvider.notifier).state = date;
                     },
                   ),
                 ],
@@ -59,12 +64,13 @@ class TrainerPersonalTrainingsPage extends ConsumerWidget {
 
             Expanded(
               child: classesAsync.when(
-                loading: () =>
-                const Center(
-                    child: CircularProgressIndicator(color: AppColors.primary)),
-                error: (err, stack) =>
-                    NoConnectionView(onRetry: () =>
-                        ref.invalidate(trainerClassesProvider(selectedDate))),
+                loading: () => const Center(
+                  child: CircularProgressIndicator(color: AppColors.primary),
+                ),
+                error: (err, stack) => NoConnectionView(
+                  onRetry: () =>
+                      ref.invalidate(trainerClassesProvider(selectedDate)),
+                ),
                 data: (dayClasses) {
                   final ptClasses = dayClasses
                       .where((c) => c.personalTraining)
@@ -116,7 +122,11 @@ class _TrainerPtCard extends ConsumerWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: isBooked ? AppColors.primary.withValues(alpha: 0.3) : Colors.white.withValues(alpha: 0.05)),
+        border: Border.all(
+          color: isBooked
+              ? AppColors.primary.withValues(alpha: 0.3)
+              : Colors.white.withValues(alpha: 0.05),
+        ),
       ),
       child: Row(
         children: [
@@ -126,7 +136,10 @@ class _TrainerPtCard extends ConsumerWidget {
             CircleAvatar(
               radius: 26,
               backgroundColor: AppColors.background,
-              child: Icon(Icons.person_add_alt_1_rounded, color: AppColors.textSecondary.withValues(alpha: 0.5)),
+              child: Icon(
+                Icons.person_add_alt_1_rounded,
+                color: AppColors.textSecondary.withValues(alpha: 0.5),
+              ),
             ),
 
           const SizedBox(width: 16),
@@ -138,14 +151,32 @@ class _TrainerPtCard extends ConsumerWidget {
                 if (isBooked)
                   _buildClientName(context, ref)
                 else
-                  Text(l10n.trainerFreeSlot, style: const TextStyle(color: AppColors.textSecondary, fontSize: 17, fontWeight: FontWeight.bold)),
+                  Text(
+                    l10n.trainerFreeSlot,
+                    style: const TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
 
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    const Icon(Icons.access_time_rounded, size: 14, color: AppColors.primary),
+                    const Icon(
+                      Icons.access_time_rounded,
+                      size: 14,
+                      color: AppColors.primary,
+                    ),
                     const SizedBox(width: 4),
-                    Text('${gymClass.startTimeFormatted} (${gymClass.durationMinutes} min)', style: const TextStyle(color: AppColors.primary, fontSize: 13, fontWeight: FontWeight.w700)),
+                    Text(
+                      '${gymClass.startTimeFormatted} (${gymClass.durationMinutes} min)',
+                      style: const TextStyle(
+                        color: AppColors.primary,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ],
                 ),
               ],
@@ -153,11 +184,16 @@ class _TrainerPtCard extends ConsumerWidget {
           ),
 
           IconButton(
-            icon: const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
+            icon: const Icon(
+              Icons.chevron_right_rounded,
+              color: AppColors.textSecondary,
+            ),
             onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.trainerManageSoon)));
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(l10n.trainerManageSoon)));
             },
-          )
+          ),
         ],
       ),
     );
@@ -168,15 +204,21 @@ class _TrainerPtCard extends ConsumerWidget {
 
     return participantsAsync.when(
       data: (users) {
-        if (users.isEmpty) return const CircleAvatar(radius: 26, backgroundColor: AppColors.background);
-        return CircleAvatar(
-          radius: 26,
-          backgroundColor: AppColors.background,
-          backgroundImage: NetworkImage(users.first.displayAvatarUrl),
-        );
+        if (users.isEmpty) {
+          return const CircleAvatar(
+            radius: 26,
+            backgroundColor: AppColors.background,
+          );
+        }
+        return AppAvatar(label: users.first.fullName, radius: 26);
       },
-      loading: () => const AppSkeleton(width: 52, height: 52, shape: BoxShape.circle),
-      error: (_, _) => const CircleAvatar(radius: 26, backgroundColor: AppColors.error, child: Icon(Icons.error, size: 20)),
+      loading: () =>
+          const AppSkeleton(width: 52, height: 52, shape: BoxShape.circle),
+      error: (_, _) => const CircleAvatar(
+        radius: 26,
+        backgroundColor: AppColors.error,
+        child: Icon(Icons.error, size: 20),
+      ),
     );
   }
 
@@ -186,14 +228,27 @@ class _TrainerPtCard extends ConsumerWidget {
 
     return participantsAsync.when(
       data: (users) {
-        if (users.isEmpty) return Text(l10n.trainerFetchErrorShort, style: const TextStyle(color: AppColors.error));
+        if (users.isEmpty) {
+          return Text(
+            l10n.trainerFetchErrorShort,
+            style: const TextStyle(color: AppColors.error),
+          );
+        }
         return Text(
-            '${users.first.firstName} ${users.first.lastName}',
-            style: const TextStyle(color: AppColors.textPrimary, fontSize: 17, fontWeight: FontWeight.bold, letterSpacing: -0.3)
+          '${users.first.firstName} ${users.first.lastName}',
+          style: const TextStyle(
+            color: AppColors.textPrimary,
+            fontSize: 17,
+            fontWeight: FontWeight.bold,
+            letterSpacing: -0.3,
+          ),
         );
       },
       loading: () => const AppSkeleton(width: 120, height: 20),
-      error: (_, _) => Text(l10n.commonError, style: const TextStyle(color: AppColors.error)),
+      error: (_, _) => Text(
+        l10n.commonError,
+        style: const TextStyle(color: AppColors.error),
+      ),
     );
   }
 }

@@ -69,7 +69,6 @@
   "dashboardReadyQuestion": "Ready to train?",
   "dashboardSectionGym": "Your Gym",
   "dashboardSectionTodayClasses": "Today's classes",
-  "dashboardMapAction": "MAP",
   "dashboardSeeAll": "SEE ALL",
   "dashboardTodayClassesError": "Could not load today's classes.",
   "dashboardMembershipRequiredForToday": "Buy a membership to see today's schedule and book a workout!",
@@ -254,6 +253,18 @@
   "trainerNoLocations": "No locations available.",
   "trainerPastClassError": "Classes cannot be scheduled in the past.",
   "trainerClassEndBeforeStartError": "Classes must end after they start.",
+  "trainerClassTimeConflictError": "You already have “{className}” at {startTime}. Choose another time.",
+  "@trainerClassTimeConflictError": {
+    "description": "Shown when a trainer tries to create a class that overlaps with another class.",
+    "placeholders": {
+      "className": {
+        "type": "String"
+      },
+      "startTime": {
+        "type": "String"
+      }
+    }
+  },
   "trainerLocationsLoadError": "Could not load locations",
   "profileNoData": "No data",
   "profileInfoSection": "Info",
@@ -266,8 +277,6 @@
   "profileLanguagePolish": "Polish",
   "profileLanguageEnglish": "English",
   "profilePushNotifications": "Push Notifications",
-  "profileHelpContact": "Help and contact",
-  "profileClubRules": "Club rules",
   "profileLogout": "Log out",
   "profileAppVersion": "App version",
   "profileVersion": "Version {version}",

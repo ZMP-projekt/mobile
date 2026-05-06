@@ -1,13 +1,17 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/dio_client.dart';
+import '../../../core/offline/offline_cache_provider.dart';
 import '../../locations/providers/location_provider.dart';
 import '../data/models/gym_class.dart';
 import '../data/repositories/class_repository.dart';
 import '../../user/data/models/user.dart';
 
 final classesRepositoryProvider = Provider<IClassesRepository>((ref) {
-  return ApiClassesRepository(ref.watch(dioProvider));
+  return ApiClassesRepository(
+    ref.watch(dioProvider),
+    ref.watch(offlineCacheStoreProvider),
+  );
 });
 
 final selectedDateProvider = StateProvider<DateTime>((ref) {
@@ -15,41 +19,45 @@ final selectedDateProvider = StateProvider<DateTime>((ref) {
   return DateTime(now.year, now.month, now.day);
 });
 
-final classesForDateProvider =
-    FutureProvider.autoDispose.family<List<GymClass>, DateTime>((ref, date) async {
-  final repo = ref.watch(classesRepositoryProvider);
-  final selectedLocationId =
-      await ref.watch(effectiveSelectedLocationIdProvider.future);
+final classesForDateProvider = FutureProvider.autoDispose
+    .family<List<GymClass>, DateTime>((ref, date) async {
+      final repo = ref.watch(classesRepositoryProvider);
+      final selectedLocationId = await ref.watch(
+        effectiveSelectedLocationIdProvider.future,
+      );
 
-  if (selectedLocationId != null) {
-    final locationClasses = await repo.getClassesByLocation(selectedLocationId);
+      if (selectedLocationId != null) {
+        final locationClasses = await repo.getClassesByLocation(
+          selectedLocationId,
+        );
 
-    return locationClasses.where((c) {
-      return c.startTime.year == date.year &&
-          c.startTime.month == date.month &&
-          c.startTime.day == date.day;
-    }).toList();
-  }
+        return locationClasses.where((c) {
+          return c.startTime.year == date.year &&
+              c.startTime.month == date.month &&
+              c.startTime.day == date.day;
+        }).toList();
+      }
 
-  return await repo.getClassesByDate(date);
-});
+      return await repo.getClassesByDate(date);
+    });
 
 final trainerLocationFilterProvider = StateProvider<int?>((ref) => null);
 
 final trainerClassesProvider = FutureProvider.autoDispose
     .family<List<GymClass>, DateTime>((ref, date) async {
-  final repo = ref.watch(classesRepositoryProvider);
-  final allClasses = await repo.getTrainerClasses(date);
+      final repo = ref.watch(classesRepositoryProvider);
+      final allClasses = await repo.getTrainerClasses(date);
 
-  final filterLocationId = ref.watch(trainerLocationFilterProvider);
+      final filterLocationId = ref.watch(trainerLocationFilterProvider);
 
-  if (filterLocationId == null) return allClasses;
+      if (filterLocationId == null) return allClasses;
 
-  return allClasses.where((c) => c.locationId == filterLocationId).toList();
-});
+      return allClasses.where((c) => c.locationId == filterLocationId).toList();
+    });
 
-final todayClassesProvider =
-    FutureProvider.autoDispose<List<GymClass>>((ref) async {
+final todayClassesProvider = FutureProvider.autoDispose<List<GymClass>>((
+  ref,
+) async {
   final now = DateTime.now();
   final today = DateTime(now.year, now.month, now.day);
 
@@ -58,10 +66,10 @@ final todayClassesProvider =
   return classes.where((c) => c.isFuture).toList();
 });
 
-final classParticipantsProvider =
-    FutureProvider.autoDispose.family<List<User>, int>((ref, classId) async {
-  return ref.watch(classesRepositoryProvider).getClassParticipants(classId);
-});
+final classParticipantsProvider = FutureProvider.autoDispose
+    .family<List<User>, int>((ref, classId) async {
+      return ref.watch(classesRepositoryProvider).getClassParticipants(classId);
+    });
 
 class BookingNotifier extends AutoDisposeAsyncNotifier<void> {
   @override
@@ -147,5 +155,5 @@ class BookingNotifier extends AutoDisposeAsyncNotifier<void> {
 
 final bookingNotifierProvider =
     AsyncNotifierProvider.autoDispose<BookingNotifier, void>(
-  BookingNotifier.new,
-);
+      BookingNotifier.new,
+    );
