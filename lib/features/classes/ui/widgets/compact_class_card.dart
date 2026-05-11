@@ -107,7 +107,9 @@ class CompactClassCard extends StatelessWidget {
                                 gymClass.currentParticipants,
                                 gymClass.maxParticipants,
                               )
-                            : l10n.classesTrainer(gymClass.trainer.fullName),
+                            : l10n.classesTrainer(
+                                gymClass.trainerDisplayName(l10n),
+                              ),
                         style: TextStyle(
                           color: Colors.white.withValues(alpha: 0.8),
                           fontSize: 13,

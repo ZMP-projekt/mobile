@@ -108,6 +108,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         icon: Icons.email_outlined,
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
+                        textInputAction: TextInputAction.next,
+                        autofillHints: const [
+                          AutofillHints.email,
+                          AutofillHints.username,
+                        ],
                         validator: (value) =>
                             AppValidators.validateEmail(value, l10n),
                       ).animate().fadeIn(delay: 400.ms).slideX(begin: 0.1, end: 0),
@@ -121,20 +126,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         isPassword: true,
                         isPasswordVisible: _isPasswordVisible,
                         onTogglePassword: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
+                        textInputAction: TextInputAction.done,
+                        autofillHints: const [AutofillHints.password],
+                        onFieldSubmitted: (_) => _handleLogin(),
                         validator: (value) =>
                             AppValidators.validatePassword(value, l10n),
                       ).animate().fadeIn(delay: 500.ms).slideX(begin: 0.1, end: 0),
-
-                      const SizedBox(height: 12),
-
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton(
-                          onPressed: () {
-                          },
-                          child: Text(l10n.authForgotPassword, style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600)),
-                        ),
-                      ).animate().fadeIn(delay: 600.ms),
 
                       const SizedBox(height: 32),
 

@@ -10,6 +10,7 @@ import '../../../l10n/app_localizations.dart';
 import '../data/models/gym_class.dart';
 import '../../user/providers/user_provider.dart';
 import '../providers/classes_provider.dart';
+import '../utils/gym_class_extension.dart';
 import 'widgets/class_action_panel.dart';
 import 'widgets/class_image.dart';
 
@@ -189,6 +190,7 @@ class ClassDetailsPage extends ConsumerWidget {
     GymClass currentClass,
   ) {
     final l10n = AppLocalizations.of(context)!;
+    final trainerName = currentClass.trainerDisplayName(l10n);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -203,7 +205,7 @@ class ClassDetailsPage extends ConsumerWidget {
           child: Row(
             children: [
               AppAvatar(
-                label: currentClass.trainer.fullName,
+                label: trainerName,
                 imageUrl: currentClass.trainer.photoUrl,
                 radius: 30,
               ),
@@ -222,7 +224,7 @@ class ClassDetailsPage extends ConsumerWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      currentClass.trainer.fullName,
+                      trainerName,
                       style: const TextStyle(
                         color: AppColors.textPrimary,
                         fontSize: 16,

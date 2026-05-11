@@ -145,6 +145,7 @@ class _DashboardUserPtCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isProcessing = ref.watch(bookingNotifierProvider).isLoading;
     final l10n = AppLocalizations.of(context)!;
+    final trainerName = gymClass.trainerDisplayName(l10n);
 
     return GestureDetector(
       onTap: () {
@@ -167,7 +168,7 @@ class _DashboardUserPtCard extends ConsumerWidget {
         child: Row(
           children: [
             AppAvatar(
-              label: gymClass.trainer.fullName,
+              label: trainerName,
               imageUrl: gymClass.trainer.photoUrl,
               radius: 26,
             ),
@@ -178,7 +179,7 @@ class _DashboardUserPtCard extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    gymClass.trainer.fullName,
+                    trainerName,
                     style: const TextStyle(
                       color: AppColors.textPrimary,
                       fontSize: 16,

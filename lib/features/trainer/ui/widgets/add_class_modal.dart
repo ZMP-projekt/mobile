@@ -10,6 +10,7 @@ import '../../../../core/ui/success_overlay.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../classes/data/models/gym_class.dart';
 import '../../../classes/providers/classes_provider.dart';
+import '../../../classes/utils/gym_class_extension.dart';
 import '../../../locations/providers/location_provider.dart';
 
 class AddClassModal extends ConsumerStatefulWidget {

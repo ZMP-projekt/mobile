@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../providers/qr_provider.dart';
-
 import 'package:screen_protector/screen_protector.dart';
+
+import '../../../../core/theme/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
+import '../../providers/qr_provider.dart';
 
 class QrEntryModalContent extends ConsumerStatefulWidget {
   const QrEntryModalContent({super.key});
 
   @override
-  ConsumerState<QrEntryModalContent> createState() => _QrEntryModalContentState();
+  ConsumerState<QrEntryModalContent> createState() =>
+      _QrEntryModalContentState();
 }
 
 class _QrEntryModalContentState extends ConsumerState<QrEntryModalContent> {
@@ -36,6 +38,7 @@ class _QrEntryModalContentState extends ConsumerState<QrEntryModalContent> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final qrCodeAsync = ref.watch(qrEntryCodeProvider);
 
     return Container(
@@ -43,9 +46,9 @@ class _QrEntryModalContentState extends ConsumerState<QrEntryModalContent> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text(
-            'Twój kod wejścia',
-            style: TextStyle(
+          Text(
+            l10n.qrEntryTitle,
+            style: const TextStyle(
               color: AppColors.textPrimary,
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -76,14 +79,19 @@ class _QrEntryModalContentState extends ConsumerState<QrEntryModalContent> {
                             minHeight: 6,
                             value: value,
                             backgroundColor: Colors.white10,
-                            color: value < 0.3 ? AppColors.error : AppColors.primary,
+                            color: value < 0.3
+                                ? AppColors.error
+                                : AppColors.primary,
                           ),
                         ),
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Kod wygaśnie za: ${(value * 15).toStringAsFixed(0)}s',
-                        style: const TextStyle(color: Colors.white38, fontSize: 11),
+                        l10n.qrEntryExpiresIn((value * 15).round()),
+                        style: const TextStyle(
+                          color: Colors.white38,
+                          fontSize: 11,
+                        ),
                       ),
                     ],
                   );
@@ -118,12 +126,18 @@ class _QrEntryModalContentState extends ConsumerState<QrEntryModalContent> {
           version: QrVersions.auto,
         ),
         loading: () => const SizedBox(
-          width: 200, height: 200,
-          child: Center(child: CircularProgressIndicator(color: AppColors.primary)),
+          width: 200,
+          height: 200,
+          child: Center(
+            child: CircularProgressIndicator(color: AppColors.primary),
+          ),
         ),
         error: (_, _) => const SizedBox(
-          width: 200, height: 200,
-          child: Center(child: Icon(Icons.error_outline, color: AppColors.error, size: 50)),
+          width: 200,
+          height: 200,
+          child: Center(
+            child: Icon(Icons.error_outline, color: AppColors.error, size: 50),
+          ),
         ),
       ),
     );

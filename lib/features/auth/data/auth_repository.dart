@@ -22,7 +22,7 @@ class AuthRepository {
 
       return Result.failure(DioErrorParser.localized((l10n) => l10n.errorServer));
     } on DioException catch (e) {
-      AppLogger.e("Błąd logowania", e);
+      AppLogger.w("Logowanie zakończone błędem API: ${e.type}");
       return Result.failure(DioErrorParser.extract(e.response, e.type));
     } catch (e) {
       AppLogger.e("Nieoczekiwany błąd", e);
@@ -55,7 +55,7 @@ class AuthRepository {
 
       return Result.failure(DioErrorParser.localized((l10n) => l10n.errorServer));
     } on DioException catch (e) {
-      AppLogger.e("Błąd rejestracji", e);
+      AppLogger.w("Rejestracja zakończona błędem API: ${e.type}");
       return Result.failure(DioErrorParser.extract(e.response, e.type));
     } catch (e) {
       AppLogger.e("Nieoczekiwany błąd rejestracji", e);

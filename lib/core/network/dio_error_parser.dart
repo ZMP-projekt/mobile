@@ -21,18 +21,29 @@ class DioErrorParser {
       if (data is Map<String, dynamic>) {
         return data['message'] ??
             data['error'] ??
-            _defaultForType(type, defaultMessage, defaultMessageBuilder);
+            _defaultForType(
+              type,
+              defaultMessage,
+              defaultMessageBuilder,
+              response.statusCode,
+            );
       } else if (data is String && data.isNotEmpty) {
         return data;
       }
     }
-    return _defaultForType(type, defaultMessage, defaultMessageBuilder);
+    return _defaultForType(
+      type,
+      defaultMessage,
+      defaultMessageBuilder,
+      response?.statusCode,
+    );
   }
 
   static String _defaultForType(
     DioExceptionType type,
     String? fallback,
     String Function(AppLocalizations l10n)? fallbackBuilder,
+    int? statusCode,
   ) {
     final l10n = _currentL10n();
 
@@ -42,6 +53,9 @@ class DioErrorParser {
       case DioExceptionType.receiveTimeout:
         return l10n.errorConnectionTimeout;
       case DioExceptionType.badResponse:
+        if (_isWakingServerStatus(statusCode)) {
+          return l10n.errorServerWaking;
+        }
         return l10n.errorServer;
       case DioExceptionType.cancel:
         return l10n.errorRequestCanceled;
@@ -52,6 +66,10 @@ class DioErrorParser {
             fallback ??
             l10n.commonUnknownError;
     }
+  }
+
+  static bool _isWakingServerStatus(int? statusCode) {
+    return statusCode == 502 || statusCode == 503 || statusCode == 504;
   }
 
   static AppLocalizations _currentL10n() {

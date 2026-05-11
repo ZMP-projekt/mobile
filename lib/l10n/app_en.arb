@@ -69,6 +69,7 @@
   "dashboardReadyQuestion": "Ready to train?",
   "dashboardSectionGym": "Your Gym",
   "dashboardSectionTodayClasses": "Today's classes",
+  "dashboardMapAction": "MAP",
   "dashboardSeeAll": "SEE ALL",
   "dashboardTodayClassesError": "Could not load today's classes.",
   "dashboardMembershipRequiredForToday": "Buy a membership to see today's schedule and book a workout!",
@@ -323,6 +324,15 @@
   },
   "qrEntryTitle": "Entry code",
   "qrEntrySubtitle": "Show the code at the club entrance.",
+  "qrEntryExpiresIn": "Code expires in: {seconds}s",
+  "@qrEntryExpiresIn": {
+    "description": "Countdown label shown below the entry QR code.",
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
   "offlineModalTitle": "No connection",
   "offlineModalSubtitle": "Could not load data. Check your internet connection and try again.",
   "offlineActionUnavailable": "This action requires an internet connection.",
@@ -384,10 +394,10 @@
     }
   },
   "errorServer": "Server error. Please try again later.",
-  "errorServerWaking": "The server is waking up. Please try again in a moment.",
-  "errorConnectionTimeout": "Connection timed out. Check your internet connection.",
+  "errorServerWaking": "The server may be starting up. Please try again in a moment.",
+  "errorConnectionTimeout": "The connection is taking too long. The server may be starting up, so try again in a moment.",
   "errorRequestCanceled": "The request was canceled.",
-  "errorNoInternet": "No internet connection.",
+  "errorNoInternet": "No connection or the server is temporarily unavailable. Please try again in a moment.",
   "errorDataLoad": "Could not load data.",
   "errorVerifyAccountAccess": "Could not verify account permissions. Check your network.",
   "errorUserProfileFetch": "Could not load the user profile.",

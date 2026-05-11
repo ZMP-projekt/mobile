@@ -25,6 +25,7 @@ class ClassCard extends ConsumerWidget {
     final isTrainer = roleString.contains('trainer');
 
     final imageUrl = gymClass.displayImageUrl;
+    final l10n = AppLocalizations.of(context)!;
 
     return GestureDetector(
       onTap: () {
@@ -133,9 +134,9 @@ class ClassCard extends ConsumerWidget {
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
-                                  AppLocalizations.of(
-                                    context,
-                                  )!.classesTrainer(gymClass.trainer.fullName),
+                                  l10n.classesTrainer(
+                                    gymClass.trainerDisplayName(l10n),
+                                  ),
                                   style: TextStyle(
                                     color: Colors.white.withValues(alpha: 0.7),
                                     fontSize: 13,

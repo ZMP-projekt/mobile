@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/auth/auth_token_store.dart';
 import '../../../core/config/env.dart';
 import '../../../core/network/dio_client.dart';
 import '../../../core/services/local_notification_service.dart';
@@ -12,6 +13,19 @@ final notificationRepositoryProvider = Provider<NotificationRepository>((ref) {
   return NotificationRepository(ref.watch(dioProvider));
 });
 
+typedef WebSocketServiceFactory =
+    WebSocketService Function({
+      required String token,
+      required void Function(AppNotification) onNotification,
+    });
+
+final webSocketServiceFactoryProvider = Provider<WebSocketServiceFactory>((
+  ref,
+) {
+  return ({required token, required onNotification}) =>
+      WebSocketService(token: token, onNotification: onNotification);
+});
+
 final notificationsProvider =
     AsyncNotifierProvider<NotificationsNotifier, List<AppNotification>>(
       NotificationsNotifier.new,
@@ -22,16 +36,7 @@ class NotificationsNotifier extends AsyncNotifier<List<AppNotification>> {
 
   @override
   Future<List<AppNotification>> build() async {
-    var authToken = ref.read(authTokenProvider);
-
-    if (authToken == null || authToken.isEmpty) {
-      final storage = ref.read(secureStorageProvider);
-      authToken = await storage.read(key: 'jwt_token');
-
-      if (authToken != null && authToken.isNotEmpty) {
-        ref.read(authTokenProvider.notifier).state = authToken;
-      }
-    }
+    final authToken = await ref.read(authTokenStoreProvider).read();
 
     if (authToken == null || authToken.isEmpty) {
       return [];
@@ -40,16 +45,13 @@ class NotificationsNotifier extends AsyncNotifier<List<AppNotification>> {
     final repo = ref.read(notificationRepositoryProvider);
     final history = await repo.getNotifications();
 
-    AppLogger.i('📬 Historia: ${history.length} powiadomień');
-    for (final n in history) {
-      AppLogger.i('  → [${n.id}] ${n.content} (read: ${n.read})');
-    }
+    AppLogger.i('Pobrano historię powiadomień: ${history.length}');
 
     final token = authToken;
 
     if (token.isNotEmpty) {
-      AppLogger.i('Łączę WebSocket');
-      _wsService = WebSocketService(
+      AppLogger.i('Łączenie z WebSocket powiadomień');
+      _wsService = ref.read(webSocketServiceFactoryProvider)(
         token: token,
         onNotification: _onNewNotification,
       );

@@ -2,6 +2,6 @@ class Env {
 
   static const apiUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://10.0.2.2:8080',
+    defaultValue: 'https://api-j6d6.onrender.com',
   );
 }
