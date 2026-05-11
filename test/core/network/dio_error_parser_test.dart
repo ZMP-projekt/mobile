@@ -85,6 +85,20 @@ void main() {
       expect(result, en.errorServer);
     });
 
+    test('extract returns waking server message for gateway errors', () {
+      for (final statusCode in [502, 503, 504]) {
+        final result = DioErrorParser.extract(
+          Response(
+            requestOptions: requestOptions,
+            statusCode: statusCode,
+          ),
+          DioExceptionType.badResponse,
+        );
+
+        expect(result, en.errorServerWaking);
+      }
+    });
+
     test('extract returns cancel message for canceled requests', () {
       final result = DioErrorParser.extract(null, DioExceptionType.cancel);
 

@@ -62,12 +62,12 @@ void main() {
       test('returns min length message for short password', () {
         expect(
           AppValidators.validatePassword('abc', l10n),
-          l10n.validationPasswordMinLength(4),
+          l10n.validationPasswordMinLength(AppValidators.minimumPasswordLength),
         );
       });
 
       test('accepts password with minimum length', () {
-        expect(AppValidators.validatePassword('abcd', l10n), isNull);
+        expect(AppValidators.validatePassword('pass', l10n), isNull);
       });
 
       test('accepts longer password', () {

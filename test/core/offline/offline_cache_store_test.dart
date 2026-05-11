@@ -1,15 +1,14 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:mobile_gym_app/core/offline/offline_cache_store.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   late OfflineCacheStore cache;
 
   setUp(() async {
-    SharedPreferences.setMockInitialValues({});
-    final prefs = await SharedPreferences.getInstance();
-    cache = OfflineCacheStore(prefs);
+    FlutterSecureStorage.setMockInitialValues({});
+    cache = const OfflineCacheStore(FlutterSecureStorage());
   });
 
   test('getOrFetch stores fresh value after successful fetch', () async {
@@ -21,7 +20,7 @@ void main() {
     );
 
     expect(value, {'name': 'Alex'});
-    expect(cache.readJson('profile'), {'name': 'Alex'});
+    await expectLater(cache.readJson('profile'), completion({'name': 'Alex'}));
   });
 
   test('getOrFetch returns cached value for offline Dio errors', () async {

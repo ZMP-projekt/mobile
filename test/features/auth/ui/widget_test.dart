@@ -9,6 +9,7 @@ import 'package:mobile_gym_app/features/auth/ui/login_page.dart';
 import 'package:mobile_gym_app/features/auth/providers/auth_provider.dart';
 import 'package:mobile_gym_app/features/auth/data/auth_repository.dart';
 import 'package:mobile_gym_app/core/models/result.dart';
+import 'package:mobile_gym_app/core/util/validators.dart';
 import 'package:mobile_gym_app/l10n/app_localizations.dart';
 import 'package:mobile_gym_app/l10n/app_localizations_pl.dart';
 
@@ -88,7 +89,14 @@ void main() {
     await tester.pump();
 
     expect(find.text(l10n.validationEmailInvalid), findsOneWidget);
-    expect(find.text(l10n.validationPasswordMinLength(4)), findsOneWidget);
+    expect(
+      find.text(
+        l10n.validationPasswordMinLength(
+          AppValidators.minimumPasswordLength,
+        ),
+      ),
+      findsOneWidget,
+    );
     verifyNever(() => mockAuthRepository.login(any(), any()));
   });
 
@@ -105,6 +113,22 @@ void main() {
     passwordField = tester.widget(find.byType(TextField).at(1));
     expect(passwordField.obscureText, isFalse);
     expect(find.byIcon(Icons.visibility), findsOneWidget);
+  });
+
+  testWidgets('configures keyboard actions and autofill hints', (
+    WidgetTester tester,
+  ) async {
+    await pumpLoginPage(tester);
+
+    final emailField = tester.widget<TextField>(find.byType(TextField).at(0));
+    final passwordField = tester.widget<TextField>(
+      find.byType(TextField).at(1),
+    );
+
+    expect(emailField.textInputAction, TextInputAction.next);
+    expect(emailField.autofillHints, contains(AutofillHints.email));
+    expect(passwordField.textInputAction, TextInputAction.done);
+    expect(passwordField.autofillHints, contains(AutofillHints.password));
   });
 
   testWidgets('submits trimmed email and password to repository', (
