@@ -1,53 +1,62 @@
-# 📱 GymSystem Mobile App
-Mobilna część systemu zarządzania siłownią realizowana w ramach projektu ZMP. Aplikacja została zaprojektowana z myślą o użytkownikach końcowych (klientach siłowni) oraz personelu trenerskim.
+# GymSystem Mobile App
 
-## 🛠 Tech Stack & Wersje
+Mobilna część systemu zarządzania siłownią realizowana w ramach projektu ZMP.
+Aplikacja obsługuje klientów siłowni oraz konta trenerskie.
+
+## Tech Stack
+
 * **Framework**: Flutter 3.x
-
 * **Język**: Dart 3.x
+* **Stan aplikacji**: Riverpod
+* **Komunikacja API**: Dio z interceptorem JWT
+* **Powiadomienia**: WebSocket/STOMP oraz powiadomienia lokalne
+* **Dane lokalne**: SharedPreferences dla ustawień oraz FlutterSecureStorage dla tokenu i cache offline danych użytkownika
+* **Architektura**: feature-first
 
-* **Zarządzanie stanem**: Riverpod (skalowalność i testowalność)
+## Funkcjonalności
 
-* **Komunikacja API**: Dio (z obsługą interceptorów dla JWT)
+**Autoryzacja**
+* Logowanie klasyczne.
+* Rejestracja użytkownika z rolą klienta.
+* Przechowywanie tokenu JWT w FlutterSecureStorage.
 
-* **Baza danych lokalna**: Drift (SQLite) – obsługa trybu offline
-
-* **Architektura**: Feature-first (podział na moduły funkcjonalne)
-
-## 🚀 Funkcjonalności (Roadmap)
-Na podstawie analizy wymagań, aplikacja realizuje następujące moduły:
-
-**🔐 Autoryzacja i Bezpieczeństwo**
-* Logowanie klasyczne oraz przez zewnętrzne serwisy (Facebook, Google).
-
-* Rejestracja nowych użytkowników i system resetowania hasła.
-
-* Dwuetapowa weryfikacja (2FA).
-
-**👤 Profil i Klient**
-* Zarządzanie profilem i sprawdzanie statusu karnetu.
-
-* Przeglądanie listy zajęć w bieżącym tygodniu i zapisywanie się na nie.
-
-* Lokalizator siłowni z informacją o aktualnym obłożeniu obiektu.
-
+**Profil i klient**
+* Podgląd profilu użytkownika.
+* Sprawdzanie statusu karnetu.
+* Przeglądanie grafiku zajęć.
+* Zapisywanie się na zajęcia i anulowanie zapisu.
+* Wybór lokalizacji klubu i sortowanie po odległości, jeśli użytkownik wyrazi zgodę na lokalizację.
 * Wybór języka aplikacji.
 
-**🎫 System Dostępu i Offline**
-* Kod QR: Generator kodów umożliwiający wejście do klubu.
+**Karnety i dostęp**
+* Zakup wybranego typu karnetu przez API.
+* Kod QR jako wizualny element wejścia do klubu w projekcie studenckim.
+* Blokada zrzutów ekranu podczas wyświetlania kodu QR.
 
-* TRYB OFFLINE: Dostęp do kluczowych danych (karnet, grafik) bez połączenia z siecią.
+**Tryb offline**
+* Odczyt ostatnio pobranych danych profilu, karnetu, grafiku i uczestników zajęć po utracie połączenia.
 
-**👟 Moduł Trenera**
-* Dedykowane Konto dla Trenera.
+**Moduł trenera**
+* Widok zajęć prowadzonych przez trenera.
+* Dodawanie, przekładanie i odwoływanie zajęć.
+* Podgląd uczestników zajęć.
 
-* Zarządzanie listą zajęć prowadzonych przez trenera.
+**Powiadomienia**
+* Historia powiadomień z API.
+* Powiadomienia w czasie rzeczywistym przez WebSocket.
+* Oznaczanie powiadomień jako przeczytane i usuwanie ich.
 
-**🔔 Powiadomienia Systemowe**
-* Aplikacja wysyła powiadomienia o:
+## Konfiguracja
 
-* Zbliżającym się terminie wygaśnięcia karnetu.
+Domyślny backend jest ustawiony w `lib/core/config/env.dart`. Można go nadpisać podczas uruchamiania:
 
-* Odwołanych lub przełożonych zajęciach.
+```bash
+flutter run --dart-define=API_BASE_URL=https://example.com
+```
 
-* Nadchodzących treningach, na które użytkownik jest zapisany.
+## Weryfikacja
+
+```bash
+flutter analyze
+flutter test
+```

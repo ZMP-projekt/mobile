@@ -8,6 +8,8 @@
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
 	<string>Mobile Gym App</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Aplikacja używa lokalizacji, aby pokazać najbliższe kluby siłowni.</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
