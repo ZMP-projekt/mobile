@@ -601,6 +601,11 @@ class AppLocalizationsPl extends AppLocalizations {
   String get qrEntrySubtitle => 'Pokaż kod przy wejściu do klubu.';
 
   @override
+  String qrEntryExpiresIn(int seconds) {
+    return 'Kod wygaśnie za: ${seconds}s';
+  }
+
+  @override
   String get offlineModalTitle => 'Brak połączenia';
 
   @override
@@ -719,17 +724,19 @@ class AppLocalizationsPl extends AppLocalizations {
   String get errorServer => 'Błąd serwera. Spróbuj ponownie później.';
 
   @override
-  String get errorServerWaking => 'Serwer się wybudza, spróbuj za chwilę.';
+  String get errorServerWaking =>
+      'Serwer może się uruchamiać. Spróbuj ponownie za chwilę.';
 
   @override
   String get errorConnectionTimeout =>
-      'Przekroczono czas połączenia. Sprawdź połączenie z internetem.';
+      'Połączenie trwa zbyt długo. Serwer może się uruchamiać, spróbuj ponownie za chwilę.';
 
   @override
   String get errorRequestCanceled => 'Żądanie zostało anulowane.';
 
   @override
-  String get errorNoInternet => 'Brak połączenia z internetem.';
+  String get errorNoInternet =>
+      'Brak połączenia albo serwer jest chwilowo niedostępny. Spróbuj ponownie za chwilę.';
 
   @override
   String get errorDataLoad => 'Błąd ładowania danych.';

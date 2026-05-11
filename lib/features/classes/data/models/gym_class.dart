@@ -36,40 +36,6 @@ class GymClass with _$GymClass {
       DateTime.now().isAfter(startTime) && DateTime.now().isBefore(endTime);
   bool get isFuture => DateTime.now().isBefore(startTime);
 
-  String get startTimeFormatted =>
-      '${startTime.hour.toString().padLeft(2, '0')}:${startTime.minute.toString().padLeft(2, '0')}';
-
-  String get dateFormatted {
-    final months = [
-      'Sty',
-      'Lut',
-      'Mar',
-      'Kwi',
-      'Maj',
-      'Cze',
-      'Lip',
-      'Sie',
-      'Wrz',
-      'Paź',
-      'Lis',
-      'Gru',
-    ];
-    return '${startTime.day} ${months[startTime.month - 1]}';
-  }
-
-  String get dayOfWeek {
-    final days = [
-      'Poniedziałek',
-      'Wtorek',
-      'Środa',
-      'Czwartek',
-      'Piątek',
-      'Sobota',
-      'Niedziela',
-    ];
-    return days[startTime.weekday - 1];
-  }
-
   bool get isToday {
     final now = DateTime.now();
     return startTime.year == now.year &&
@@ -79,7 +45,7 @@ class GymClass with _$GymClass {
 
   @override
   String toString() {
-    return 'GymClass(id: $id, name: $name, startTime: $startTimeFormatted, spots: $spotsLeft/$maxParticipants, booked: $userEnrolled)';
+    return 'GymClass(id: $id, name: $name, startTime: $startTime, spots: $spotsLeft/$maxParticipants, booked: $userEnrolled)';
   }
 
   factory GymClass.fromJson(Map<String, dynamic> json) =>
@@ -93,10 +59,10 @@ class GymClass with _$GymClass {
         json['personalTraining'] ?? json['isPersonalTraining'] ?? false;
 
     if (map['trainer'] == null) {
-      final fullName = (map['trainerName'] as String?) ?? 'Nieznany Trener';
-      final nameParts = fullName.trim().split(' ');
+      final fullName = (map['trainerName'] as String?)?.trim() ?? '';
+      final nameParts = fullName.isEmpty ? <String>[] : fullName.split(' ');
       map['trainer'] = {
-        'firstName': nameParts.isNotEmpty ? nameParts.first : 'Nieznany',
+        'firstName': nameParts.isNotEmpty ? nameParts.first : '',
         'lastName': nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '',
       };
     }

@@ -10,6 +10,7 @@ import '../../../core/ui/widgets/no_connection_view.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../classes/providers/classes_provider.dart';
 import '../../classes/data/models/gym_class.dart';
+import '../../classes/utils/gym_class_extension.dart';
 
 class TrainerPersonalTrainingsPage extends ConsumerWidget {
   const TrainerPersonalTrainingsPage({super.key});

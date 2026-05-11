@@ -324,6 +324,15 @@
   },
   "qrEntryTitle": "Kod wejścia",
   "qrEntrySubtitle": "Pokaż kod przy wejściu do klubu.",
+  "qrEntryExpiresIn": "Kod wygaśnie za: {seconds}s",
+  "@qrEntryExpiresIn": {
+    "description": "Countdown label shown below the entry QR code.",
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
   "offlineModalTitle": "Brak połączenia",
   "offlineModalSubtitle": "Nie udało się pobrać danych. Sprawdź połączenie internetowe i spróbuj ponownie.",
   "offlineActionUnavailable": "Ta akcja wymaga połączenia z internetem.",
@@ -385,10 +394,10 @@
     }
   },
   "errorServer": "Błąd serwera. Spróbuj ponownie później.",
-  "errorServerWaking": "Serwer się wybudza, spróbuj za chwilę.",
-  "errorConnectionTimeout": "Przekroczono czas połączenia. Sprawdź połączenie z internetem.",
+  "errorServerWaking": "Serwer może się uruchamiać. Spróbuj ponownie za chwilę.",
+  "errorConnectionTimeout": "Połączenie trwa zbyt długo. Serwer może się uruchamiać, spróbuj ponownie za chwilę.",
   "errorRequestCanceled": "Żądanie zostało anulowane.",
-  "errorNoInternet": "Brak połączenia z internetem.",
+  "errorNoInternet": "Brak połączenia albo serwer jest chwilowo niedostępny. Spróbuj ponownie za chwilę.",
   "errorDataLoad": "Błąd ładowania danych.",
   "errorVerifyAccountAccess": "Nie udało się zweryfikować uprawnień konta. Sprawdź sieć.",
   "errorUserProfileFetch": "Nie udało się pobrać profilu użytkownika.",

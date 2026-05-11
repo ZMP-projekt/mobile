@@ -149,7 +149,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dashboardSectionTodayClasses => 'Today\'s classes';
 
   @override
-  String get dashboardMapAction => 'MAPA';
+  String get dashboardMapAction => 'MAP';
 
   @override
   String get dashboardSeeAll => 'SEE ALL';
@@ -598,6 +598,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get qrEntrySubtitle => 'Show the code at the club entrance.';
 
   @override
+  String qrEntryExpiresIn(int seconds) {
+    return 'Code expires in: ${seconds}s';
+  }
+
+  @override
   String get offlineModalTitle => 'No connection';
 
   @override
@@ -713,17 +718,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorServerWaking =>
-      'The server is waking up. Please try again in a moment.';
+      'The server may be starting up. Please try again in a moment.';
 
   @override
   String get errorConnectionTimeout =>
-      'Connection timed out. Check your internet connection.';
+      'The connection is taking too long. The server may be starting up, so try again in a moment.';
 
   @override
   String get errorRequestCanceled => 'The request was canceled.';
 
   @override
-  String get errorNoInternet => 'No internet connection.';
+  String get errorNoInternet =>
+      'No connection or the server is temporarily unavailable. Please try again in a moment.';
 
   @override
   String get errorDataLoad => 'Could not load data.';

@@ -1124,6 +1124,12 @@ abstract class AppLocalizations {
   /// **'Pokaż kod przy wejściu do klubu.'**
   String get qrEntrySubtitle;
 
+  /// Countdown label shown below the entry QR code.
+  ///
+  /// In pl, this message translates to:
+  /// **'Kod wygaśnie za: {seconds}s'**
+  String qrEntryExpiresIn(int seconds);
+
   /// No description provided for @offlineModalTitle.
   ///
   /// In pl, this message translates to:
@@ -1301,13 +1307,13 @@ abstract class AppLocalizations {
   /// No description provided for @errorServerWaking.
   ///
   /// In pl, this message translates to:
-  /// **'Serwer się wybudza, spróbuj za chwilę.'**
+  /// **'Serwer może się uruchamiać. Spróbuj ponownie za chwilę.'**
   String get errorServerWaking;
 
   /// No description provided for @errorConnectionTimeout.
   ///
   /// In pl, this message translates to:
-  /// **'Przekroczono czas połączenia. Sprawdź połączenie z internetem.'**
+  /// **'Połączenie trwa zbyt długo. Serwer może się uruchamiać, spróbuj ponownie za chwilę.'**
   String get errorConnectionTimeout;
 
   /// No description provided for @errorRequestCanceled.
@@ -1319,7 +1325,7 @@ abstract class AppLocalizations {
   /// No description provided for @errorNoInternet.
   ///
   /// In pl, this message translates to:
-  /// **'Brak połączenia z internetem.'**
+  /// **'Brak połączenia albo serwer jest chwilowo niedostępny. Spróbuj ponownie za chwilę.'**
   String get errorNoInternet;
 
   /// No description provided for @errorDataLoad.
