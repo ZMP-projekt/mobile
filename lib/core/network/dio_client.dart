@@ -1,16 +1,11 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
+import '../auth/auth_token_store.dart';
 import '../config/env.dart';
-import 'network_status_provider.dart';
 import '../util/app_logger.dart';
-
-final secureStorageProvider = Provider<FlutterSecureStorage>((ref) {
-  return const FlutterSecureStorage();
-});
-
-final authTokenProvider = StateProvider<String?>((ref) => null);
+import 'network_status_provider.dart';
 
 final dioProvider = Provider<Dio>((ref) {
   final dio = Dio(
@@ -36,22 +31,17 @@ final dioProvider = Provider<Dio>((ref) {
   dio.interceptors.add(
     InterceptorsWrapper(
       onRequest: (options, handler) async {
-        var token = ref.read(authTokenProvider);
+        final isAuthEndpoint = options.path.contains('/auth/');
 
-        if (token == null) {
-          final storage = ref.read(secureStorageProvider);
-          token = await storage.read(key: 'jwt_token');
-
-          if (token != null) {
-            ref.read(authTokenProvider.notifier).state = token;
+        if (!isAuthEndpoint) {
+          final token = await ref.read(authTokenStoreProvider).read();
+          if (token == null) {
+            AppLogger.w('Brak tokena dla żądania: ${options.path}');
+            return handler.next(options);
           }
-        }
 
-        if (token != null) {
           options.headers['Authorization'] = 'Bearer $token';
           AppLogger.d('Dodano nagłówek Authorization dla: ${options.path}');
-        } else {
-          AppLogger.w('Brak tokena dla żądania: ${options.path}');
         }
 
         return handler.next(options);
@@ -60,7 +50,7 @@ final dioProvider = Provider<Dio>((ref) {
         ref.read(isOfflineProvider.notifier).state = false;
         return handler.next(response);
       },
-      onError: (DioException e, handler) {
+      onError: (DioException e, handler) async {
         final isAuthEndpoint = e.requestOptions.path.contains('/auth/');
         final isConnectionProblem =
             e.type == DioExceptionType.connectionError ||
@@ -74,8 +64,7 @@ final dioProvider = Provider<Dio>((ref) {
 
         if (e.response?.statusCode == 401 && !isAuthEndpoint) {
           AppLogger.w("Token wygasł lub jest nieprawidłowy.");
-          ref.read(authTokenProvider.notifier).state = null;
-          ref.read(secureStorageProvider).delete(key: 'jwt_token');
+          await ref.read(authTokenStoreProvider).clear();
         }
 
         return handler.next(e);

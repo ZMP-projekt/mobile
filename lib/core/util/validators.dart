@@ -1,11 +1,13 @@
 import '../../l10n/app_localizations.dart';
 
 class AppValidators {
+  static const minimumPasswordLength = 4;
+
   static String? validateEmail(String? value, AppLocalizations l10n) {
     if (value == null || value.trim().isEmpty) {
       return l10n.validationEmailRequired;
     }
-    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    final emailRegex = RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$');
     if (!emailRegex.hasMatch(value.trim())) {
       return l10n.validationEmailInvalid;
     }
@@ -16,8 +18,8 @@ class AppValidators {
     if (value == null || value.isEmpty) {
       return l10n.validationPasswordRequired;
     }
-    if (value.length < 4) {
-      return l10n.validationPasswordMinLength(4);
+    if (value.length < minimumPasswordLength) {
+      return l10n.validationPasswordMinLength(minimumPasswordLength);
     }
     return null;
   }

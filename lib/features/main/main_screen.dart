@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile_gym_app/features/main/ui/widgets/main_action_button.dart';
 
-import '../../core/network/dio_client.dart';
+import '../../core/auth/auth_token_store.dart';
 import '../../core/ui/widgets/async_value_widget.dart';
 import '../../core/ui/widgets/no_connection_view.dart';
 import '../../core/ui/widgets/offline_access_modal.dart';

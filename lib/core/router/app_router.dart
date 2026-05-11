@@ -8,7 +8,7 @@ import '../../features/main/main_screen.dart';
 import '../../features/classes/ui/class_details_page.dart';
 import '../../features/classes/data/models/gym_class.dart';
 import '../../features/notifications/ui/notifications_page.dart';
-import '../network/dio_client.dart';
+import '../auth/auth_token_store.dart';
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 

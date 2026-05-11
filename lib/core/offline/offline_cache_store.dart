@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class OfflineCacheMissException implements Exception {
   final String key;
@@ -14,9 +14,9 @@ class OfflineCacheMissException implements Exception {
 }
 
 class OfflineCacheStore {
-  final SharedPreferences _prefs;
+  final FlutterSecureStorage _storage;
 
-  const OfflineCacheStore(this._prefs);
+  const OfflineCacheStore(this._storage);
 
   Future<T> getOrFetch<T>({
     required String key,
@@ -31,20 +31,20 @@ class OfflineCacheStore {
     } on DioException catch (error) {
       if (!error.isOfflineFailure) rethrow;
 
-      final cachedJson = readJson(key);
+      final cachedJson = await readJson(key);
       if (cachedJson == null) throw OfflineCacheMissException(key);
       return fromJson(cachedJson);
     }
   }
 
-  Object? readJson(String key) {
-    final raw = _prefs.getString(key);
+  Future<Object?> readJson(String key) async {
+    final raw = await _storage.read(key: key);
     if (raw == null || raw.isEmpty) return null;
     return jsonDecode(raw);
   }
 
   Future<void> saveJson(String key, Object? json) async {
-    await _prefs.setString(key, jsonEncode(json));
+    await _storage.write(key: key, value: jsonEncode(json));
   }
 }
 

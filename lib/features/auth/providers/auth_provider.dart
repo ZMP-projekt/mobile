@@ -1,15 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/network/dio_client.dart';
-import '../../classes/providers/classes_provider.dart';
-import '../../main/main_screen.dart';
-import '../../membership/providers/membership_provider.dart';
-import '../../notifications/providers/notification_provider.dart';
-import '../data/auth_repository.dart';
-import '../../../core/util/app_logger.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import '../../user/providers/user_provider.dart';
-
 import 'package:freezed_annotation/freezed_annotation.dart';
+
+import '../../../core/auth/auth_token_store.dart';
+import '../../../core/network/dio_client.dart';
+import '../../../core/util/app_logger.dart';
+import '../../user/providers/user_provider.dart';
+import '../data/auth_repository.dart';
+import 'auth_session_cleaner.dart';
 
 part 'auth_provider.freezed.dart';
 
@@ -20,7 +17,9 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
 
 final authStateProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   final repo = ref.watch(authRepositoryProvider);
-  return AuthNotifier(repo, ref);
+  final tokenStore = ref.watch(authTokenStoreProvider);
+  final sessionCleaner = ref.watch(authSessionCleanerProvider);
+  return AuthNotifier(repo, tokenStore, sessionCleaner, ref);
 });
 
 @freezed
@@ -35,10 +34,12 @@ class AuthState with _$AuthState {
 
 class AuthNotifier extends StateNotifier<AuthState> {
   final AuthRepository _repo;
-  final _storage = const FlutterSecureStorage();
+  final AuthTokenStore _tokenStore;
+  final AuthSessionCleaner _sessionCleaner;
   final Ref ref;
 
-  AuthNotifier(this._repo, this.ref) : super(const AuthState()) {
+  AuthNotifier(this._repo, this._tokenStore, this._sessionCleaner, this.ref)
+      : super(const AuthState()) {
     _checkInitialAuth();
 
     ref.listen<String?>(authTokenProvider, (previous, next) {
@@ -49,10 +50,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   Future<void> _checkInitialAuth() async {
-    final token = await _storage.read(key: 'jwt_token');
+    final token = await _tokenStore.read();
 
     if (token != null) {
-      ref.read(authTokenProvider.notifier).state = token;
       state = state.copyWith(isAuthenticated: true, isInitializing: false);
       return;
     }
@@ -67,23 +67,22 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
     return result.when(
       success: (token) async {
-        await _storage.write(key: 'jwt_token', value: token);
-        ref.read(authTokenProvider.notifier).state = token;
-        ref.read(mainNavigationProvider.notifier).state = 0;
+        await _tokenStore.save(token);
+        _sessionCleaner.resetNavigation(ref);
 
         try {
           await ref.read(currentUserProvider.future);
         } catch (e) {
-          AppLogger.e("Błąd pobierania usera", e);
+          AppLogger.e("Błąd pobierania użytkownika po logowaniu", e);
         }
 
         state = state.copyWith(isLoading: false, isAuthenticated: true);
-        AppLogger.i("✅ Zalogowano: $email");
+        AppLogger.i("Zalogowano użytkownika");
         return true;
       },
       failure: (error) {
         state = state.copyWith(isLoading: false, errorMessage: error);
-        AppLogger.e("❌ Błąd: $error");
+        AppLogger.w("Logowanie nie powiodło się");
         return false;
       },
     );
@@ -101,9 +100,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
     return result.when(
       success: (token) async {
-        await _storage.write(key: 'jwt_token', value: token);
-        ref.read(authTokenProvider.notifier).state = token;
-        ref.read(mainNavigationProvider.notifier).state = 0;
+        await _tokenStore.save(token);
+        _sessionCleaner.resetNavigation(ref);
 
         state = state.copyWith(isLoading: false, isAuthenticated: true);
         return true;
@@ -118,21 +116,15 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<void> logout() async {
     if (!state.isAuthenticated) return;
 
-    ref.read(mainNavigationProvider.notifier).state = 0;
+    _sessionCleaner.resetNavigation(ref);
     state = state.copyWith(isAuthenticated: false);
 
-    await _storage.delete(key: 'jwt_token');
+    await _tokenStore.clear();
 
     Future.microtask(() {
-      ref.read(authTokenProvider.notifier).state = null;
-      ref.invalidate(currentUserProvider);
-      ref.invalidate(currentMembershipProvider);
-      ref.invalidate(classesForDateProvider);
-      ref.invalidate(todayClassesProvider);
-      ref.invalidate(trainerClassesProvider);
-      ref.invalidate(notificationsProvider);
+      _sessionCleaner.invalidateUserData(ref);
     });
 
-    AppLogger.i("👋 Wylogowano");
+    AppLogger.i("Wylogowano użytkownika");
   }
 }

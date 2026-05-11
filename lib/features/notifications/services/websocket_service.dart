@@ -33,12 +33,12 @@ class WebSocketService {
   }
 
   void _onConnected(StompFrame frame) {
-    AppLogger.i('WebSocket połączony ✅');
+    AppLogger.i('WebSocket połączony');
     _client!.subscribe(
       destination: '/user/queue/notifications',
       callback: (frame) {
-        AppLogger.i('📨 WebSocket frame odebrany: ${frame.body}');
         if (frame.body == null) return;
+        AppLogger.i('Odebrano powiadomienie WebSocket');
 
         try {
           final json = jsonDecode(frame.body!);
