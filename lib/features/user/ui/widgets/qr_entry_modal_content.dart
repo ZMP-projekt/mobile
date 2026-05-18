@@ -4,6 +4,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:screen_protector/screen_protector.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/util/app_logger.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../providers/qr_provider.dart';
 
@@ -19,7 +20,9 @@ class _QrEntryModalContentState extends ConsumerState<QrEntryModalContent> {
   @override
   void initState() {
     super.initState();
-    _secureScreen();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _secureScreen();
+    });
   }
 
   @override
@@ -29,11 +32,19 @@ class _QrEntryModalContentState extends ConsumerState<QrEntryModalContent> {
   }
 
   Future<void> _secureScreen() async {
-    await ScreenProtector.preventScreenshotOn();
+    try {
+      await ScreenProtector.preventScreenshotOn();
+    } catch (e) {
+      AppLogger.w('Could not enable QR screen protection: $e');
+    }
   }
 
   Future<void> _unsecureScreen() async {
-    await ScreenProtector.preventScreenshotOff();
+    try {
+      await ScreenProtector.preventScreenshotOff();
+    } catch (e) {
+      AppLogger.w('Could not disable QR screen protection: $e');
+    }
   }
 
   @override
@@ -69,6 +80,11 @@ class _QrEntryModalContentState extends ConsumerState<QrEntryModalContent> {
                 tween: Tween<double>(begin: startProgress, end: 0.0),
                 duration: Duration(milliseconds: remainingMillis),
                 builder: (context, value, child) {
+                  final secondsRemaining = (value * 15).ceil();
+                  final displaySeconds = secondsRemaining < 1
+                      ? 1
+                      : secondsRemaining;
+
                   return Column(
                     children: [
                       SizedBox(
@@ -87,7 +103,7 @@ class _QrEntryModalContentState extends ConsumerState<QrEntryModalContent> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        l10n.qrEntryExpiresIn((value * 15).round()),
+                        l10n.qrEntryExpiresIn(displaySeconds),
                         style: const TextStyle(
                           color: Colors.white38,
                           fontSize: 11,

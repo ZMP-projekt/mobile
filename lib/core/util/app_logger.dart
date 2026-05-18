@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:logger/logger.dart';
 
 class AppLogger {
@@ -11,10 +12,21 @@ class AppLogger {
     ),
   );
 
-  static void d(String message) => _logger.d(message);
-  static void i(String message) => _logger.i(message);
-  static void w(String message) => _logger.w(message);
+  static void d(String message) {
+    if (kDebugMode) _logger.d(message);
+  }
+
+  static void i(String message) {
+    if (kDebugMode) _logger.i(message);
+  }
+
+  static void w(String message) {
+    if (kDebugMode) _logger.w(message);
+  }
+
   static void e(String message, [dynamic error, StackTrace? stackTrace]) {
-    _logger.e(message, error: error, stackTrace: stackTrace);
+    if (kDebugMode) {
+      _logger.e(message, error: error, stackTrace: stackTrace);
+    }
   }
 }

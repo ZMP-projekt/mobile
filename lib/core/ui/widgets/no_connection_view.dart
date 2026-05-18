@@ -7,11 +7,7 @@ class NoConnectionView extends StatelessWidget {
   final VoidCallback onRetry;
   final String? message;
 
-  const NoConnectionView({
-    super.key,
-    required this.onRetry,
-    this.message,
-  });
+  const NoConnectionView({super.key, required this.onRetry, this.message});
 
   @override
   Widget build(BuildContext context) {
@@ -28,15 +24,26 @@ class NoConnectionView extends StatelessWidget {
               children: [
                 Container(
                   padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(color: AppColors.error.withValues(alpha: 0.1), shape: BoxShape.circle),
-                  child: const Icon(Icons.wifi_off_rounded, size: 64, color: AppColors.error),
+                  decoration: BoxDecoration(
+                    color: AppColors.error.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.wifi_off_rounded,
+                    size: 64,
+                    color: AppColors.error,
+                  ),
                 ).animate().scale(duration: 400.ms, curve: Curves.easeOutBack),
 
                 const SizedBox(height: 32),
 
                 Text(
                   l10n.offlineModalTitle,
-                  style: const TextStyle(color: AppColors.textPrimary, fontSize: 24, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ).animate().fadeIn(delay: 200.ms),
 
                 const SizedBox(height: 16),
@@ -44,7 +51,11 @@ class NoConnectionView extends StatelessWidget {
                 Text(
                   message ?? l10n.offlineModalSubtitle,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(color: AppColors.textSecondary, fontSize: 16, height: 1.5),
+                  style: const TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 16,
+                    height: 1.5,
+                  ),
                 ).animate().fadeIn(delay: 300.ms),
 
                 const SizedBox(height: 48),
@@ -54,12 +65,24 @@ class NoConnectionView extends StatelessWidget {
                   height: 56,
                   child: ElevatedButton.icon(
                     onPressed: onRetry,
-                    icon: const Icon(Icons.refresh_rounded, color: Colors.white),
+                    icon: const Icon(
+                      Icons.refresh_rounded,
+                      color: Colors.white,
+                    ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                     ),
-                    label: Text(l10n.commonRetry, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                    label: Text(
+                      l10n.commonRetry,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.2),
               ],

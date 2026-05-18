@@ -120,7 +120,11 @@ final selectedLocationIdProvider =
       SelectedLocationNotifier.new,
     );
 
+final locationSortingEnabledProvider = StateProvider<bool>((ref) => false);
+
 final userPositionProvider = FutureProvider<Position?>((ref) async {
+  if (!ref.watch(locationSortingEnabledProvider)) return null;
+
   final serviceEnabled = await Geolocator.isLocationServiceEnabled();
   if (!serviceEnabled) return null;
 

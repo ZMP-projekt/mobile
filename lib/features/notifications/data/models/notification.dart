@@ -16,20 +16,31 @@ class AppNotification with _$AppNotification {
       _$AppNotificationFromJson(_sanitize(json));
 
   static Map<String, dynamic> _sanitize(Map<String, dynamic> json) {
-    String serverTime = json['createdAt'] ?? DateTime.now().toIso8601String();
-
-
-    if (!serverTime.endsWith('Z')) {
-      serverTime = '${serverTime}Z';
-    }
-
-    final localTimeStr = DateTime.parse(serverTime).toLocal().toIso8601String();
+    final createdAt = _parseCreatedAt(json['createdAt']);
 
     return {
       'id': json['id'],
       'content': json['content'],
-      'createdAt': localTimeStr,
+      'createdAt': createdAt.toIso8601String(),
       'read': json['read'] ?? false,
     };
+  }
+
+  static DateTime _parseCreatedAt(Object? value) {
+    if (value is DateTime) return value.toLocal();
+
+    if (value is String) {
+      final trimmed = value.trim();
+      if (trimmed.isNotEmpty) {
+        final hasTimeZone = RegExp(
+          r'(z|[+-]\d{2}:?\d{2})$',
+          caseSensitive: false,
+        ).hasMatch(trimmed);
+        final normalized = hasTimeZone ? trimmed : '${trimmed}Z';
+        return DateTime.parse(normalized).toLocal();
+      }
+    }
+
+    return DateTime.now();
   }
 }

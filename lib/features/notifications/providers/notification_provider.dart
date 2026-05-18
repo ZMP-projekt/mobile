@@ -17,13 +17,24 @@ typedef WebSocketServiceFactory =
     WebSocketService Function({
       required String token,
       required void Function(AppNotification) onNotification,
+      void Function()? onUnauthorized,
+      Future<String?> Function()? readToken,
     });
 
 final webSocketServiceFactoryProvider = Provider<WebSocketServiceFactory>((
   ref,
 ) {
-  return ({required token, required onNotification}) =>
-      WebSocketService(token: token, onNotification: onNotification);
+  return ({
+    required token,
+    required onNotification,
+    onUnauthorized,
+    readToken,
+  }) => WebSocketService(
+    token: token,
+    onNotification: onNotification,
+    onUnauthorized: onUnauthorized,
+    readToken: readToken,
+  );
 });
 
 final notificationsProvider =
@@ -36,33 +47,60 @@ class NotificationsNotifier extends AsyncNotifier<List<AppNotification>> {
 
   @override
   Future<List<AppNotification>> build() async {
-    final authToken = await ref.read(authTokenStoreProvider).read();
+    final authToken =
+        ref.watch(authTokenValueProvider) ??
+        await ref.read(authTokenStoreProvider).read();
 
     if (authToken == null || authToken.isEmpty) {
+      _disconnectWebSocket();
       return [];
     }
 
     final repo = ref.read(notificationRepositoryProvider);
-    final history = await repo.getNotifications();
+    var history = <AppNotification>[];
 
-    AppLogger.i('Pobrano historię powiadomień: ${history.length}');
+    try {
+      history = await repo.getNotifications();
+      AppLogger.i('Pobrano historie powiadomien: ${history.length}');
+    } catch (e) {
+      AppLogger.w('Could not load notification history: $e');
+    }
 
-    final token = authToken;
+    _connectWebSocket(authToken);
 
-    if (token.isNotEmpty) {
-      AppLogger.i('Łączenie z WebSocket powiadomień');
+    ref.onDispose(_disconnectWebSocket);
+
+    return history;
+  }
+
+  void _connectWebSocket(String token) {
+    _disconnectWebSocket();
+
+    try {
+      AppLogger.i('Laczenie z WebSocket powiadomien');
       _wsService = ref.read(webSocketServiceFactoryProvider)(
         token: token,
         onNotification: _onNewNotification,
+        onUnauthorized: _onWebSocketUnauthorized,
+        readToken: () => ref.read(authTokenStoreProvider).read(),
       );
       _wsService!.connect(Env.apiUrl);
+    } catch (e) {
+      AppLogger.w('Could not connect notification WebSocket: $e');
+      _wsService = null;
     }
+  }
 
-    ref.onDispose(() {
-      _wsService?.disconnect();
+  void _disconnectWebSocket() {
+    _wsService?.disconnect();
+    _wsService = null;
+  }
+
+  void _onWebSocketUnauthorized() {
+    AppLogger.w('Notification WebSocket unauthorized. Clearing session token.');
+    ref.read(authTokenStoreProvider).clear().catchError((Object error) {
+      AppLogger.w('Could not clear token after WebSocket unauthorized: $error');
     });
-
-    return history;
   }
 
   void _onNewNotification(AppNotification notification) {
@@ -71,7 +109,12 @@ class NotificationsNotifier extends AsyncNotifier<List<AppNotification>> {
 
     ref.read(toastNotificationProvider.notifier).state = notification;
 
-    LocalNotificationService.show(notification.id, notification.content);
+    LocalNotificationService.show(
+      notification.id,
+      notification.content,
+    ).catchError((Object error) {
+      AppLogger.w('Could not show local notification: $error');
+    });
   }
 
   Future<void> markAsRead(int id) async {
@@ -88,7 +131,7 @@ class NotificationsNotifier extends AsyncNotifier<List<AppNotification>> {
       await ref.read(notificationRepositoryProvider).markAsRead(id);
     } catch (e) {
       AppLogger.e(
-        'Błąd oznaczania powiadomienia jako przeczytane. Przywracam stan...',
+        'Blad oznaczania powiadomienia jako przeczytane. Przywracam stan...',
         e,
       );
       state = AsyncData(backupList);
@@ -106,7 +149,7 @@ class NotificationsNotifier extends AsyncNotifier<List<AppNotification>> {
     try {
       await ref.read(notificationRepositoryProvider).deleteNotification(id);
     } catch (e) {
-      AppLogger.e('Błąd usuwania powiadomienia', e);
+      AppLogger.e('Blad usuwania powiadomienia', e);
       state = AsyncData(backupList);
     }
   }

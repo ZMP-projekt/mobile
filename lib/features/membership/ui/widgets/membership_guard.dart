@@ -24,7 +24,7 @@ class MembershipGuard extends ConsumerWidget {
 
     if (membershipAsync.hasValue) {
       final membership = membershipAsync.value!;
-      if (membership.active && membership.daysRemaining > 0) {
+      if (membership.isValid) {
         return child;
       }
       return _buildLockedScreen(context);
@@ -33,7 +33,9 @@ class MembershipGuard extends ConsumerWidget {
     if (membershipAsync.isLoading) {
       return const Scaffold(
         backgroundColor: AppColors.background,
-        body: Center(child: CircularProgressIndicator(color: AppColors.primary)),
+        body: Center(
+          child: CircularProgressIndicator(color: AppColors.primary),
+        ),
       );
     }
 
@@ -65,17 +67,32 @@ class MembershipGuard extends ConsumerWidget {
                 decoration: BoxDecoration(
                   color: AppColors.surface,
                   shape: BoxShape.circle,
-                  border: Border.all(color: AppColors.primary.withValues(alpha: 0.3), width: 2),
+                  border: Border.all(
+                    color: AppColors.primary.withValues(alpha: 0.3),
+                    width: 2,
+                  ),
                   boxShadow: AppColors.mediumGlow,
                 ),
-                child: const Icon(Icons.lock_outline, size: 64, color: AppColors.primary),
-              ).animate().scale(delay: 100.ms, duration: 400.ms, curve: Curves.easeOutBack),
+                child: const Icon(
+                  Icons.lock_outline,
+                  size: 64,
+                  color: AppColors.primary,
+                ),
+              ).animate().scale(
+                delay: 100.ms,
+                duration: 400.ms,
+                curve: Curves.easeOutBack,
+              ),
 
               const SizedBox(height: 32),
 
               Text(
                 l10n.membershipLockedTitle,
-                style: const TextStyle(color: AppColors.textPrimary, fontSize: 24, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
               ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.2),
 
               const SizedBox(height: 16),
@@ -83,7 +100,11 @@ class MembershipGuard extends ConsumerWidget {
               Text(
                 l10n.membershipLockedSubtitle,
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: AppColors.textSecondary, fontSize: 16, height: 1.5),
+                style: const TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 16,
+                  height: 1.5,
+                ),
               ).animate().fadeIn(delay: 400.ms),
 
               const SizedBox(height: 48),
@@ -101,11 +122,20 @@ class MembershipGuard extends ConsumerWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.transparent,
                     shadowColor: Colors.transparent,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                   ),
-                  child: Text(l10n.membershipBuyNow, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                  child: Text(
+                    l10n.membershipBuyNow,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
-              ).animate().fadeIn(delay: 500.ms).slideY(begin: 0.2)
+              ).animate().fadeIn(delay: 500.ms).slideY(begin: 0.2),
             ],
           ),
         ),

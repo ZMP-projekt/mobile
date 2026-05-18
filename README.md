@@ -45,18 +45,3 @@ Aplikacja obsługuje klientów siłowni oraz konta trenerskie.
 * Historia powiadomień z API.
 * Powiadomienia w czasie rzeczywistym przez WebSocket.
 * Oznaczanie powiadomień jako przeczytane i usuwanie ich.
-
-## Konfiguracja
-
-Domyślny backend jest ustawiony w `lib/core/config/env.dart`. Można go nadpisać podczas uruchamiania:
-
-```bash
-flutter run --dart-define=API_BASE_URL=https://example.com
-```
-
-## Weryfikacja
-
-```bash
-flutter analyze
-flutter test
-```

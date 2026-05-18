@@ -47,14 +47,17 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    l10n.classesSchedule,
-                    style: const TextStyle(
-                      color: AppColors.textPrimary,
-                      fontSize: 34,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -1.0,
-                    ),
-                  ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.1, end: 0),
+                        l10n.classesSchedule,
+                        style: const TextStyle(
+                          color: AppColors.textPrimary,
+                          fontSize: 34,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -1.0,
+                        ),
+                      )
+                      .animate()
+                      .fadeIn(duration: 400.ms)
+                      .slideY(begin: 0.1, end: 0),
 
                   const SizedBox(height: 20),
                   HorizontalCalendar(
@@ -100,19 +103,21 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
 
                   final content = displayedClasses.isEmpty
                       ? FullScreenEmptyState(
-                    key: ValueKey(
-                        'empty_${selectedDate}_$_showOnlyMyClasses'),
-                    icon: Icons.event_busy_rounded,
-                    title: l10n.classesNoClassesDateTitle,
-                    subtitle: l10n.classesChooseAnotherDate,
-                    iconColor: AppColors.primary,
-                  )
+                          key: ValueKey(
+                            'empty_${selectedDate}_$_showOnlyMyClasses',
+                          ),
+                          icon: Icons.event_busy_rounded,
+                          title: l10n.classesNoClassesDateTitle,
+                          subtitle: l10n.classesChooseAnotherDate,
+                          iconColor: AppColors.primary,
+                        )
                       : _buildClassesList(
-                    displayedClasses,
-                    selectedDate,
-                    key: ValueKey(
-                        'list_${selectedDate}_$_showOnlyMyClasses'),
-                  );
+                          displayedClasses,
+                          selectedDate,
+                          key: ValueKey(
+                            'list_${selectedDate}_$_showOnlyMyClasses',
+                          ),
+                        );
 
                   return AnimatedSwitcher(
                     duration: const Duration(milliseconds: 400),
@@ -140,10 +145,10 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
   }
 
   Widget _buildClassesList(
-      List<GymClass> classes,
-      DateTime selectedDate, {
-        required Key key,
-      }) {
+    List<GymClass> classes,
+    DateTime selectedDate, {
+    required Key key,
+  }) {
     return ListView.builder(
       key: key,
       padding: const EdgeInsets.fromLTRB(20, 10, 20, 130),

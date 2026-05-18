@@ -42,6 +42,9 @@ void main() {
     when(() => tokenStore.read()).thenAnswer((_) async => null);
     when(() => tokenStore.save(any())).thenAnswer((_) async {});
     when(() => tokenStore.clear()).thenAnswer((_) async {});
+    when(
+      () => sessionCleaner.clearOfflineCache(any()),
+    ).thenAnswer((_) async {});
   });
 
   ProviderContainer createContainer() {
@@ -155,6 +158,7 @@ void main() {
     expect(container.read(authStateProvider).isAuthenticated, isFalse);
     verify(() => sessionCleaner.resetNavigation(any())).called(1);
     verify(() => tokenStore.clear()).called(1);
+    verify(() => sessionCleaner.clearOfflineCache(any())).called(1);
     verify(() => sessionCleaner.invalidateUserData(any())).called(1);
   });
 }

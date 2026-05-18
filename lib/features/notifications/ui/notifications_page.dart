@@ -24,8 +24,10 @@ class NotificationsPage extends ConsumerWidget {
         backgroundColor: AppColors.background,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded,
-              color: AppColors.textPrimary),
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: AppColors.textPrimary,
+          ),
           onPressed: () => context.pop(),
         ),
         title: Row(
@@ -41,8 +43,7 @@ class NotificationsPage extends ConsumerWidget {
             if (unreadCount > 0) ...[
               const SizedBox(width: 10),
               Container(
-                padding:
-                const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   color: AppColors.primary,
                   borderRadius: BorderRadius.circular(20),
@@ -65,8 +66,10 @@ class NotificationsPage extends ConsumerWidget {
           child: CircularProgressIndicator(color: AppColors.primary),
         ),
         error: (err, stack) => Center(
-          child: Text(l10n.notificationsError(err),
-              style: const TextStyle(color: AppColors.error)),
+          child: Text(
+            l10n.notificationsError(err),
+            style: const TextStyle(color: AppColors.error),
+          ),
         ),
         data: (notifications) {
           if (notifications.isEmpty) {
@@ -79,44 +82,56 @@ class NotificationsPage extends ConsumerWidget {
 
           final now = DateTime.now();
           final today = DateTime(now.year, now.month, now.day);
-          final todayItems =
-          notifications.where((n) => n.createdAt.isAfter(today)).toList();
-          final earlierItems =
-          notifications.where((n) => !n.createdAt.isAfter(today)).toList();
+          final todayItems = notifications
+              .where((n) => n.createdAt.isAfter(today))
+              .toList();
+          final earlierItems = notifications
+              .where((n) => !n.createdAt.isAfter(today))
+              .toList();
 
           return ListView(
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 120),
             children: [
               if (todayItems.isNotEmpty) ...[
                 _SectionHeader(
-                    title: l10n.notificationsToday,
-                    count: todayItems.where((n) => !n.read).length),
+                  title: l10n.notificationsToday,
+                  count: todayItems.where((n) => !n.read).length,
+                ),
                 const SizedBox(height: 8),
-                ...todayItems.asMap().entries.map((e) =>
-                    _buildActionableCard(e.value, e.key, ref) // Zmiana tutaj!
-                        .animate()
-                        .fadeIn(delay: (e.key * 60).ms, duration: 350.ms)
-                        .slideX(
-                      begin: 0.08,
-                      curve: Curves.easeOutQuad,
-                      delay: (e.key * 60).ms,
-                    )),
+                ...todayItems.asMap().entries.map(
+                  (e) =>
+                      _buildActionableCard(e.value, e.key, ref) // Zmiana tutaj!
+                          .animate()
+                          .fadeIn(delay: (e.key * 60).ms, duration: 350.ms)
+                          .slideX(
+                            begin: 0.08,
+                            curve: Curves.easeOutQuad,
+                            delay: (e.key * 60).ms,
+                          ),
+                ),
               ],
               if (earlierItems.isNotEmpty) ...[
                 if (todayItems.isNotEmpty) const SizedBox(height: 20),
                 _SectionHeader(title: l10n.notificationsEarlier, count: 0),
                 const SizedBox(height: 8),
-                ...earlierItems.asMap().entries.map((e) =>
-                    _buildActionableCard(e.value, todayItems.length + e.key, ref) // Zmiana tutaj!
-                        .animate()
-                        .fadeIn(
-                        delay: ((todayItems.length + e.key) * 50).ms,
-                        duration: 300.ms)
-                        .slideX(
-                      begin: 0.06,
-                      curve: Curves.easeOutQuad,
-                      delay: ((todayItems.length + e.key) * 50).ms,
-                    )),
+                ...earlierItems.asMap().entries.map(
+                  (e) =>
+                      _buildActionableCard(
+                            e.value,
+                            todayItems.length + e.key,
+                            ref,
+                          ) // Zmiana tutaj!
+                          .animate()
+                          .fadeIn(
+                            delay: ((todayItems.length + e.key) * 50).ms,
+                            duration: 300.ms,
+                          )
+                          .slideX(
+                            begin: 0.06,
+                            curve: Curves.easeOutQuad,
+                            delay: ((todayItems.length + e.key) * 50).ms,
+                          ),
+                ),
               ],
             ],
           );
@@ -125,12 +140,18 @@ class NotificationsPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildActionableCard(AppNotification notification, int index, WidgetRef ref) {
+  Widget _buildActionableCard(
+    AppNotification notification,
+    int index,
+    WidgetRef ref,
+  ) {
     return Dismissible(
       key: ValueKey(notification.id),
       direction: DismissDirection.endToStart,
       onDismissed: (_) {
-        ref.read(notificationsProvider.notifier).deleteNotification(notification.id);
+        ref
+            .read(notificationsProvider.notifier)
+            .deleteNotification(notification.id);
       },
       background: Container(
         margin: const EdgeInsets.only(bottom: 10),
@@ -145,7 +166,9 @@ class NotificationsPage extends ConsumerWidget {
       child: GestureDetector(
         onTap: () {
           if (!notification.read) {
-            ref.read(notificationsProvider.notifier).markAsRead(notification.id);
+            ref
+                .read(notificationsProvider.notifier)
+                .markAsRead(notification.id);
           }
         },
         child: _NotificationCard(notification: notification, index: index),
@@ -230,20 +253,11 @@ class _NotificationCard extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (isUnread)
-                Container(
-                  width: 4,
-                  color: AppColors.primary,
-                ),
+              if (isUnread) Container(width: 4, color: AppColors.primary),
               Expanded(
                 child: Container(
                   constraints: const BoxConstraints(minHeight: 72),
-                  padding: EdgeInsets.fromLTRB(
-                    isUnread ? 14 : 16,
-                    14,
-                    16,
-                    14,
-                  ),
+                  padding: EdgeInsets.fromLTRB(isUnread ? 14 : 16, 14, 16, 14),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -289,8 +303,9 @@ class _NotificationCard extends StatelessWidget {
                               style: TextStyle(
                                 color: isUnread
                                     ? AppColors.primary.withValues(alpha: 0.7)
-                                    : AppColors.textSecondary
-                                    .withValues(alpha: 0.6),
+                                    : AppColors.textSecondary.withValues(
+                                        alpha: 0.6,
+                                      ),
                                 fontSize: 11,
                                 fontWeight: isUnread
                                     ? FontWeight.w500
@@ -302,21 +317,21 @@ class _NotificationCard extends StatelessWidget {
                       ),
                       if (isUnread)
                         Container(
-                          margin: const EdgeInsets.only(top: 4, left: 8),
-                          width: 8,
-                          height: 8,
-                          decoration: const BoxDecoration(
-                            color: AppColors.primary,
-                            shape: BoxShape.circle,
-                          ),
-                        )
+                              margin: const EdgeInsets.only(top: 4, left: 8),
+                              width: 8,
+                              height: 8,
+                              decoration: const BoxDecoration(
+                                color: AppColors.primary,
+                                shape: BoxShape.circle,
+                              ),
+                            )
                             .animate(onPlay: (c) => c.repeat(reverse: true))
                             .scaleXY(
-                          begin: 0.8,
-                          end: 1.2,
-                          duration: 1200.ms,
-                          curve: Curves.easeInOut,
-                        ),
+                              begin: 0.8,
+                              end: 1.2,
+                              duration: 1200.ms,
+                              curve: Curves.easeInOut,
+                            ),
                     ],
                   ),
                 ),

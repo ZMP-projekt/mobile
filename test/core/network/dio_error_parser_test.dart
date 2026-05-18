@@ -88,10 +88,7 @@ void main() {
     test('extract returns waking server message for gateway errors', () {
       for (final statusCode in [502, 503, 504]) {
         final result = DioErrorParser.extract(
-          Response(
-            requestOptions: requestOptions,
-            statusCode: statusCode,
-          ),
+          Response(requestOptions: requestOptions, statusCode: statusCode),
           DioExceptionType.badResponse,
         );
 

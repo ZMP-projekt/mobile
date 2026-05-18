@@ -168,11 +168,20 @@ class _AddClassModalState extends ConsumerState<AddClassModal> {
       _selectedDate.month,
       _selectedDate.day,
     );
-    final conflictingClass = await _findConflictingClass(
-      selectedDay,
-      startDateTime,
-      endDateTime,
-    );
+    GymClass? conflictingClass;
+    try {
+      conflictingClass = await _findConflictingClass(
+        selectedDay,
+        startDateTime,
+        endDateTime,
+      );
+    } catch (_) {
+      final msg = ref.read(isOfflineProvider)
+          ? l10n.offlineActionUnavailable
+          : l10n.errorTrainerScheduleFetch;
+      _showFormMessage(msg);
+      return;
+    }
 
     if (conflictingClass != null) {
       if (!mounted) return;
@@ -231,20 +240,16 @@ class _AddClassModalState extends ConsumerState<AddClassModal> {
     DateTime startDateTime,
     DateTime endDateTime,
   ) async {
-    try {
-      final classes = await ref.read(trainerClassesProvider(day).future);
+    final classes = await ref.read(trainerClassesProvider(day).future);
 
-      for (final gymClass in classes) {
-        final overlaps =
-            startDateTime.isBefore(gymClass.endTime) &&
-            endDateTime.isAfter(gymClass.startTime);
+    for (final gymClass in classes) {
+      final overlaps =
+          startDateTime.isBefore(gymClass.endTime) &&
+          endDateTime.isAfter(gymClass.startTime);
 
-        if (overlaps) {
-          return gymClass;
-        }
+      if (overlaps) {
+        return gymClass;
       }
-    } catch (_) {
-      return null;
     }
 
     return null;

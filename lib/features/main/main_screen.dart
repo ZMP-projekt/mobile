@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile_gym_app/features/main/ui/widgets/main_action_button.dart';
 
-import '../../core/auth/auth_token_store.dart';
 import '../../core/ui/widgets/async_value_widget.dart';
 import '../../core/ui/widgets/no_connection_view.dart';
 import '../../core/ui/widgets/offline_access_modal.dart';
@@ -36,12 +35,14 @@ class MainScreen extends ConsumerStatefulWidget {
   ConsumerState<MainScreen> createState() => _MainScreenState();
 }
 
-class _MainScreenState extends ConsumerState<MainScreen> {
+class _MainScreenState extends ConsumerState<MainScreen>
+    with WidgetsBindingObserver {
   late PageController _pageController;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _pageController = PageController(
       initialPage: ref.read(mainNavigationProvider),
     );
@@ -49,8 +50,16 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _pageController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      ref.invalidate(notificationsProvider);
+    }
   }
 
   List<Widget> _getScreens(bool isTrainer) {
@@ -139,8 +148,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       },
       error: (err, stack) => NoConnectionView(
         onRetry: () {
-          final token = ref.read(authTokenProvider);
-          if (token != null) {
+          final authState = ref.read(authStateProvider);
+          if (authState.isAuthenticated) {
             ref.read(authStateProvider.notifier).logout();
           } else {
             ref.invalidate(currentUserProvider);
@@ -209,8 +218,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
     final membershipAsync = ref.read(currentMembershipProvider);
     final membership = membershipAsync.valueOrNull;
-    final hasActiveMembership =
-        membership != null && membership.active && membership.daysRemaining > 0;
+    final hasActiveMembership = membership?.isValid ?? false;
 
     if (hasActiveMembership) {
       _showQRModal(context);

@@ -7,7 +7,10 @@ final qrEntryCodeProvider = StreamProvider.autoDispose<String>((ref) async* {
   final user = ref.watch(currentUserProvider).valueOrNull;
   if (user == null) return;
 
-  while (true) {
+  var disposed = false;
+  ref.onDispose(() => disposed = true);
+
+  while (!disposed) {
     yield QrGenerator.generateEntryPayload(user.id);
 
     final now = DateTime.now().millisecondsSinceEpoch;

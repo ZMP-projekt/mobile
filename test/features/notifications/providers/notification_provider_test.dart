@@ -1,3 +1,4 @@
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mocktail/mocktail.dart';
@@ -20,10 +21,16 @@ class FakeWebSocketService implements WebSocketService {
   @override
   final void Function(AppNotification) onNotification;
 
+  final void Function()? onUnauthorized;
+
   String? connectedBaseUrl;
   bool disconnectCalled = false;
 
-  FakeWebSocketService({required this.token, required this.onNotification});
+  FakeWebSocketService({
+    required this.token,
+    required this.onNotification,
+    this.onUnauthorized,
+  });
 
   @override
   void connect(String baseUrl) {
@@ -34,6 +41,8 @@ class FakeWebSocketService implements WebSocketService {
   void disconnect() {
     disconnectCalled = true;
   }
+
+  void triggerUnauthorized() => onUnauthorized?.call();
 }
 
 void main() {
@@ -59,27 +68,36 @@ void main() {
     repository = MockNotificationRepository();
     webSocketService = null;
     when(() => tokenStore.read()).thenAnswer((_) async => null);
+    when(() => tokenStore.clear()).thenAnswer((_) async {});
+    FlutterSecureStorage.setMockInitialValues({});
   });
 
-  ProviderContainer createContainer({bool disposeOnTearDown = true}) {
+  ProviderContainer createContainer({
+    bool disposeOnTearDown = true,
+    bool overrideTokenStore = true,
+  }) {
     WebSocketService createWebSocketService({
       required String token,
       required void Function(AppNotification) onNotification,
+      void Function()? onUnauthorized,
+      Future<String?> Function()? readToken,
     }) {
       webSocketService = FakeWebSocketService(
         token: token,
         onNotification: onNotification,
+        onUnauthorized: onUnauthorized,
       );
       return webSocketService!;
     }
 
     final container = ProviderContainer(
       overrides: [
-        authTokenStoreProvider.overrideWithValue(tokenStore),
         notificationRepositoryProvider.overrideWithValue(repository),
         webSocketServiceFactoryProvider.overrideWithValue(
           createWebSocketService,
         ),
+        if (overrideTokenStore)
+          authTokenStoreProvider.overrideWithValue(tokenStore),
       ],
     );
     if (disposeOnTearDown) {
@@ -126,6 +144,62 @@ void main() {
       expect(webSocketService!.disconnectCalled, isTrue);
     },
   );
+
+  test(
+    'rebuilds and connects websocket when token appears after empty build',
+    () async {
+      final history = [
+        notification(id: 1, content: 'First after login', read: false),
+      ];
+      when(
+        () => repository.getNotifications(),
+      ).thenAnswer((_) async => history);
+      final container = createContainer(overrideTokenStore: false);
+
+      final emptyResult = await container.read(notificationsProvider.future);
+      expect(emptyResult, isEmpty);
+      expect(webSocketService, isNull);
+
+      await container.read(authTokenStoreProvider).save('jwt-token');
+      await Future<void>.delayed(Duration.zero);
+
+      final result = await container.read(notificationsProvider.future);
+
+      expect(result, history);
+      expect(webSocketService, isNotNull);
+      expect(webSocketService!.token, 'jwt-token');
+      expect(webSocketService!.connectedBaseUrl, Env.apiUrl);
+    },
+  );
+
+  test(
+    'connects websocket even when notification history fails to load',
+    () async {
+      when(() => tokenStore.read()).thenAnswer((_) async => 'jwt-token');
+      when(
+        () => repository.getNotifications(),
+      ).thenAnswer((_) async => throw Exception('temporary backend error'));
+      final container = createContainer();
+
+      final result = await container.read(notificationsProvider.future);
+
+      expect(result, isEmpty);
+      expect(webSocketService, isNotNull);
+      expect(webSocketService!.connectedBaseUrl, Env.apiUrl);
+    },
+  );
+
+  test('clears token when websocket reports unauthorized', () async {
+    when(() => tokenStore.read()).thenAnswer((_) async => 'jwt-token');
+    when(() => repository.getNotifications()).thenAnswer((_) async => []);
+    final container = createContainer();
+
+    await container.read(notificationsProvider.future);
+    webSocketService!.triggerUnauthorized();
+    await Future<void>.delayed(Duration.zero);
+
+    verify(() => tokenStore.clear()).called(1);
+  });
 
   test('markAsRead updates item optimistically and calls repository', () async {
     final history = [notification(id: 1, content: 'Unread', read: false)];

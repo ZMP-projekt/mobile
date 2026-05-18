@@ -31,10 +31,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   void _handleLogin() {
     if (_formKey.currentState!.validate()) {
       FocusScope.of(context).unfocus();
-      ref.read(authStateProvider.notifier).login(
-        _emailController.text.trim(),
-        _passwordController.text,
-      );
+      ref
+          .read(authStateProvider.notifier)
+          .login(_emailController.text.trim(), _passwordController.text);
     }
   }
 
@@ -44,16 +43,22 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     final l10n = AppLocalizations.of(context)!;
 
     ref.listen<AuthState>(authStateProvider, (previous, next) {
-      if (next.errorMessage != null && next.errorMessage != previous?.errorMessage) {
+      if (next.errorMessage != null &&
+          next.errorMessage != previous?.errorMessage) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-                next.errorMessage!,
-                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)
+              next.errorMessage!,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             backgroundColor: AppColors.error,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
           ),
         );
       }
@@ -64,13 +69,21 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       body: Stack(
         children: [
           Positioned(
-            top: -100, right: -100,
+            top: -100,
+            right: -100,
             child: Container(
-              width: 300, height: 300,
+              width: 300,
+              height: 300,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: AppColors.primary.withValues(alpha: 0.15),
-                boxShadow: const [BoxShadow(blurRadius: 100, spreadRadius: 50, color: AppColors.primary)],
+                boxShadow: const [
+                  BoxShadow(
+                    blurRadius: 100,
+                    spreadRadius: 50,
+                    color: AppColors.primary,
+                  ),
+                ],
               ),
             ),
           ),
@@ -78,7 +91,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           SafeArea(
             child: Center(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24.0,
+                  vertical: 20.0,
+                ),
                 child: Form(
                   key: _formKey,
                   child: Column(
@@ -88,84 +104,144 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       const SizedBox(height: 32),
 
                       Text(
-                        l10n.authLoginSubtitle,
-                        style: const TextStyle(color: AppColors.textPrimary, fontSize: 32, fontWeight: FontWeight.w800, letterSpacing: -1.0),
-                        textAlign: TextAlign.center,
-                      ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.2, end: 0),
+                            l10n.authLoginSubtitle,
+                            style: const TextStyle(
+                              color: AppColors.textPrimary,
+                              fontSize: 32,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: -1.0,
+                            ),
+                            textAlign: TextAlign.center,
+                          )
+                          .animate()
+                          .fadeIn(delay: 200.ms)
+                          .slideY(begin: 0.2, end: 0),
 
                       const SizedBox(height: 8),
 
                       Text(
-                        l10n.authLoginContinue,
-                        style: const TextStyle(color: AppColors.textSecondary, fontSize: 16),
-                        textAlign: TextAlign.center,
-                      ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.2, end: 0),
+                            l10n.authLoginContinue,
+                            style: const TextStyle(
+                              color: AppColors.textSecondary,
+                              fontSize: 16,
+                            ),
+                            textAlign: TextAlign.center,
+                          )
+                          .animate()
+                          .fadeIn(delay: 300.ms)
+                          .slideY(begin: 0.2, end: 0),
 
                       const SizedBox(height: 48),
 
                       CustomTextField(
-                        label: l10n.fieldEmail,
-                        icon: Icons.email_outlined,
-                        controller: _emailController,
-                        keyboardType: TextInputType.emailAddress,
-                        textInputAction: TextInputAction.next,
-                        autofillHints: const [
-                          AutofillHints.email,
-                          AutofillHints.username,
-                        ],
-                        validator: (value) =>
-                            AppValidators.validateEmail(value, l10n),
-                      ).animate().fadeIn(delay: 400.ms).slideX(begin: 0.1, end: 0),
+                            label: l10n.fieldEmail,
+                            icon: Icons.email_outlined,
+                            controller: _emailController,
+                            keyboardType: TextInputType.emailAddress,
+                            textInputAction: TextInputAction.next,
+                            autofillHints: const [
+                              AutofillHints.email,
+                              AutofillHints.username,
+                            ],
+                            validator: (value) =>
+                                AppValidators.validateEmail(value, l10n),
+                          )
+                          .animate()
+                          .fadeIn(delay: 400.ms)
+                          .slideX(begin: 0.1, end: 0),
 
                       const SizedBox(height: 20),
 
                       CustomTextField(
-                        label: l10n.fieldPassword,
-                        icon: Icons.lock_outline_rounded,
-                        controller: _passwordController,
-                        isPassword: true,
-                        isPasswordVisible: _isPasswordVisible,
-                        onTogglePassword: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
-                        textInputAction: TextInputAction.done,
-                        autofillHints: const [AutofillHints.password],
-                        onFieldSubmitted: (_) => _handleLogin(),
-                        validator: (value) =>
-                            AppValidators.validatePassword(value, l10n),
-                      ).animate().fadeIn(delay: 500.ms).slideX(begin: 0.1, end: 0),
+                            label: l10n.fieldPassword,
+                            icon: Icons.lock_outline_rounded,
+                            controller: _passwordController,
+                            isPassword: true,
+                            isPasswordVisible: _isPasswordVisible,
+                            onTogglePassword: () => setState(
+                              () => _isPasswordVisible = !_isPasswordVisible,
+                            ),
+                            textInputAction: TextInputAction.done,
+                            autofillHints: const [AutofillHints.password],
+                            onFieldSubmitted: (_) => _handleLogin(),
+                            validator: (value) =>
+                                AppValidators.validatePassword(value, l10n),
+                          )
+                          .animate()
+                          .fadeIn(delay: 500.ms)
+                          .slideX(begin: 0.1, end: 0),
 
                       const SizedBox(height: 32),
 
                       Container(
-                        height: 56,
-                        decoration: BoxDecoration(
-                          gradient: AppColors.primaryGradient,
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(color: AppColors.primary.withValues(alpha: 0.3), blurRadius: 20, offset: const Offset(0, 8)),
-                          ],
-                        ),
-                        child: ElevatedButton(
-                          onPressed: authState.isLoading ? null : _handleLogin,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.transparent,
-                            shadowColor: Colors.transparent,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                          ),
-                          child: authState.isLoading
-                              ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                              : Text(l10n.authLoginAction, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
-                        ),
-                      ).animate().fadeIn(delay: 700.ms).slideY(begin: 0.2, end: 0),
+                            height: 56,
+                            decoration: BoxDecoration(
+                              gradient: AppColors.primaryGradient,
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.primary.withValues(
+                                    alpha: 0.3,
+                                  ),
+                                  blurRadius: 20,
+                                  offset: const Offset(0, 8),
+                                ),
+                              ],
+                            ),
+                            child: ElevatedButton(
+                              onPressed: authState.isLoading
+                                  ? null
+                                  : _handleLogin,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                shadowColor: Colors.transparent,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                              ),
+                              child: authState.isLoading
+                                  ? const SizedBox(
+                                      width: 24,
+                                      height: 24,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  : Text(
+                                      l10n.authLoginAction,
+                                      style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                            ),
+                          )
+                          .animate()
+                          .fadeIn(delay: 700.ms)
+                          .slideY(begin: 0.2, end: 0),
 
                       const SizedBox(height: 24),
 
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text(l10n.authNoAccount, style: const TextStyle(color: AppColors.textSecondary)),
+                          Text(
+                            l10n.authNoAccount,
+                            style: const TextStyle(
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
                           GestureDetector(
                             onTap: () => context.push('/register'),
-                            child: Text(l10n.authRegisterAction, style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
+                            child: Text(
+                              l10n.authRegisterAction,
+                              style: const TextStyle(
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
                         ],
                       ).animate().fadeIn(delay: 800.ms),

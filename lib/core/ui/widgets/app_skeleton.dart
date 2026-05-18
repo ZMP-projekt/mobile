@@ -19,16 +19,17 @@ class AppSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: width,
-      height: height,
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        shape: shape,
-        borderRadius: shape == BoxShape.circle ? null : BorderRadius.circular(borderRadius),
-      ),
-    ).animate(onPlay: (controller) => controller.repeat()).shimmer(
-      duration: 1200.ms,
-      color: Colors.white24,
-    );
+          width: width,
+          height: height,
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            shape: shape,
+            borderRadius: shape == BoxShape.circle
+                ? null
+                : BorderRadius.circular(borderRadius),
+          ),
+        )
+        .animate(onPlay: (controller) => controller.repeat())
+        .shimmer(duration: 1200.ms, color: Colors.white24);
   }
 }
