@@ -39,12 +39,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
   final Ref ref;
 
   AuthNotifier(this._repo, this._tokenStore, this._sessionCleaner, this.ref)
-      : super(const AuthState()) {
+    : super(const AuthState()) {
     _checkInitialAuth();
 
-    ref.listen<String?>(authTokenProvider, (previous, next) {
-      if (previous != null && next == null) {
-        logout();
+    ref.listen<String?>(authTokenValueProvider, (previous, next) {
+      if (previous != null && next == null && state.isAuthenticated) {
+        _completeExternalSessionClear();
       }
     });
   }
@@ -69,20 +69,15 @@ class AuthNotifier extends StateNotifier<AuthState> {
       success: (token) async {
         await _tokenStore.save(token);
         _sessionCleaner.resetNavigation(ref);
-
-        try {
-          await ref.read(currentUserProvider.future);
-        } catch (e) {
-          AppLogger.e("Błąd pobierania użytkownika po logowaniu", e);
-        }
+        await _warmUpCurrentUser('logowaniu');
 
         state = state.copyWith(isLoading: false, isAuthenticated: true);
-        AppLogger.i("Zalogowano użytkownika");
+        AppLogger.i('Zalogowano uzytkownika');
         return true;
       },
       failure: (error) {
         state = state.copyWith(isLoading: false, errorMessage: error);
-        AppLogger.w("Logowanie nie powiodło się");
+        AppLogger.w('Logowanie nie powiodlo sie');
         return false;
       },
     );
@@ -102,6 +97,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       success: (token) async {
         await _tokenStore.save(token);
         _sessionCleaner.resetNavigation(ref);
+        await _warmUpCurrentUser('rejestracji');
 
         state = state.copyWith(isLoading: false, isAuthenticated: true);
         return true;
@@ -117,14 +113,36 @@ class AuthNotifier extends StateNotifier<AuthState> {
     if (!state.isAuthenticated) return;
 
     _sessionCleaner.resetNavigation(ref);
-    state = state.copyWith(isAuthenticated: false);
+    state = state.copyWith(isAuthenticated: false, isLoading: false);
 
     await _tokenStore.clear();
+    await _clearSessionData();
+
+    AppLogger.i('Wylogowano uzytkownika');
+  }
+
+  Future<void> _completeExternalSessionClear() async {
+    _sessionCleaner.resetNavigation(ref);
+    state = state.copyWith(isAuthenticated: false, isLoading: false);
+
+    await _clearSessionData();
+
+    AppLogger.i('Sesja wygasla');
+  }
+
+  Future<void> _warmUpCurrentUser(String actionName) async {
+    try {
+      await ref.read(currentUserProvider.future);
+    } catch (e) {
+      AppLogger.e('Blad pobierania uzytkownika po $actionName', e);
+    }
+  }
+
+  Future<void> _clearSessionData() async {
+    await _sessionCleaner.clearOfflineCache(ref);
 
     Future.microtask(() {
       _sessionCleaner.invalidateUserData(ref);
     });
-
-    AppLogger.i("Wylogowano użytkownika");
   }
 }

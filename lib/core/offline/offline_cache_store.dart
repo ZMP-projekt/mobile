@@ -4,6 +4,9 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+const _cacheKeyPrefix = 'offline_cache:';
+const _publicCacheNamespace = 'public';
+
 class OfflineCacheMissException implements Exception {
   final String key;
 
@@ -15,8 +18,10 @@ class OfflineCacheMissException implements Exception {
 
 class OfflineCacheStore {
   final FlutterSecureStorage _storage;
+  final String? _namespace;
 
-  const OfflineCacheStore(this._storage);
+  const OfflineCacheStore(this._storage, {String? namespace})
+    : _namespace = namespace;
 
   Future<T> getOrFetch<T>({
     required String key,
@@ -38,13 +43,29 @@ class OfflineCacheStore {
   }
 
   Future<Object?> readJson(String key) async {
-    final raw = await _storage.read(key: key);
+    final raw = await _storage.read(key: _scopedKey(key));
     if (raw == null || raw.isEmpty) return null;
     return jsonDecode(raw);
   }
 
   Future<void> saveJson(String key, Object? json) async {
-    await _storage.write(key: key, value: jsonEncode(json));
+    await _storage.write(key: _scopedKey(key), value: jsonEncode(json));
+  }
+
+  Future<void> clearAll() async {
+    final values = await _storage.readAll();
+    final cacheKeys = values.keys
+        .where((key) => key.startsWith(_cacheKeyPrefix))
+        .toList();
+
+    for (final key in cacheKeys) {
+      await _storage.delete(key: key);
+    }
+  }
+
+  String _scopedKey(String key) {
+    final namespace = _namespace ?? _publicCacheNamespace;
+    return '$_cacheKeyPrefix$namespace:$key';
   }
 }
 

@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import '../../../core/util/app_logger.dart';
 import '../../../core/models/result.dart';
-import '../../../core/network/dio_error_parser.dart'; 
+import '../../../core/network/dio_error_parser.dart';
 
 class AuthRepository {
   final Dio _dio;
@@ -20,22 +20,26 @@ class AuthRepository {
         return Result.success(token);
       }
 
-      return Result.failure(DioErrorParser.localized((l10n) => l10n.errorServer));
+      return Result.failure(
+        DioErrorParser.localized((l10n) => l10n.errorServer),
+      );
     } on DioException catch (e) {
       AppLogger.w("Logowanie zakończone błędem API: ${e.type}");
       return Result.failure(DioErrorParser.extract(e.response, e.type));
     } catch (e) {
       AppLogger.e("Nieoczekiwany błąd", e);
-      return Result.failure(DioErrorParser.localized((l10n) => l10n.commonUnknownError));
+      return Result.failure(
+        DioErrorParser.localized((l10n) => l10n.commonUnknownError),
+      );
     }
   }
 
   Future<Result<String>> register(
-      String firstName,
-      String lastName,
-      String email,
-      String password,
-      ) async {
+    String firstName,
+    String lastName,
+    String email,
+    String password,
+  ) async {
     try {
       final response = await _dio.post(
         '/auth/register',
@@ -53,13 +57,17 @@ class AuthRepository {
         return Result.success(token);
       }
 
-      return Result.failure(DioErrorParser.localized((l10n) => l10n.errorServer));
+      return Result.failure(
+        DioErrorParser.localized((l10n) => l10n.errorServer),
+      );
     } on DioException catch (e) {
       AppLogger.w("Rejestracja zakończona błędem API: ${e.type}");
       return Result.failure(DioErrorParser.extract(e.response, e.type));
     } catch (e) {
       AppLogger.e("Nieoczekiwany błąd rejestracji", e);
-      return Result.failure(DioErrorParser.localized((l10n) => l10n.commonUnknownError));
+      return Result.failure(
+        DioErrorParser.localized((l10n) => l10n.commonUnknownError),
+      );
     }
   }
 }

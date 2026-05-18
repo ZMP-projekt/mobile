@@ -62,8 +62,11 @@ final dioProvider = Provider<Dio>((ref) {
           ref.read(isOfflineProvider.notifier).state = true;
         }
 
-        if (e.response?.statusCode == 401 && !isAuthEndpoint) {
-          AppLogger.w("Token wygasł lub jest nieprawidłowy.");
+        final statusCode = e.response?.statusCode;
+        final isUnauthorized = statusCode == 401;
+
+        if (isUnauthorized && !isAuthEndpoint) {
+          AppLogger.w('Token wygasł lub jest nieprawidłowy.');
           await ref.read(authTokenStoreProvider).clear();
         }
 

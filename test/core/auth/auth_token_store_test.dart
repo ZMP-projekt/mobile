@@ -14,9 +14,11 @@ void main() {
 
     await container.read(authTokenStoreProvider).save('token-123');
 
-    expect(container.read(authTokenProvider), 'token-123');
+    expect(container.read(authTokenValueProvider), 'token-123');
     expect(
-      await container.read(secureStorageProvider).read(key: authTokenStorageKey),
+      await container
+          .read(secureStorageProvider)
+          .read(key: authTokenStorageKey),
       'token-123',
     );
   });
@@ -31,7 +33,7 @@ void main() {
     final token = await container.read(authTokenStoreProvider).read();
 
     expect(token, 'stored-token');
-    expect(container.read(authTokenProvider), 'stored-token');
+    expect(container.read(authTokenValueProvider), 'stored-token');
   });
 
   test('clear removes stored token and resets in-memory provider', () async {
@@ -41,9 +43,11 @@ void main() {
     await container.read(authTokenStoreProvider).save('token-123');
     await container.read(authTokenStoreProvider).clear();
 
-    expect(container.read(authTokenProvider), isNull);
+    expect(container.read(authTokenValueProvider), isNull);
     expect(
-      await container.read(secureStorageProvider).read(key: authTokenStorageKey),
+      await container
+          .read(secureStorageProvider)
+          .read(key: authTokenStorageKey),
       isNull,
     );
   });

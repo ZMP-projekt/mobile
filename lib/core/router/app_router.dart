@@ -8,7 +8,6 @@ import '../../features/main/main_screen.dart';
 import '../../features/classes/ui/class_details_page.dart';
 import '../../features/classes/data/models/gym_class.dart';
 import '../../features/notifications/ui/notifications_page.dart';
-import '../auth/auth_token_store.dart';
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -17,13 +16,12 @@ final routerProvider = Provider<GoRouter>((ref) {
     initialLocation: '/',
     redirect: (context, state) {
       final authState = ref.read(authStateProvider);
-      final token = ref.read(authTokenProvider);
 
       if (authState.isInitializing) {
         return null;
       }
 
-      final isAuth = authState.isAuthenticated && token != null;
+      final isAuth = authState.isAuthenticated;
       final isLoggingIn =
           state.matchedLocation == '/login' ||
           state.matchedLocation == '/register';
@@ -66,12 +64,6 @@ final routerProvider = Provider<GoRouter>((ref) {
   ref.listen(authStateProvider, (previous, next) {
     if (previous?.isInitializing != next.isInitializing ||
         previous?.isAuthenticated != next.isAuthenticated) {
-      router.refresh();
-    }
-  });
-
-  ref.listen(authTokenProvider, (previous, next) {
-    if (previous != next) {
       router.refresh();
     }
   });

@@ -4,6 +4,8 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:path_provider/path_provider.dart';
 
+const _maxCachedImageBytes = 5 * 1024 * 1024;
+
 class OfflineImageCache {
   final Dio _dio;
 
@@ -23,6 +25,14 @@ class OfflineImageCache {
       );
       final bytes = response.data;
       if (bytes == null || bytes.isEmpty) return null;
+
+      final contentType = response.headers.value(Headers.contentTypeHeader);
+      if (contentType != null &&
+          !contentType.toLowerCase().startsWith('image/')) {
+        return null;
+      }
+
+      if (bytes.length > _maxCachedImageBytes) return null;
 
       await file.writeAsBytes(Uint8List.fromList(bytes), flush: true);
       return file;

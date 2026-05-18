@@ -74,4 +74,46 @@ void main() {
 
     await expectLater(call, throwsA(same(error)));
   });
+
+  test('namespaces cached values between sessions', () async {
+    final firstUserCache = const OfflineCacheStore(
+      FlutterSecureStorage(),
+      namespace: 'user-a',
+    );
+    final secondUserCache = const OfflineCacheStore(
+      FlutterSecureStorage(),
+      namespace: 'user-b',
+    );
+
+    await firstUserCache.saveJson('profile', {'name': 'First'});
+    await secondUserCache.saveJson('profile', {'name': 'Second'});
+
+    await expectLater(
+      firstUserCache.readJson('profile'),
+      completion({'name': 'First'}),
+    );
+    await expectLater(
+      secondUserCache.readJson('profile'),
+      completion({'name': 'Second'}),
+    );
+  });
+
+  test('clearAll removes cached values', () async {
+    await cache.saveJson('profile', {'name': 'Cached Alex'});
+
+    await cache.clearAll();
+
+    await expectLater(cache.readJson('profile'), completion(isNull));
+  });
+
+  test('clearAll keeps unrelated secure storage values', () async {
+    const storage = FlutterSecureStorage();
+
+    await cache.saveJson('profile', {'name': 'Cached Alex'});
+    await storage.write(key: 'jwt_token', value: 'api-token');
+
+    await cache.clearAll();
+
+    await expectLater(storage.read(key: 'jwt_token'), completion('api-token'));
+  });
 }
