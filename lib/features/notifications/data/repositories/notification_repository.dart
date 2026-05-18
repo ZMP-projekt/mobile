@@ -9,8 +9,15 @@ class NotificationRepository {
   Future<List<AppNotification>> getNotifications() async {
     try {
       final response = await _dio.get('/api/notifications');
-      return (response.data as List)
-          .map((j) => AppNotification.fromJson(j))
+      final data = response.data;
+      if (data is! List) return [];
+
+      return data
+          .map(
+            (json) => AppNotification.fromJson(
+              Map<String, dynamic>.from(json as Map),
+            ),
+          )
           .toList();
     } on DioException catch (e) {
       throw Exception(DioErrorParser.extract(e.response, e.type));
