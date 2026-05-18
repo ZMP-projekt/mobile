@@ -5,8 +5,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../providers/shared_preferences_provider.dart';
 
-final localeNotifierProvider =
-    StateNotifierProvider<LocaleNotifier, Locale>((ref) {
+final localeNotifierProvider = StateNotifierProvider<LocaleNotifier, Locale>((
+  ref,
+) {
   return LocaleNotifier(ref.watch(sharedPreferencesProvider));
 });
 
@@ -16,10 +17,7 @@ class LocaleNotifier extends StateNotifier<Locale> {
   }
 
   static const _key = 'app_locale';
-  static const supportedLocales = [
-    Locale('pl'),
-    Locale('en'),
-  ];
+  static const supportedLocales = [Locale('pl'), Locale('en')];
 
   final SharedPreferences _prefs;
 

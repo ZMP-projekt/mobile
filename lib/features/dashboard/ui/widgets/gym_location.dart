@@ -20,7 +20,6 @@ class GymLocationCard extends ConsumerWidget {
     final sortedLocationsAsync = ref.watch(sortedLocationsProvider);
     final activeLocationAsync = ref.watch(activeLocationProvider);
     final selectedLocationId = ref.watch(selectedLocationIdProvider);
-    final userPosition = ref.watch(userPositionProvider).valueOrNull;
 
     return sortedLocationsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -38,7 +37,6 @@ class GymLocationCard extends ConsumerWidget {
             ref: ref,
             locations: locations,
             selectedId: selectedLocationId,
-            userPosition: userPosition,
           ),
         );
       },
@@ -50,7 +48,6 @@ class GymLocationCard extends ConsumerWidget {
     required WidgetRef ref,
     required List<GymLocation> locations,
     required int? selectedId,
-    required Position? userPosition,
   }) {
     showModalBottomSheet<void>(
       context: context,
@@ -63,7 +60,6 @@ class GymLocationCard extends ConsumerWidget {
         return _LocationPickerSheet(
           locations: locations,
           selectedId: selectedId,
-          userPosition: userPosition,
           onSelected: (locationId) {
             ref
                 .read(selectedLocationIdProvider.notifier)
@@ -77,10 +73,7 @@ class GymLocationCard extends ConsumerWidget {
 }
 
 class _LocationCardSurface extends StatelessWidget {
-  const _LocationCardSurface({
-    required this.location,
-    required this.onTap,
-  });
+  const _LocationCardSurface({required this.location, required this.onTap});
 
   final GymLocation location;
   final VoidCallback onTap;
@@ -135,11 +128,7 @@ class _LocationIcon extends StatelessWidget {
         color: AppColors.error.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(14),
       ),
-      child: const Icon(
-        Icons.location_on,
-        color: AppColors.error,
-        size: 24,
-      ),
+      child: const Icon(Icons.location_on, color: AppColors.error, size: 24),
     );
   }
 }
@@ -179,32 +168,30 @@ class _LocationSummary extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           '${location.address}, ${location.city}',
-          style: const TextStyle(
-            color: AppColors.textSecondary,
-            fontSize: 12,
-          ),
+          style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
         ),
       ],
     );
   }
 }
 
-class _LocationPickerSheet extends StatelessWidget {
+class _LocationPickerSheet extends ConsumerWidget {
   const _LocationPickerSheet({
     required this.locations,
     required this.selectedId,
-    required this.userPosition,
     required this.onSelected,
   });
 
   final List<GymLocation> locations;
   final int? selectedId;
-  final Position? userPosition;
   final ValueChanged<int> onSelected;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
+    final sortedLocations =
+        ref.watch(sortedLocationsProvider).valueOrNull ?? locations;
+    final userPosition = ref.watch(userPositionProvider).valueOrNull;
 
     return SafeArea(
       child: Padding(
@@ -222,21 +209,39 @@ class _LocationPickerSheet extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                l10n.locationChooseGym,
-                style: const TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      l10n.locationChooseGym,
+                      style: const TextStyle(
+                        color: AppColors.textPrimary,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: l10n.gpsPermissionRationale,
+                    onPressed: () {
+                      ref.read(locationSortingEnabledProvider.notifier).state =
+                          true;
+                      ref.invalidate(userPositionProvider);
+                    },
+                    icon: const Icon(
+                      Icons.my_location_rounded,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 16),
               Flexible(
                 child: ListView.builder(
                   shrinkWrap: true,
-                  itemCount: locations.length,
+                  itemCount: sortedLocations.length,
                   itemBuilder: (context, index) {
-                    final location = locations[index];
+                    final location = sortedLocations[index];
                     return _LocationPickerTile(
                       location: location,
                       isSelected: location.id == selectedId,
@@ -289,10 +294,7 @@ class _LocationPickerTile extends StatelessWidget {
           '${location.address}, ${location.city}',
           formatDistance(l10n, userPosition, location),
         ].whereType<String>().join(' - '),
-        style: const TextStyle(
-          color: AppColors.textSecondary,
-          fontSize: 12,
-        ),
+        style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
       ),
       trailing: isSelected
           ? const Icon(Icons.check_circle, color: AppColors.primary)

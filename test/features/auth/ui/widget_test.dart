@@ -91,9 +91,7 @@ void main() {
     expect(find.text(l10n.validationEmailInvalid), findsOneWidget);
     expect(
       find.text(
-        l10n.validationPasswordMinLength(
-          AppValidators.minimumPasswordLength,
-        ),
+        l10n.validationPasswordMinLength(AppValidators.minimumPasswordLength),
       ),
       findsOneWidget,
     );

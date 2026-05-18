@@ -21,8 +21,7 @@ class ClassCard extends ConsumerWidget {
     final isProcessing = ref.watch(bookingNotifierProvider).isLoading;
 
     final user = ref.watch(currentUserProvider).value;
-    final roleString = user?.role.toString().toLowerCase() ?? '';
-    final isTrainer = roleString.contains('trainer');
+    final isTrainer = user?.isTrainer ?? false;
 
     final imageUrl = gymClass.displayImageUrl;
     final l10n = AppLocalizations.of(context)!;

@@ -35,9 +35,13 @@ class TrainerSummaryCard extends ConsumerWidget {
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
           gradient: LinearGradient(
-              colors: [AppColors.surface, AppColors.surface.withValues(alpha: 0.8)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight),
+            colors: [
+              AppColors.surface,
+              AppColors.surface.withValues(alpha: 0.8),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
           borderRadius: BorderRadius.circular(25),
           border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
         ),
@@ -60,22 +64,35 @@ class TrainerSummaryCard extends ConsumerWidget {
                     Text(
                       l10n.trainerSummaryToday,
                       style: TextStyle(
-                          color: isBusy ? AppColors.success : AppColors.textSecondary,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1),
+                        color: isBusy
+                            ? AppColors.success
+                            : AppColors.textSecondary,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1,
+                      ),
                     ),
-                    const Icon(Icons.check_circle_outline_rounded, color: AppColors.success),
+                    const Icon(
+                      Icons.check_circle_outline_rounded,
+                      color: AppColors.success,
+                    ),
                   ],
                 ),
                 Text(
                   l10n.trainerSummaryReadyTitle,
-                  style: const TextStyle(color: AppColors.textPrimary, fontSize: 24, fontWeight: FontWeight.w800),
+                  style: const TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 24,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   l10n.trainerSummaryReadySubtitle,
-                  style: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
+                  style: const TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 14,
+                  ),
                 ),
               ],
             ).animate().fadeIn(duration: 400.ms);
@@ -112,10 +129,18 @@ class TrainerSummaryCard extends ConsumerWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-                l10n.trainerSummaryToday,
-                style: const TextStyle(color: AppColors.textSecondary, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1)
+              l10n.trainerSummaryToday,
+              style: const TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1,
+              ),
             ),
-            Icon(Icons.event_available_rounded, color: AppColors.textSecondary.withValues(alpha: 0.5)),
+            Icon(
+              Icons.event_available_rounded,
+              color: AppColors.textSecondary.withValues(alpha: 0.5),
+            ),
           ],
         ),
 
@@ -139,9 +164,9 @@ class TrainerSummaryCard extends ConsumerWidget {
         ClipRRect(
           borderRadius: BorderRadius.circular(10),
           child: LinearProgressIndicator(
-              value: 0,
-              minHeight: 8,
-              backgroundColor: Colors.white.withValues(alpha: 0.1)
+            value: 0,
+            minHeight: 8,
+            backgroundColor: Colors.white.withValues(alpha: 0.1),
           ),
         ),
       ],
@@ -153,10 +178,27 @@ class TrainerSummaryCard extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const Icon(Icons.error_outline_rounded, color: AppColors.error, size: 28),
+        const Icon(
+          Icons.error_outline_rounded,
+          color: AppColors.error,
+          size: 28,
+        ),
         const SizedBox(height: 8),
-        Text(l10n.commonLoadError, style: const TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.bold)),
-        Text(l10n.trainerSummaryLoadErrorSubtitle, style: TextStyle(color: AppColors.textSecondary.withValues(alpha: 0.8), fontSize: 13)),
+        Text(
+          l10n.commonLoadError,
+          style: const TextStyle(
+            color: AppColors.textPrimary,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        Text(
+          l10n.trainerSummaryLoadErrorSubtitle,
+          style: TextStyle(
+            color: AppColors.textSecondary.withValues(alpha: 0.8),
+            fontSize: 13,
+          ),
+        ),
       ],
     ).animate().fadeIn();
   }

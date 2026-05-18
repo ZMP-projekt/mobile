@@ -133,6 +133,10 @@ class ApiClassesRepository implements IClassesRepository {
         fromJson: _usersFromJson,
       );
     } on DioException catch (e) {
+      if (e.response?.statusCode == 403) {
+        return [];
+      }
+
       throw Exception(
         DioErrorParser.extract(
           e.response,

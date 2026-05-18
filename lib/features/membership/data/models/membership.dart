@@ -14,7 +14,8 @@ class Membership with _$Membership {
     @Default('UNKNOWN') String type,
   }) = _Membership;
 
-  factory Membership.fromJson(Map<String, dynamic> json) => _$MembershipFromJson(json);
+  factory Membership.fromJson(Map<String, dynamic> json) =>
+      _$MembershipFromJson(json);
 
   int get daysRemaining {
     final now = DateTime.now();

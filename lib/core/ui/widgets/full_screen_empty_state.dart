@@ -28,7 +28,9 @@ class FullScreenEmptyState extends StatelessWidget {
               shape: BoxShape.circle,
               color: AppColors.surface,
               border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
-              boxShadow: iconColor == AppColors.primary ? AppColors.subtleGlow : null,
+              boxShadow: iconColor == AppColors.primary
+                  ? AppColors.subtleGlow
+                  : null,
             ),
             child: Icon(icon, size: 70, color: iconColor),
           ).animate().scale(duration: 400.ms, curve: Curves.easeOutBack),
@@ -37,19 +39,22 @@ class FullScreenEmptyState extends StatelessWidget {
             title,
             textAlign: TextAlign.center,
             style: const TextStyle(
-                color: AppColors.textPrimary,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                height: 1.2
+              color: AppColors.textPrimary,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              height: 1.2,
             ),
           ).animate().fadeIn(delay: 200.ms),
           if (subtitle != null) ...[
             const SizedBox(height: 12),
             Text(
               subtitle!,
-              style: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
+              style: const TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 14,
+              ),
             ).animate().fadeIn(delay: 300.ms),
-          ]
+          ],
         ],
       ),
     );

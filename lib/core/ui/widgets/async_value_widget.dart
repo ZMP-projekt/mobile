@@ -24,23 +24,36 @@ class AsyncValueWidget<T> extends StatelessWidget {
     return value.when(
       skipLoadingOnReload: true,
       data: data,
-      loading: loading ?? () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
-      error: error ?? (err, stack) => Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.error_outline_rounded, color: AppColors.error, size: 28),
-              const SizedBox(height: 8),
-              Text(
-                l10n.errorDataLoad,
-                style: TextStyle(color: AppColors.textSecondary.withValues(alpha: 0.8), fontSize: 13),
-              ),
-            ],
+      loading:
+          loading ??
+          () => const Center(
+            child: CircularProgressIndicator(color: AppColors.primary),
           ),
-        ),
-      ),
+      error:
+          error ??
+          (err, stack) => Center(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.error_outline_rounded,
+                    color: AppColors.error,
+                    size: 28,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    l10n.errorDataLoad,
+                    style: TextStyle(
+                      color: AppColors.textSecondary.withValues(alpha: 0.8),
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
     );
   }
 }

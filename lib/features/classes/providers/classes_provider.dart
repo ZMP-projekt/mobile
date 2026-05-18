@@ -63,7 +63,8 @@ final todayClassesProvider = FutureProvider.autoDispose<List<GymClass>>((
 
   final classes = await ref.watch(classesForDateProvider(today).future);
 
-  return classes.where((c) => c.isFuture).toList();
+  return classes.where((c) => !c.isPast).toList()
+    ..sort((a, b) => a.startTime.compareTo(b.startTime));
 });
 
 final classParticipantsProvider = FutureProvider.autoDispose

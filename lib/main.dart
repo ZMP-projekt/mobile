@@ -43,10 +43,7 @@ class MyApp extends ConsumerWidget {
       ),
       routerConfig: router,
       locale: currentLocale,
-      supportedLocales: const [
-        Locale('pl'),
-        Locale('en'),
-      ],
+      supportedLocales: const [Locale('pl'), Locale('en')],
       localizationsDelegates: const [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,

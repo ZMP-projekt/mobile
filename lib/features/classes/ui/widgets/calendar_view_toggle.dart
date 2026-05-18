@@ -27,7 +27,9 @@ class CalendarViewToggle extends StatelessWidget {
       child: Stack(
         children: [
           AnimatedAlign(
-            alignment: isMyClassesSelected ? Alignment.centerRight : Alignment.centerLeft,
+            alignment: isMyClassesSelected
+                ? Alignment.centerRight
+                : Alignment.centerLeft,
             duration: const Duration(milliseconds: 250),
             curve: Curves.easeOutCubic,
             child: FractionallySizedBox(
@@ -37,7 +39,10 @@ class CalendarViewToggle extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: AppColors.primary.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: AppColors.primary.withValues(alpha: 0.5), width: 1),
+                  border: Border.all(
+                    color: AppColors.primary.withValues(alpha: 0.5),
+                    width: 1,
+                  ),
                 ),
               ),
             ),
@@ -52,8 +57,12 @@ class CalendarViewToggle extends StatelessWidget {
                     child: Text(
                       l10n.classesAll,
                       style: TextStyle(
-                        color: !isMyClassesSelected ? AppColors.primary : AppColors.textSecondary,
-                        fontWeight: !isMyClassesSelected ? FontWeight.bold : FontWeight.w500,
+                        color: !isMyClassesSelected
+                            ? AppColors.primary
+                            : AppColors.textSecondary,
+                        fontWeight: !isMyClassesSelected
+                            ? FontWeight.bold
+                            : FontWeight.w500,
                         fontSize: 14,
                       ),
                     ),
@@ -68,8 +77,12 @@ class CalendarViewToggle extends StatelessWidget {
                     child: Text(
                       l10n.classesMyBookings,
                       style: TextStyle(
-                        color: isMyClassesSelected ? AppColors.primary : AppColors.textSecondary,
-                        fontWeight: isMyClassesSelected ? FontWeight.bold : FontWeight.w500,
+                        color: isMyClassesSelected
+                            ? AppColors.primary
+                            : AppColors.textSecondary,
+                        fontWeight: isMyClassesSelected
+                            ? FontWeight.bold
+                            : FontWeight.w500,
                         fontSize: 14,
                       ),
                     ),

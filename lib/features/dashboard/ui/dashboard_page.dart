@@ -13,13 +13,26 @@ import 'widgets/gym_location.dart';
 import 'widgets/dashboard_header.dart';
 import 'widgets/today_classes.dart';
 
-class DashboardPage extends ConsumerWidget {
+class DashboardPage extends ConsumerStatefulWidget {
   const DashboardPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DashboardPage> createState() => _DashboardPageState();
+}
+
+class _DashboardPageState extends ConsumerState<DashboardPage> {
+  @override
+  Widget build(BuildContext context) {
+    ref.listen<int>(mainNavigationProvider, (previous, next) {
+      if (previous != 0 && next == 0) {
+        ref.invalidate(classesForDateProvider);
+        ref.invalidate(todayClassesProvider);
+      }
+    });
+
     ref.watch(notificationsProvider);
-    final hasError = ref.watch(currentUserProvider).hasError ||
+    final hasError =
+        ref.watch(currentUserProvider).hasError ||
         ref.watch(todayClassesProvider).hasError ||
         ref.watch(currentMembershipProvider).hasError;
     final l10n = AppLocalizations.of(context)!;
@@ -44,10 +57,11 @@ class DashboardPage extends ConsumerWidget {
           child: RefreshIndicator(
             onRefresh: () async {
               ref.invalidate(classesForDateProvider);
+              ref.invalidate(todayClassesProvider);
               await Future.wait([
                 ref.refresh(currentUserProvider.future),
-                ref.read(todayClassesProvider.future),
-                ref.read(currentMembershipProvider.future),
+                ref.refresh(todayClassesProvider.future),
+                ref.refresh(currentMembershipProvider.future),
               ]);
             },
             color: AppColors.primary,
@@ -60,19 +74,37 @@ class DashboardPage extends ConsumerWidget {
 
                   if (hasError)
                     Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 20).copyWith(bottom: 20),
-                      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                      ).copyWith(bottom: 20),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 12,
+                        horizontal: 16,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.error.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
+                        border: Border.all(
+                          color: AppColors.error.withValues(alpha: 0.3),
+                        ),
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.wifi_off_rounded, color: AppColors.error, size: 24),
+                          const Icon(
+                            Icons.wifi_off_rounded,
+                            color: AppColors.error,
+                            size: 24,
+                          ),
                           const SizedBox(width: 12),
                           Expanded(
-                            child: Text(l10n.dashboardNoConnection, style: const TextStyle(color: AppColors.error, fontSize: 14, fontWeight: FontWeight.bold)),
+                            child: Text(
+                              l10n.dashboardNoConnection,
+                              style: const TextStyle(
+                                color: AppColors.error,
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
                           TextButton(
                             onPressed: () {
@@ -81,12 +113,26 @@ class DashboardPage extends ConsumerWidget {
                               ref.invalidate(currentMembershipProvider);
                             },
                             style: TextButton.styleFrom(
-                              backgroundColor: AppColors.error.withValues(alpha: 0.2),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              backgroundColor: AppColors.error.withValues(
+                                alpha: 0.2,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 8,
+                              ),
                               minimumSize: Size.zero,
                             ),
-                            child: Text(l10n.commonRefresh.toUpperCase(), style: const TextStyle(color: AppColors.error, fontWeight: FontWeight.bold, fontSize: 12)),
+                            child: Text(
+                              l10n.commonRefresh.toUpperCase(),
+                              style: const TextStyle(
+                                color: AppColors.error,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                              ),
+                            ),
                           ),
                         ],
                       ),
@@ -109,9 +155,9 @@ class DashboardPage extends ConsumerWidget {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20.0),
                     child: _buildSectionHeader(
-                        title: l10n.dashboardSectionGym,
-                        action: l10n.dashboardMapAction,
-                        onTap: () {}
+                      title: l10n.dashboardSectionGym,
+                      action: l10n.dashboardMapAction,
+                      onTap: () {},
                     ).animate().fadeIn(delay: 200.ms),
                   ),
 
@@ -130,7 +176,8 @@ class DashboardPage extends ConsumerWidget {
                     child: _buildSectionHeader(
                       title: l10n.dashboardSectionTodayClasses,
                       action: l10n.dashboardSeeAll,
-                      onTap: () => ref.read(mainNavigationProvider.notifier).state = 1,
+                      onTap: () =>
+                          ref.read(mainNavigationProvider.notifier).state = 1,
                     ).animate().fadeIn(delay: 400.ms),
                   ),
 
@@ -146,17 +193,40 @@ class DashboardPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildSectionHeader({required String title, required String action, required VoidCallback onTap}) {
+  Widget _buildSectionHeader({
+    required String title,
+    required String action,
+    required VoidCallback onTap,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 15),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(title, style: const TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.bold)),
+          Text(
+            title,
+            style: const TextStyle(
+              color: AppColors.textPrimary,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           TextButton(
             onPressed: onTap,
-            style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: Size.zero, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-            child: Text(action, style: const TextStyle(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+            style: TextButton.styleFrom(
+              padding: EdgeInsets.zero,
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: Text(
+              action,
+              style: const TextStyle(
+                color: AppColors.primary,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 0.5,
+              ),
+            ),
           ),
         ],
       ),
