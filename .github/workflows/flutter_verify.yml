@@ -27,11 +27,14 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Create .env file
-        run: echo "API_BASE_URL=https://api-placeholder.com" > .env
+      - name: Check formatting
+        run: dart format --set-exit-if-changed lib test
 
       - name: Run Flutter analyze
         run: flutter analyze
 
       - name: Run Flutter test
-        run: flutter test
+        run: flutter test --dart-define=API_BASE_URL=https://api-j6d6.onrender.com
+
+      - name: Build debug APK
+        run: flutter build apk --debug --dart-define=API_BASE_URL=https://api-j6d6.onrender.com
