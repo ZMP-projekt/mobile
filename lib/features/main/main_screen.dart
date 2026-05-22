@@ -57,6 +57,8 @@ class _MainScreenState extends ConsumerState<MainScreen>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    ref.read(appLifecycleStateProvider.notifier).state = state;
+
     if (state == AppLifecycleState.resumed) {
       ref.invalidate(notificationsProvider);
     }

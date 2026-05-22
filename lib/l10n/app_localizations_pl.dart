@@ -431,13 +431,16 @@ class AppLocalizationsPl extends AppLocalizations {
   String get trainerSummaryToday => 'DZISIAJ';
 
   @override
-  String get trainerSummaryReadyTitle => 'Harmonogram gotowy';
+  String get trainerSummaryReadyTitle => 'Aktywność dzisiaj';
 
   @override
-  String get trainerSummaryReadySubtitle => 'Wszystkie zajęcia są zaplanowane.';
+  String trainerSummaryReadySubtitle(int classesCount, int participantsCount) {
+    return 'Zajęcia: $classesCount • Uczestnicy: $participantsCount';
+  }
 
   @override
-  String get trainerSummaryEmptyTitle => 'Brak zaplanowanych zajęć';
+  String get trainerSummaryEmptyTitle =>
+      'Brak aktywności zaplanowanej na dziś.';
 
   @override
   String get trainerSummaryLoadErrorSubtitle => 'Nie udało się pobrać grafiku.';

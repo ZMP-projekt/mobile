@@ -229,9 +229,20 @@
   "trainerDashboardGroupClasses": "Twoje zajęcia grupowe",
   "trainerDashboardAdd": "DODAJ",
   "trainerSummaryToday": "DZISIAJ",
-  "trainerSummaryReadyTitle": "Harmonogram gotowy",
-  "trainerSummaryReadySubtitle": "Wszystkie zajęcia są zaplanowane.",
-  "trainerSummaryEmptyTitle": "Brak zaplanowanych zajęć",
+  "trainerSummaryReadyTitle": "Aktywność dzisiaj",
+  "trainerSummaryReadySubtitle": "Zajęcia: {classesCount} • Uczestnicy: {participantsCount}",
+  "@trainerSummaryReadySubtitle": {
+    "description": "Trainer dashboard activity summary for today's classes.",
+    "placeholders": {
+      "classesCount": {
+        "type": "int"
+      },
+      "participantsCount": {
+        "type": "int"
+      }
+    }
+  },
+  "trainerSummaryEmptyTitle": "Brak aktywności zaplanowanej na dziś.",
   "trainerSummaryLoadErrorSubtitle": "Nie udało się pobrać grafiku.",
   "trainerDashboardAllReadyTitle": "Wszystko gotowe",
   "trainerDashboardAllReadySubtitle": "Nie masz już dziś zaplanowanych zajęć grupowych.",

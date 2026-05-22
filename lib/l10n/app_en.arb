@@ -229,9 +229,20 @@
   "trainerDashboardGroupClasses": "Your group classes",
   "trainerDashboardAdd": "ADD",
   "trainerSummaryToday": "TODAY",
-  "trainerSummaryReadyTitle": "Schedule ready",
-  "trainerSummaryReadySubtitle": "All classes are scheduled.",
-  "trainerSummaryEmptyTitle": "No scheduled classes",
+  "trainerSummaryReadyTitle": "Today's activity",
+  "trainerSummaryReadySubtitle": "Classes: {classesCount} • Participants: {participantsCount}",
+  "@trainerSummaryReadySubtitle": {
+    "description": "Trainer dashboard activity summary for today's classes.",
+    "placeholders": {
+      "classesCount": {
+        "type": "int"
+      },
+      "participantsCount": {
+        "type": "int"
+      }
+    }
+  },
+  "trainerSummaryEmptyTitle": "No activity scheduled for today.",
   "trainerSummaryLoadErrorSubtitle": "Could not load the schedule.",
   "trainerDashboardAllReadyTitle": "All set",
   "trainerDashboardAllReadySubtitle": "You have no more group classes scheduled for today.",

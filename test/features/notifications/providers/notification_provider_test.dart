@@ -1,4 +1,5 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mocktail/mocktail.dart';
@@ -42,6 +43,10 @@ class FakeWebSocketService implements WebSocketService {
     disconnectCalled = true;
   }
 
+  void triggerNotification(AppNotification notification) {
+    onNotification(notification);
+  }
+
   void triggerUnauthorized() => onUnauthorized?.call();
 }
 
@@ -49,6 +54,7 @@ void main() {
   late MockAuthTokenStore tokenStore;
   late MockNotificationRepository repository;
   late FakeWebSocketService? webSocketService;
+  late List<({int id, String content})> localNotifications;
 
   AppNotification notification({
     required int id,
@@ -67,6 +73,7 @@ void main() {
     tokenStore = MockAuthTokenStore();
     repository = MockNotificationRepository();
     webSocketService = null;
+    localNotifications = [];
     when(() => tokenStore.read()).thenAnswer((_) async => null);
     when(() => tokenStore.clear()).thenAnswer((_) async {});
     FlutterSecureStorage.setMockInitialValues({});
@@ -96,6 +103,10 @@ void main() {
         webSocketServiceFactoryProvider.overrideWithValue(
           createWebSocketService,
         ),
+        localNotificationPresenterProvider.overrideWithValue((id, content) {
+          localNotifications.add((id: id, content: content));
+          return Future.value();
+        }),
         if (overrideTokenStore)
           authTokenStoreProvider.overrideWithValue(tokenStore),
       ],
@@ -200,6 +211,50 @@ void main() {
 
     verify(() => tokenStore.clear()).called(1);
   });
+
+  test('new websocket notification shows in-app toast in foreground', () async {
+    when(() => tokenStore.read()).thenAnswer((_) async => 'jwt-token');
+    when(() => repository.getNotifications()).thenAnswer((_) async => []);
+    final container = createContainer();
+    await container.read(notificationsProvider.future);
+
+    final incoming = notification(
+      id: 10,
+      content: 'Foreground notification',
+      read: false,
+    );
+    webSocketService!.triggerNotification(incoming);
+
+    expect(container.read(toastNotificationProvider), incoming);
+    expect(localNotifications, isEmpty);
+    expect(container.read(notificationsProvider).value!.first, incoming);
+  });
+
+  test(
+    'new websocket notification uses system notification in background',
+    () async {
+      when(() => tokenStore.read()).thenAnswer((_) async => 'jwt-token');
+      when(() => repository.getNotifications()).thenAnswer((_) async => []);
+      final container = createContainer();
+      container.read(appLifecycleStateProvider.notifier).state =
+          AppLifecycleState.paused;
+      await container.read(notificationsProvider.future);
+
+      final incoming = notification(
+        id: 11,
+        content: 'Background notification',
+        read: false,
+      );
+      webSocketService!.triggerNotification(incoming);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(container.read(toastNotificationProvider), isNull);
+      expect(localNotifications, [
+        (id: incoming.id, content: incoming.content),
+      ]);
+      expect(container.read(notificationsProvider).value!.first, incoming);
+    },
+  );
 
   test('markAsRead updates item optimistically and calls repository', () async {
     final history = [notification(id: 1, content: 'Unread', read: false)];
