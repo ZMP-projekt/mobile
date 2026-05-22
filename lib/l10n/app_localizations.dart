@@ -815,19 +815,19 @@ abstract class AppLocalizations {
   /// No description provided for @trainerSummaryReadyTitle.
   ///
   /// In pl, this message translates to:
-  /// **'Harmonogram gotowy'**
+  /// **'Aktywność dzisiaj'**
   String get trainerSummaryReadyTitle;
 
-  /// No description provided for @trainerSummaryReadySubtitle.
+  /// Trainer dashboard activity summary for today's classes.
   ///
   /// In pl, this message translates to:
-  /// **'Wszystkie zajęcia są zaplanowane.'**
-  String get trainerSummaryReadySubtitle;
+  /// **'Zajęcia: {classesCount} • Uczestnicy: {participantsCount}'**
+  String trainerSummaryReadySubtitle(int classesCount, int participantsCount);
 
   /// No description provided for @trainerSummaryEmptyTitle.
   ///
   /// In pl, this message translates to:
-  /// **'Brak zaplanowanych zajęć'**
+  /// **'Brak aktywności zaplanowanej na dziś.'**
   String get trainerSummaryEmptyTitle;
 
   /// No description provided for @trainerSummaryLoadErrorSubtitle.

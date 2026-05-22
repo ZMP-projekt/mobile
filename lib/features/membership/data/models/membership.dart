@@ -23,7 +23,8 @@ class Membership with _$Membership {
     final endMidnight = DateTime(endDate.year, endDate.month, endDate.day);
 
     final remaining = endMidnight.difference(todayMidnight).inDays;
-    return remaining > 0 ? remaining : 0;
+    if (remaining < 0) return 0;
+    return remaining == 0 ? 1 : remaining;
   }
 
   bool get isValid => active && daysRemaining > 0;

@@ -52,6 +52,10 @@ class TrainerSummaryCard extends ConsumerWidget {
             if (classes.isEmpty) return _buildEmptyState(l10n);
 
             final classCount = classes.length;
+            final participantsCount = classes.fold<int>(
+              0,
+              (total, gymClass) => total + gymClass.currentParticipants,
+            );
             final isBusy = classCount > 2;
 
             return Column(
@@ -88,7 +92,10 @@ class TrainerSummaryCard extends ConsumerWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  l10n.trainerSummaryReadySubtitle,
+                  l10n.trainerSummaryReadySubtitle(
+                    classCount,
+                    participantsCount,
+                  ),
                   style: const TextStyle(
                     color: AppColors.textSecondary,
                     fontSize: 14,
@@ -147,16 +154,30 @@ class TrainerSummaryCard extends ConsumerWidget {
         Expanded(
           child: Align(
             alignment: Alignment.centerLeft,
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Text(
-                l10n.trainerSummaryEmptyTitle,
-                style: const TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 24,
-                  fontWeight: FontWeight.w800,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    l10n.trainerSummaryReadyTitle,
+                    style: const TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 24,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
                 ),
-              ),
+                const SizedBox(height: 6),
+                Text(
+                  l10n.trainerSummaryEmptyTitle,
+                  style: const TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
             ),
           ),
         ),

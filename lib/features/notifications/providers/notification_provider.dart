@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/widgets.dart';
 
 import '../../../core/auth/auth_token_store.dart';
 import '../../../core/config/env.dart';
@@ -12,6 +13,17 @@ import '../services/websocket_service.dart';
 final notificationRepositoryProvider = Provider<NotificationRepository>((ref) {
   return NotificationRepository(ref.watch(dioProvider));
 });
+
+final appLifecycleStateProvider = StateProvider<AppLifecycleState>((ref) {
+  return AppLifecycleState.resumed;
+});
+
+typedef LocalNotificationPresenter =
+    Future<void> Function(int id, String content);
+
+final localNotificationPresenterProvider = Provider<LocalNotificationPresenter>(
+  (ref) => LocalNotificationService.show,
+);
 
 typedef WebSocketServiceFactory =
     WebSocketService Function({
@@ -107,14 +119,21 @@ class NotificationsNotifier extends AsyncNotifier<List<AppNotification>> {
     final current = state.valueOrNull ?? [];
     state = AsyncData([notification, ...current]);
 
-    ref.read(toastNotificationProvider.notifier).state = notification;
+    final appLifecycleState = ref.read(appLifecycleStateProvider);
+    final isForeground = appLifecycleState == AppLifecycleState.resumed;
 
-    LocalNotificationService.show(
-      notification.id,
-      notification.content,
-    ).catchError((Object error) {
-      AppLogger.w('Could not show local notification: $error');
-    });
+    if (isForeground) {
+      ref.read(toastNotificationProvider.notifier).state = notification;
+    } else {
+      ref
+          .read(localNotificationPresenterProvider)(
+            notification.id,
+            notification.content,
+          )
+          .catchError((Object error) {
+            AppLogger.w('Could not show local notification: $error');
+          });
+    }
   }
 
   Future<void> markAsRead(int id) async {

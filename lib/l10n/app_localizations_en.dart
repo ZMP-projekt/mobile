@@ -427,13 +427,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get trainerSummaryToday => 'TODAY';
 
   @override
-  String get trainerSummaryReadyTitle => 'Schedule ready';
+  String get trainerSummaryReadyTitle => 'Today\'s activity';
 
   @override
-  String get trainerSummaryReadySubtitle => 'All classes are scheduled.';
+  String trainerSummaryReadySubtitle(int classesCount, int participantsCount) {
+    return 'Classes: $classesCount • Participants: $participantsCount';
+  }
 
   @override
-  String get trainerSummaryEmptyTitle => 'No scheduled classes';
+  String get trainerSummaryEmptyTitle => 'No activity scheduled for today.';
 
   @override
   String get trainerSummaryLoadErrorSubtitle => 'Could not load the schedule.';
